@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "262062337996",
+    "project_id": "hikaya-e16a9",
+    "storage_bucket": "hikaya-e16a9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:262062337996:android:441b5e6ba7dbd9c8f5b769",
+        "android_client_info": {
+          "package_name": "com.example.flutter_application_3"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCmo7uz6fDIBf_fUd8ggquR6wi9ju4JFBI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
