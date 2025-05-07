@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_3/letters/arabicLetter/levelOne/game1_screen.dart';
+import 'package:flutter_application_3/letters/arabicLetter/levelOne/arabic_level1_screen.dart';
 import 'package:flutter_application_3/letters/englishLetters/bLetter/b_letters.dart';
 import 'package:flutter_application_3/letters/mathmatics/game.dart';
 
@@ -61,7 +61,7 @@ class LevelsScreen extends StatelessWidget {
       ];
     } else if (subject == "Arabic") {
       return [
-        {"title": "Letters", "screen": Game1ScreenState()},
+        {"title": "Letters", "screen": KaraokeSentenceScreen()},
         {"title": "Words", "screen": ArabicWordsScreen()},
         {"title": "Sentences", "screen": ArabicSentencesScreen()},
       ];

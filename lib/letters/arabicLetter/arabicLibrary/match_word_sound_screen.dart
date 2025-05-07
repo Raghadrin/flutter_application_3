@@ -21,12 +21,12 @@ class _MatchWordSoundScreenState extends State<MatchWordSoundScreen> {
       options: ['تُفاحةٌ', 'تِفاحةٍ', 'تَفاحةً'],
     ),
     SoundQuestion(
-      soundPath: 'car.mp3',
+      soundPath: 'sounds/car.mp3',
       correctWord: 'سَيارةٌ',
       options: ['سَيارةٌ', 'سِيارةٍ', 'سُيارةُ'],
     ),
     SoundQuestion(
-      soundPath: 'book.mp3',
+      soundPath: 'sounds/kitab.mp3',
       correctWord: 'كِتابً',
       options: ['كِتابً', 'كُتابً', 'كَتابُ'],
     ),

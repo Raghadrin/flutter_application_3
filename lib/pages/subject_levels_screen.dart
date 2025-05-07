@@ -63,7 +63,7 @@ class SubjectLevelsScreen extends StatelessWidget {
             if (subject == tr('arabic')) {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => QuizAllScreen()),
+                MaterialPageRoute(builder: (context) => QuizAScreen()),
               );
             } else if (subject == tr('math')) {
               Navigator.push(
