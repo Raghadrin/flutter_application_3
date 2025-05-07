@@ -32,7 +32,7 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
       "image": "images/bird.png",
     },
     {
-      "text": "المدن مليئه بالصوت والحركه والشوارع مكتظه بالناس",
+      "text": "المدينه مليئه بالصوت والحركه والشوارع مكتظه بالناس",
       "audio": "audio/madina.mp3",
       "image": "images/city.png",
     },
@@ -140,7 +140,7 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
       (index) => Icon(
         index < stars ? Icons.star : Icons.star_border,
         color: Colors.amber,
-        size: 50,
+        size: 30,
       ),
     );
   }
@@ -153,10 +153,10 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
       return TextSpan(
         text: '$word ',
         style: TextStyle(
-          fontSize: 32,
+          fontSize: 22,
           fontWeight: FontWeight.bold,
           fontFamily: 'Arial',
-          color: index == currentWordIndex ? Colors.blue : Colors.black,
+          color: index == currentWordIndex ? Colors.red : Colors.black,
         ),
       );
     }).toList();
@@ -170,124 +170,125 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
         backgroundColor: Colors.teal,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // الصورة والنص داخل حاوية أنيقة
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.teal.shade50,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 8,
-                    offset: Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                textDirection: TextDirection.rtl,
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(15),
-                    child: Image.asset(
-                      currentSentence["image"]!,
-                      width: 150,
-                      height: 150,
-                      fit: BoxFit.cover,
+        padding: const EdgeInsets.all(12.0),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                height: MediaQuery.of(context).size.height * 0.28,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.teal.shade50,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 6,
+                      offset: Offset(0, 3),
                     ),
-                  ),
-                  const SizedBox(width: 20),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: RichText(
-                        textAlign: TextAlign.center,
-                        textDirection: TextDirection.rtl,
-                        text: TextSpan(children: buildHighlightedSentence()),
+                  ],
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  textDirection: TextDirection.rtl,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.asset(
+                        currentSentence["image"]!,
+                        width: 200,
+                        height: 300,
+                        fit: BoxFit.cover,
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            ElevatedButton.icon(
-              icon: const Icon(Icons.play_arrow, size: 30),
-              label: const Text('استمع للجملة',
-                  style: TextStyle(fontSize: 24, fontFamily: 'Arial')),
-              style: ElevatedButton.styleFrom(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 15, horizontal: 40),
-                backgroundColor: Colors.blueAccent,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15)),
-              ),
-              onPressed: () => playAudio(currentSentence["audio"]!),
-            ),
-            const SizedBox(height: 20),
-
-            ElevatedButton.icon(
-              icon: Icon(isListening ? Icons.stop : Icons.mic, size: 30),
-              label: Text(isListening ? 'إيقاف' : 'ابدأ التحدث',
-                  style: const TextStyle(fontSize: 24, fontFamily: 'Arial')),
-              style: ElevatedButton.styleFrom(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 15, horizontal: 40),
-                backgroundColor: isListening ? Colors.red : Colors.green,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15)),
-              ),
-              onPressed: () {
-                if (isListening) {
-                  speech.stop();
-                  setState(() => isListening = false);
-                  evaluateResult();
-                } else {
-                  startListening();
-                }
-              },
-            ),
-            const SizedBox(height: 30),
-
-            const Text('النص الذي قلته',
-                style: TextStyle(
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Arial')),
-            const SizedBox(height: 10),
-            Text(
-              recognizedText,
-              style: const TextStyle(fontSize: 24, fontFamily: 'Arial'),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 30),
-
-            if (!isListening && recognizedText.isNotEmpty) ...[
-              Text(' % التقييم: ${score.toStringAsFixed(1)}',
-                  style: const TextStyle(fontSize: 28, fontFamily: 'Arial')),
-              Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: buildStars()),
-              const SizedBox(height: 20),
-              ElevatedButton.icon(
-                onPressed: nextSentence,
-                icon: const Icon(Icons.navigate_next, size: 30),
-                label: const Text('جملة جديدة',
-                    style: TextStyle(fontSize: 24, fontFamily: 'Arial')),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.amber,
-                  padding:
-                      const EdgeInsets.symmetric(vertical: 15, horizontal: 40),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Center(
+                        child: RichText(
+                          textAlign: TextAlign.center,
+                          textDirection: TextDirection.rtl,
+                          text: TextSpan(children: buildHighlightedSentence()),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.play_arrow, size: 22),
+                label: const Text('استمع للجملة',
+                    style: TextStyle(fontSize: 18, fontFamily: 'Arial')),
+                style: ElevatedButton.styleFrom(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                  backgroundColor: Colors.blueAccent,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: () => playAudio(currentSentence["audio"]!),
+              ),
+              const SizedBox(height: 12),
+              ElevatedButton.icon(
+                icon: Icon(isListening ? Icons.stop : Icons.mic, size: 22),
+                label: Text(isListening ? 'إيقاف' : 'ابدأ التحدث',
+                    style: const TextStyle(fontSize: 18, fontFamily: 'Arial')),
+                style: ElevatedButton.styleFrom(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                  backgroundColor: isListening ? Colors.red : Colors.green,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: () {
+                  if (isListening) {
+                    speech.stop();
+                    setState(() => isListening = false);
+                    evaluateResult();
+                  } else {
+                    startListening();
+                  }
+                },
+              ),
+              const SizedBox(height: 24),
+              const Text('النص الذي قلته',
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Arial')),
+              const SizedBox(height: 10),
+              Text(
+                recognizedText,
+                style: const TextStyle(fontSize: 18, fontFamily: 'Arial'),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              if (!isListening && recognizedText.isNotEmpty) ...[
+                Text(' % التقييم: ${score.toStringAsFixed(1)}',
+                    style:
+                        const TextStyle(fontSize: 20, fontFamily: 'Arial')),
+                const SizedBox(height: 8),
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: buildStars()),
+                const SizedBox(height: 12),
+                ElevatedButton.icon(
+                  onPressed: nextSentence,
+                  icon: const Icon(Icons.navigate_next, size: 22),
+                  label: const Text('جملة جديدة',
+                      style: TextStyle(fontSize: 18, fontFamily: 'Arial')),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.amber,
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 12, horizontal: 24),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

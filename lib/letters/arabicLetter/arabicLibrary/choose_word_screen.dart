@@ -16,7 +16,7 @@ class _ChoosePunctuationScreenState extends State<ChoosePunctuationScreen> {
 
   final List<PunctuationQuestion> questions = [
     PunctuationQuestion(
-      sentenceWithGap: '_ كيف حالك ',
+      sentenceWithGap: '_كيف حالك ',
       correctMark: '؟',
       options: ['.', '؟', '!'],
     ),
@@ -26,7 +26,7 @@ class _ChoosePunctuationScreenState extends State<ChoosePunctuationScreen> {
       options: ['،', '.', '؟'],
     ),
     PunctuationQuestion(
-      sentenceWithGap: '_  ما اجمل السماء ',
+      sentenceWithGap: ' _ ما اجمل السماء ',
       correctMark: '!',
       options: ['.', '؟', '!'],
     ),
@@ -36,7 +36,7 @@ class _ChoosePunctuationScreenState extends State<ChoosePunctuationScreen> {
       options: ['،', '؟', '.'],
     ),
     PunctuationQuestion(
-      sentenceWithGap: '_ ما اسمك ',
+      sentenceWithGap: '_ما اسمك ',
       correctMark: '؟',
       options: ['؟', '.', '!'],
     ),
