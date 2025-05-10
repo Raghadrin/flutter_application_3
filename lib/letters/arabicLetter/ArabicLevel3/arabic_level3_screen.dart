@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class KaraokeSentenceLevel3Screen extends StatefulWidget {
   const KaraokeSentenceLevel3Screen({super.key});
 
   @override
-  _KaraokeSentenceLevel3ScreenState createState() => _KaraokeSentenceLevel3ScreenState();
+  _KaraokeSentenceLevel3ScreenState createState() =>
+      _KaraokeSentenceLevel3ScreenState();
 }
 
-class _KaraokeSentenceLevel3ScreenState extends State<KaraokeSentenceLevel3Screen> {
+class _KaraokeSentenceLevel3ScreenState
+    extends State<KaraokeSentenceLevel3Screen> {
   late AudioPlayer audioPlayer;
   late stt.SpeechToText speech;
   bool isListening = false;
@@ -103,10 +107,53 @@ class _KaraokeSentenceLevel3ScreenState extends State<KaraokeSentenceLevel3Scree
     }
   }
 
-  void evaluateResult() {
+  Future<void> saveScoreToFirestore(double score, int stars) async {
+    try {
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+      if (userId == null)
+        return; // If the user is not authenticated, exit early
+
+      // Fetch the first child (for simplicity, assuming you have only one child)
+      final snapshot = await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(userId)
+          .collection('children')
+          .limit(1)
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        final childId = snapshot.docs.first.id;
+        String quizId = 'quiz_' +
+            DateTime.now().toIso8601String(); // Generate a unique quiz ID
+
+        // Save the score to Firestore
+        await FirebaseFirestore.instance
+            .collection('parents')
+            .doc(userId)
+            .collection('children')
+            .doc(childId)
+            .collection('scores')
+            .doc('arabic') // You can change this to another subject if needed
+            .collection('quiz')
+            .doc(quizId)
+            .set({
+          'score': score,
+          'stars': stars,
+          'timestamp': FieldValue.serverTimestamp(),
+        });
+
+        print('Score saved successfully!');
+      }
+    } catch (e) {
+      print('Error saving score: $e');
+    }
+  }
+
+  void evaluateResult() async {
     String expected = currentSentence["text"] ?? "";
     List<String> expectedWords = expected.split(RegExp(r'\s+'));
 
+    // Calculate the score based on matched words
     score = (matchedWords.length / expectedWords.length) * 100;
 
     if (score >= 90) {
@@ -123,8 +170,73 @@ class _KaraokeSentenceLevel3ScreenState extends State<KaraokeSentenceLevel3Scree
       stars = 0;
     }
 
-    setState(() {});
+    // Save score to Firestore
+    await saveScoreToFirestore(score, stars);
+
+    setState(() {}); // Update UI if needed
   }
+
+  // void evaluateResult() async {
+  //   String expected = currentSentence["text"] ?? "";
+  //   List<String> expectedWords = expected.split(RegExp(r'\s+'));
+
+  //   score = (matchedWords.length / expectedWords.length) * 100;
+
+  //   if (score >= 90) {
+  //     stars = 5;
+  //   } else if (score >= 75) {
+  //     stars = 4;
+  //   } else if (score >= 60) {
+  //     stars = 3;
+  //   } else if (score >= 40) {
+  //     stars = 2;
+  //   } else if (score > 0) {
+  //     stars = 1;
+  //   } else {
+  //     stars = 0;
+  //   }
+
+  //   // Save score to Firestore
+  //   try {
+  //     final userId = FirebaseAuth.instance.currentUser?.uid;
+  //     if (userId == null) return;
+
+  //     // Fetch child ID
+  //     final snapshot = await FirebaseFirestore.instance
+  //         .collection('parents')
+  //         .doc(userId)
+  //         .collection('children')
+  //         .limit(1)
+  //         .get();
+
+  //     if (snapshot.docs.isNotEmpty) {
+  //       final childId = snapshot.docs.first.id;
+  //       final sentencePath = 'level3/sentence_$currentSentenceIndex';
+  //       String quizId = 'quiz_' + DateTime.now().toIso8601String();
+
+  //       await FirebaseFirestore.instance
+  //           .collection('parents')
+  //           .doc(userId)
+  //           .collection('children')
+  //           .doc(childId)
+  //           .collection('scores')
+  //           .doc('arabic')
+  //           .collection('quiz')
+  //           .doc(quizId)
+  //           .set({
+  //         'score': score,
+  //         'stars': stars,
+  //         'timestamp': FieldValue.serverTimestamp(),
+  //       });
+
+  //       print('Score saved successfully for $sentencePath');
+  //     }
+  //   } catch (e) {
+  //     print('Error saving score: $e');
+  //   }
+
+  //   setState(() {});
+  // }
 
   void nextSentence() {
     setState(() {
@@ -269,8 +381,7 @@ class _KaraokeSentenceLevel3ScreenState extends State<KaraokeSentenceLevel3Scree
               const SizedBox(height: 16),
               if (!isListening && recognizedText.isNotEmpty) ...[
                 Text(' % التقييم: ${score.toStringAsFixed(1)}',
-                    style:
-                        const TextStyle(fontSize: 20, fontFamily: 'Arial')),
+                    style: const TextStyle(fontSize: 20, fontFamily: 'Arial')),
                 const SizedBox(height: 8),
                 Row(
                     mainAxisAlignment: MainAxisAlignment.center,

@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:audioplayers/audioplayers.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class QuizAScreen extends StatefulWidget {
   const QuizAScreen({super.key});
@@ -16,22 +19,34 @@ class _QuizAScreenState extends State<QuizAScreen> {
   final AudioPlayer audioPlayer = AudioPlayer();
   final flutterTts = FlutterTts();
   final stt.SpeechToText speech = stt.SpeechToText();
-  final List<String> messages = ["ممتاز", "رائع", "عمل جيد", "أنت رائع", "جهد رائع"];
+  final List<String> messages = [
+    "ممتاز",
+    "رائع",
+    "عمل جيد",
+    "أنت رائع",
+    "جهد رائع"
+  ];
 
   final List<Map<String, String>> quizData = [
     {
-      "paragraph": "اليوم ذهبنا إلى الحديقة، كانت الشمس مشرقة، لعبنا على الأرجوحة واستمتعنا",
-      "target": "اليوم ذهبنا إلى الحديقة، كانت الشمس مشرقة، لعبنا على الأرجوحة واستمتعنا",
+      "paragraph":
+          "اليوم ذهبنا إلى الحديقة، كانت الشمس مشرقة، لعبنا على الأرجوحة واستمتعنا",
+      "target":
+          "اليوم ذهبنا إلى الحديقة، كانت الشمس مشرقة، لعبنا على الأرجوحة واستمتعنا",
       "audioPath": "audio/alyaoum.mp3",
     },
     {
-      "paragraph": "كان عيد ميلادي الأسبوع الماضي. حصلت على كعكة كبيرة وبالونات. جاء أصدقائي للعب معي",
-      "target": "كان عيد ميلادي الأسبوع الماضي. حصلت على كعكة كبيرة وبالونات. جاء أصدقائي للعب معي",
+      "paragraph":
+          "كان عيد ميلادي الأسبوع الماضي. حصلت على كعكة كبيرة وبالونات. جاء أصدقائي للعب معي",
+      "target":
+          "كان عيد ميلادي الأسبوع الماضي. حصلت على كعكة كبيرة وبالونات. جاء أصدقائي للعب معي",
       "audioPath": "audio/eid.mp3",
     },
     {
-      "paragraph": "في الصيف الماضي، سافرنا إلى الغابة في رحلة تخييم. رأينا أشجارًا طويلة وطيورًا.",
-      "target": "في الصيف الماضي، سافرنا إلى الغابة في رحلة تخييم. رأينا أشجارًا طويلة وطيورًا.",
+      "paragraph":
+          "في الصيف الماضي، سافرنا إلى الغابة في رحلة تخييم. رأينا أشجارًا طويلة وطيورًا.",
+      "target":
+          "في الصيف الماضي، سافرنا إلى الغابة في رحلة تخييم. رأينا أشجارًا طويلة وطيورًا.",
       "audioPath": "audio/saif.mp3",
     },
   ];
@@ -45,7 +60,7 @@ class _QuizAScreenState extends State<QuizAScreen> {
   bool showNext = false;
   String? motivationalMessage;
   int recordingTimeLeft = 0;
-
+  String? childId;
   final Duration maxTime = Duration(minutes: 3);
   Duration timeLeft = Duration(minutes: 3);
   Timer? timer;
@@ -54,7 +69,27 @@ class _QuizAScreenState extends State<QuizAScreen> {
   @override
   void initState() {
     super.initState();
+    fetchChildId();
     startTimer();
+  }
+
+  Future<void> fetchChildId() async {
+    // Fetch child ID from Firebase (Assume FirebaseAuth is already set up and authenticated)
+    var user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      var snapshot = await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(user.uid) // Assuming user is the parent
+          .collection('children')
+          .limit(1) // Assuming one child for now
+          .get();
+
+      if (snapshot.docs.isNotEmpty) {
+        setState(() {
+          childId = snapshot.docs.first.id; // Get child ID
+        });
+      }
+    }
   }
 
   void startTimer() {
@@ -157,7 +192,8 @@ class _QuizAScreenState extends State<QuizAScreen> {
     if (s.isEmpty) return t.length;
     if (t.isEmpty) return s.length;
 
-    List<List<int>> matrix = List.generate(s.length + 1, (_) => List<int>.filled(t.length + 1, 0));
+    List<List<int>> matrix =
+        List.generate(s.length + 1, (_) => List<int>.filled(t.length + 1, 0));
     for (int i = 0; i <= s.length; i++) matrix[i][0] = i;
     for (int j = 0; j <= t.length; j++) matrix[0][j] = j;
 
@@ -176,13 +212,29 @@ class _QuizAScreenState extends State<QuizAScreen> {
 
   void _showFinalScore() {
     double percent = (score / quizData.length) * 100;
-    String emoji = percent >= 100 ? "💯" : percent >= 80 ? "🌟" : percent >= 60 ? "👍" : "🙂";
+    String emoji = percent >= 100
+        ? "💯"
+        : percent >= 80
+            ? "🌟"
+            : percent >= 60
+                ? "👍"
+                : "🙂";
+
+    // Save score to Firebase
+    saveScoreToFirebase(percent);
 
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text("$emoji النتيجة النهائية", textAlign: TextAlign.center, style: TextStyle(fontSize: 22)),
-        content: Text("نتيجتك هي ${score.toInt()} / ${quizData.length}", textAlign: TextAlign.center, style: TextStyle(fontSize: 20)),
+        title: Text("$emoji ${'final_score'.tr()}",
+            textAlign: TextAlign.center, style: TextStyle(fontSize: 22)),
+        content: Text(
+            "${'your_score'.tr(args: [
+                  score.toInt().toString(),
+                  quizData.length.toString()
+                ])}",
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 20)),
         actions: [
           TextButton(
             child: Text("عودة", style: TextStyle(fontSize: 18)),
@@ -191,6 +243,22 @@ class _QuizAScreenState extends State<QuizAScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> saveScoreToFirebase(double score) async {
+    if (childId != null) {
+      // Assuming the child collection has a `quizScores` sub-collection
+      await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(FirebaseAuth.instance.currentUser?.uid) // Parent UID
+          .collection('children')
+          .doc(childId)
+          .collection('quizScores')
+          .add({
+        'score': score,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+    }
   }
 
   @override
@@ -211,14 +279,16 @@ class _QuizAScreenState extends State<QuizAScreen> {
     return Scaffold(
       backgroundColor: Colors.orange.shade50,
       appBar: AppBar(
-        title: const Text("📝 الاختبار", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+        title: const Text("📝 الاختبار",
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.orange.shade300,
         centerTitle: true,
         actions: [
           Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Text("⏱ ${formatTime(timeLeft)}", style: const TextStyle(fontSize: 22)),
+              child: Text("⏱ ${formatTime(timeLeft)}",
+                  style: const TextStyle(fontSize: 22)),
             ),
           )
         ],
@@ -229,9 +299,12 @@ class _QuizAScreenState extends State<QuizAScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text("⭐ نتيجتك: ${score.toInt()} / ${quizData.length}",
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.right),
+              Text(
+                "⭐ نتيجتك: ${score.toInt()} / ${quizData.length}",
+                style:
+                    const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.right,
+              ),
               const SizedBox(height: 20),
               Container(
                 width: double.infinity,
@@ -243,45 +316,58 @@ class _QuizAScreenState extends State<QuizAScreen> {
                 ),
                 child: Text(
                   paragraph,
-                  style: const TextStyle(fontSize: 22, height: 1.8, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                      fontSize: 22, height: 1.8, fontWeight: FontWeight.w600),
                   textAlign: TextAlign.right,
                 ),
               ),
               const SizedBox(height: 24),
               ElevatedButton.icon(
-                onPressed: () async => await audioPlayer.play(AssetSource(audioPath)),
+                onPressed: () async =>
+                    await audioPlayer.play(AssetSource(audioPath)),
                 icon: const Icon(Icons.volume_up, size: 30),
                 label: const Text("استمع", style: TextStyle(fontSize: 20)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orange.shade200,
-                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                 ),
               ),
               const SizedBox(height: 24),
               if (isPreparing)
-                const Text("🎯 استعد للتسجيل...", style: TextStyle(fontSize: 20, color: Colors.deepOrange), textAlign: TextAlign.right),
+                const Text("🎯 استعد للتسجيل...",
+                    style: TextStyle(fontSize: 20, color: Colors.deepOrange),
+                    textAlign: TextAlign.right),
               if (isListening)
-                Text("🎙️ تسجيل... $recordingTimeLeft ثانية", style: const TextStyle(fontSize: 20, color: Colors.blue), textAlign: TextAlign.right),
+                Text("🎙️ تسجيل... $recordingTimeLeft ثانية",
+                    style: const TextStyle(fontSize: 20, color: Colors.blue),
+                    textAlign: TextAlign.right),
               ElevatedButton.icon(
                 onPressed: () => evaluate(paragraph),
                 icon: const Icon(Icons.mic, size: 30),
                 label: const Text("تسجيل", style: TextStyle(fontSize: 20)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.lightBlueAccent.shade100,
-                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                 ),
               ),
               const SizedBox(height: 24),
               if (spokenText.isNotEmpty)
-                Text("🗣️ قلت: \"$spokenText\"",
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w500), textAlign: TextAlign.right),
+                Text(
+                  "🗣️ قلت: \"$spokenText\"",
+                  style: const TextStyle(
+                      fontSize: 20, fontWeight: FontWeight.w500),
+                  textAlign: TextAlign.right,
+                ),
               if (sentenceScore > 0)
                 Text(
                   "النتيجة: ${sentenceScore.toStringAsFixed(1)} %",
                   style: TextStyle(
-                      color: sentenceScore >= 80 ? Colors.green : Colors.red,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold),
+                    color: sentenceScore >= 80 ? Colors.green : Colors.red,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
                   textAlign: TextAlign.right,
                 ),
               if (motivationalMessage != null)
@@ -292,7 +378,9 @@ class _QuizAScreenState extends State<QuizAScreen> {
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
-                      color: motivationalMessage == "حاول مرة أخرى" ? Colors.red : Colors.green,
+                      color: motivationalMessage == "حاول مرة أخرى"
+                          ? Colors.red
+                          : Colors.green,
                     ),
                     textAlign: TextAlign.right,
                   ),
@@ -313,10 +401,15 @@ class _QuizAScreenState extends State<QuizAScreen> {
                     }
                   },
                   icon: const Icon(Icons.navigate_next),
-                  label: Text(currentIndex == quizData.length - 1 ? "🏁 إنهاء" : "التالي", style: const TextStyle(fontSize: 22)),
+                  label: Text(
+                      currentIndex == quizData.length - 1
+                          ? "🏁 إنهاء"
+                          : "التالي",
+                      style: const TextStyle(fontSize: 22)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.pinkAccent.shade100,
-                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 12, horizontal: 24),
                   ),
                 )
             ],

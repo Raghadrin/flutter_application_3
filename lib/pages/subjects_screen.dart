@@ -29,12 +29,12 @@ class SubjectsScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
-          const SizedBox(height: 40),
+          const SizedBox(height: 30),
           Image.asset(
             "images/subject_fox.jpg",
-            height: 300,
+            height: 280,
           ),
-          const SizedBox(height: 30),
+          const SizedBox(height: 20),
           Text(
             tr("choose subject"), // Add this to your translation files
             style: TextStyle(
@@ -44,7 +44,7 @@ class SubjectsScreen extends StatelessWidget {
               fontFamily: 'Arial',
             ),
           ),
-          const SizedBox(height: 25),
+          const SizedBox(height: 10),
           _buildSubjectButton(
               context, tr("arabic"), "images/arabicsubject.png"),
           _buildSubjectButton(

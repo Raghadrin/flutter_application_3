@@ -35,9 +35,9 @@ class SubjectLevelsScreen extends StatelessWidget {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const SizedBox(height: 50),
-          Image.asset("images/subject_fox.jpg", height: 300),
-          const SizedBox(height: 50),
+          const SizedBox(height: 40),
+          Image.asset("images/subject_fox.jpg", height: 280),
+          const SizedBox(height: 30),
           _buildLevelButton(context, tr('practice')),
           _buildLevelButton(context, tr('quiz')),
           _buildLevelButton(context, tr('library')),
@@ -71,6 +71,12 @@ class SubjectLevelsScreen extends StatelessWidget {
                 MaterialPageRoute(builder: (context) => Level1Quiz()),
               );
             }
+            //  else if (subject == tr('english')) {
+            //   Navigator.push(
+            //     context,
+            //     MaterialPageRoute(builder: (context) => Level1Quiz()),
+            //   );
+            //}
           } else if (text == tr('library')) {
             if (subject == tr('arabic')) {
               Navigator.push(
@@ -83,6 +89,12 @@ class SubjectLevelsScreen extends StatelessWidget {
                 MaterialPageRoute(builder: (context) => Level1Quiz()),
               );
             }
+            //  else if (subject == tr('english')) {
+            //   Navigator.push(
+            //     context,
+            //     MaterialPageRoute(builder: (context) => Level1Quiz()),
+            //   );
+            //}
           }
         },
         child: Container(

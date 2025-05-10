@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class KaraokeSentenceLevel2Screen extends StatefulWidget {
   const KaraokeSentenceLevel2Screen({super.key});
 
   @override
-  _KaraokeSentenceLevel2ScreenState createState() => _KaraokeSentenceLevel2ScreenState();
+  _KaraokeSentenceLevel2ScreenState createState() =>
+      _KaraokeSentenceLevel2ScreenState();
 }
 
-class _KaraokeSentenceLevel2ScreenState extends State<KaraokeSentenceLevel2Screen> {
- 
-
+class _KaraokeSentenceLevel2ScreenState
+    extends State<KaraokeSentenceLevel2Screen> {
   late AudioPlayer audioPlayer;
   late stt.SpeechToText speech;
   bool isListening = false;
@@ -24,17 +27,20 @@ class _KaraokeSentenceLevel2ScreenState extends State<KaraokeSentenceLevel2Scree
 
   List<Map<String, String>> sentences = [
     {
-      "text": "ذهبت العائله الى البحر وقضت وقتا ممتعا في السباحه وبناء القلاع الرمليه",
+      "text":
+          "ذهبت العائله الى البحر وقضت وقتا ممتعا في السباحه وبناء القلاع الرمليه",
       "audio": "audio/family.mp3",
       "image": "images/family.png",
     },
     {
-      "text": "استيقظ سامي مبكرا وحمل حقيبته الجديده وذهب الى المدرسه بحماس كبير",
+      "text":
+          "استيقظ سامي مبكرا وحمل حقيبته الجديده وذهب الى المدرسه بحماس كبير",
       "audio": "audio/school.mp3",
       "image": "images/school.png",
     },
     {
-      "text": "اشتريت كتابا جديدا عن الفضاء وقرات عن الكواكب والنجوم والمجرات البعيده",
+      "text":
+          "اشتريت كتابا جديدا عن الفضاء وقرات عن الكواكب والنجوم والمجرات البعيده",
       "audio": "audio/book.mp3",
       "image": "images/book.png",
     },
@@ -102,6 +108,53 @@ class _KaraokeSentenceLevel2ScreenState extends State<KaraokeSentenceLevel2Scree
     }
   }
 
+  Future<String?> fetchChildId() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return null;
+
+      final querySnapshot = await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(user.uid)
+          .collection('children')
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        return querySnapshot.docs.first.id;
+      }
+    } catch (e) {
+      print("Error fetching child ID: $e");
+    }
+    return null;
+  }
+
+  Future<void> saveScoreToFirestore(double score, int stars) async {
+    try {
+      final childId = await fetchChildId();
+      if (childId == null) return;
+
+      final docRef = FirebaseFirestore.instance
+          .collection('parents')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .collection('children')
+          .doc(childId)
+          .collection('scores')
+          .doc('Arabic')
+          .collection('level2')
+          .doc('sentence_$currentSentenceIndex');
+
+      await docRef.set({
+        'score': score,
+        'stars': stars,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      print("Score saved successfully!");
+    } catch (e) {
+      print("Error saving score: $e");
+    }
+  }
+
   void evaluateResult() {
     String expected = currentSentence["text"] ?? "";
     List<String> expectedWords = expected.split(RegExp(r'\s+'));
@@ -121,6 +174,8 @@ class _KaraokeSentenceLevel2ScreenState extends State<KaraokeSentenceLevel2Scree
     } else {
       stars = 0;
     }
+
+    saveScoreToFirestore(score, stars); // Save the score to Firestore
 
     setState(() {});
   }
@@ -247,8 +302,7 @@ class _KaraokeSentenceLevel2ScreenState extends State<KaraokeSentenceLevel2Scree
                   if (isListening) {
                     speech.stop();
                     setState(() => isListening = false);
-                    evaluateResult();
-                    nextSentence();  // الانتقال إلى الجملة التالية بعد التقييم
+                    evaluateResult(); // ✅ Only evaluate, don't move to next sentence
                   } else {
                     startListening();
                   }
@@ -269,8 +323,7 @@ class _KaraokeSentenceLevel2ScreenState extends State<KaraokeSentenceLevel2Scree
               const SizedBox(height: 16),
               if (!isListening && recognizedText.isNotEmpty) ...[
                 Text(' % التقييم: ${score.toStringAsFixed(1)}',
-                    style:
-                        const TextStyle(fontSize: 20, fontFamily: 'Arial')),
+                    style: const TextStyle(fontSize: 20, fontFamily: 'Arial')),
                 const SizedBox(height: 8),
                 Row(
                     mainAxisAlignment: MainAxisAlignment.center,

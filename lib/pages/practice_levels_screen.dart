@@ -43,9 +43,9 @@ class PracticeLevelsScreen extends StatelessWidget {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const SizedBox(height: 50),
+          const SizedBox(height: 40),
           Image.asset("images/subject_fox.jpg", height: 280),
-          const SizedBox(height: 50),
+          const SizedBox(height: 30),
           Text(
             tr("start learning"),
             style: const TextStyle(
