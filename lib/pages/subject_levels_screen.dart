@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_3/letters/arabicLetter/arabicLibrary/library_screen.dart';
-import 'package:flutter_application_3/math/math_quizes/level1_quiz.dart';
+import 'package:flutter_application_3/letters/englishLetters/libeng/english_library_screen.dart';
+import 'package:flutter_application_3/letters/englishLetters/quiz/quiz_all_screen.dart';
+import 'package:flutter_application_3/math/library/library_screen.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_application_3/math/quiz/quiz_for_all.dart';
 import 'practice_levels_screen.dart';
 import '../letters/arabicLetter/arabicLevel2/quiz_all_screen.dart';
 
@@ -68,15 +71,15 @@ class SubjectLevelsScreen extends StatelessWidget {
             } else if (subject == tr('math')) {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => Level1Quiz()),
+                MaterialPageRoute(builder: (context) => QuizForAll()),
               );
             }
-            //  else if (subject == tr('english')) {
-            //   Navigator.push(
-            //     context,
-            //     MaterialPageRoute(builder: (context) => Level1Quiz()),
-            //   );
-            //}
+              else if (subject == tr('english')) {
+               Navigator.push(
+                 context,
+                 MaterialPageRoute(builder: (context) => QuizEScreen(subject: '',)),
+               );
+            }
           } else if (text == tr('library')) {
             if (subject == tr('arabic')) {
               Navigator.push(
@@ -86,15 +89,15 @@ class SubjectLevelsScreen extends StatelessWidget {
             } else if (subject == tr('math')) {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => Level1Quiz()),
+                MaterialPageRoute(builder: (context) =>LibraryScreen()),
               );
             }
-            //  else if (subject == tr('english')) {
-            //   Navigator.push(
-            //     context,
-            //     MaterialPageRoute(builder: (context) => Level1Quiz()),
-            //   );
-            //}
+              else if (subject == tr('english')) {
+               Navigator.push(
+                 context,
+                 MaterialPageRoute(builder: (context) =>EnglishLibraryScreen()),
+               );
+            }
           }
         },
         child: Container(

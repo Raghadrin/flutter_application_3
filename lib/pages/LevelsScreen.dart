@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_3/letters/arabicLetter/levelOne/arabic_level1_screen.dart';
-import 'package:flutter_application_3/letters/englishLetters/bLetter/b_letters.dart';
-import 'package:flutter_application_3/letters/mathmatics/game.dart';
+import 'package:flutter_application_3/letters/englishLetters/practice/english_level1_screen.dart';
+import 'package:flutter_application_3/math/math/math_level1_screen.dart';
 
 class LevelsScreen extends StatelessWidget {
   final String subject;
@@ -55,22 +55,16 @@ class LevelsScreen extends StatelessWidget {
   List<Map<String, dynamic>> _getLevelsForSubject(String subject) {
     if (subject == "English") {
       return [
-        {"title": "Letters", "screen": LetterBTracingScreen()},
-        {"title": "Words", "screen": EnglishWordsScreen()},
-        {"title": "Sentences", "screen": EnglishSentencesScreen()},
-      ];
+        {"title": "Letters", "screen": EnglishLevel1Screen()},
+        ];
     } else if (subject == "Arabic") {
       return [
         {"title": "Letters", "screen": KaraokeSentenceScreen()},
-        {"title": "Words", "screen": ArabicWordsScreen()},
-        {"title": "Sentences", "screen": ArabicSentencesScreen()},
-      ];
+        ];
     } else if (subject == "Mathematics") {
       return [
-        {"title": "Games", "screen": GamesScreen()},
-        {"title": "Math Operations Time", "screen": MathOperationsScreen()},
-        {"title": "Number", "screen": NumberGameScreen()},
-      ];
+        {"title": "Games", "screen":MathLevel1Screen()},
+       ];
     }
     return [];
   }

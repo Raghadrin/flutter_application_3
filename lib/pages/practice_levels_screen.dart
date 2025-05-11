@@ -3,12 +3,12 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_application_3/letters/arabicLetter/ArabicLevel3/arabic_level3_screen.dart';
 import 'package:flutter_application_3/letters/arabicLetter/arabicLevel2/arabic_level2_screen.dart';
 import 'package:flutter_application_3/letters/arabicLetter/levelOne/arabic_level1_screen.dart';
-import 'package:flutter_application_3/letters/englishLetters/bLetter/EnglishLevel1Screen.dart';
-import 'package:flutter_application_3/letters/englishLetters/englishLevel2/EnglishLevel2Screen.dart';
-import 'package:flutter_application_3/letters/englishLetters/englishLevel3/EnglishLevel3Screen.dart';
-import 'package:flutter_application_3/math/math_level1_screen.dart';
-import 'package:flutter_application_3/math/math_level2_screen.dart';
-import 'package:flutter_application_3/math/math_level3_screen.dart';
+import 'package:flutter_application_3/letters/englishLetters/practice/english_level1_screen.dart';
+import 'package:flutter_application_3/letters/englishLetters/practice/english_level2_screen.dart';
+import 'package:flutter_application_3/letters/englishLetters/practice/english_level3_screen.dart';
+import 'package:flutter_application_3/math/math/math_level1_screen.dart';
+import 'package:flutter_application_3/math/math/math_level2_screen.dart';
+import 'package:flutter_application_3/math/math/math_level3_screen.dart';
 
 class PracticeLevelsScreen extends StatelessWidget {
   final String subject;
@@ -83,7 +83,7 @@ class PracticeLevelsScreen extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => EnglishLevel1Screen(letter: ''),
+                  builder: (context) => EnglishLevel1Screen(),
                 ),
               );
             } else if (isMath) {
