@@ -55,9 +55,9 @@ class PracticeLevelsScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 15),
-          _buildLevelButton(context, tr("level 1")),
-          _buildLevelButton(context, tr("level 2")),
-          _buildLevelButton(context, tr("level 3")),
+          _buildLevelButton(context, tr("Level 1")),
+          _buildLevelButton(context, tr("Level 2")),
+          _buildLevelButton(context, tr("Level 3")),
           const Spacer(),
         ],
       ),
@@ -69,11 +69,11 @@ class PracticeLevelsScreen extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 50.0),
       child: GestureDetector(
         onTap: () {
-          final isArabic = subject == tr('arabic');
-          final isEnglish = subject == tr('english');
-          final isMath = subject == tr('math');
+          final isArabic = subject == tr('Arabic');
+          final isEnglish = subject == tr('English');
+          final isMath = subject == tr('Math');
 
-          if (level == tr("level 1")) {
+          if (level == tr("Level 1")) {
             if (isArabic) {
               Navigator.push(
                   context,
@@ -94,7 +94,7 @@ class PracticeLevelsScreen extends StatelessWidget {
             }
           }
 
-          if (level == tr("level 2")) {
+          if (level == tr("Level 2")) {
             if (isArabic) {
               Navigator.push(
                 context,
@@ -114,7 +114,7 @@ class PracticeLevelsScreen extends StatelessWidget {
             }
           }
 
-          if (level == tr("level 3")) {
+          if (level == tr("Level 3")) {
             if (isEnglish) {
               Navigator.push(
                 context,

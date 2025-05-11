@@ -18,7 +18,7 @@ class SubjectsScreen extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          tr("subjects"),
+          tr("Subjects"),
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
@@ -36,7 +36,7 @@ class SubjectsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           Text(
-            tr("choose subject"), // Add this to your translation files
+            tr("Choose Subject"), // Add this to your translation files
             style: TextStyle(
               fontSize: 34,
               color: const Color.fromARGB(255, 42, 42, 42),
@@ -46,10 +46,10 @@ class SubjectsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           _buildSubjectButton(
-              context, tr("arabic"), "images/arabicsubject.png"),
+              context, tr("Arabic"), "images/arabicsubject.png"),
           _buildSubjectButton(
-              context, tr("english"), "images/englishsubject.png"),
-          _buildSubjectButton(context, tr("math"), "images/mathsubject.png"),
+              context, tr("English"), "images/englishsubject.png"),
+          _buildSubjectButton(context, tr("Math"), "images/mathsubject.png"),
           const Spacer(),
         ],
       ),
