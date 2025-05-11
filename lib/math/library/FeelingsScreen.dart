@@ -21,11 +21,12 @@ class _FeelingsScreenState extends State<FeelingsScreen>
   @override
   void initState() {
     super.initState();
-    _foxController =
-        AnimationController(vsync: this, duration: const Duration(milliseconds: 1000));
-    _textController =
-        AnimationController(vsync: this, duration: const Duration(milliseconds: 1000));
-    _confettiController = ConfettiController(duration: const Duration(seconds: 1));
+    _foxController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 1000));
+    _textController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 1000));
+    _confettiController =
+        ConfettiController(duration: const Duration(seconds: 1));
 
     _foxController.forward();
     Future.delayed(const Duration(milliseconds: 500), () {
@@ -106,7 +107,8 @@ class _FeelingsScreenState extends State<FeelingsScreen>
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: Colors.deepOrange, width: 2),
+                          border:
+                              Border.all(color: Colors.deepOrange, width: 2),
                         ),
                         child: Text(
                           message,
@@ -129,9 +131,11 @@ class _FeelingsScreenState extends State<FeelingsScreen>
                           backgroundColor: Colors.deepOrange,
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20)),
-                          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 16),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 30, vertical: 16),
                         ),
-                        child: const Text("Thanks, Fox!", style: TextStyle(fontSize: 22)),
+                        child: const Text("Thanks, Fox!",
+                            style: TextStyle(fontSize: 22)),
                       ),
                     ],
                   ),
@@ -173,21 +177,23 @@ class _FeelingsScreenState extends State<FeelingsScreen>
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            const SizedBox(height: 20),
+            //const SizedBox(height: 10),
             FadeTransition(
               opacity: _foxController,
-              child: Lottie.asset('images/happy_fox.json', width: 180, height: 180),
+              child: Lottie.asset('images/happy_fox.json',
+                  width: 180, height: 180),
             ),
-            const SizedBox(height: 20),
+            //const SizedBox(height: 5),
             FadeTransition(
               opacity: _textController,
               child: const Text(
                 "Hey buddy,\nI'm your math fox friend!\nHow are you feeling today?",
-                style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold, height: 1.5),
+                style: TextStyle(
+                    fontSize: 30, fontWeight: FontWeight.bold, height: 1.5),
                 textAlign: TextAlign.center,
               ),
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 10),
             Expanded(
               child: GridView.count(
                 crossAxisCount: 2,
@@ -318,7 +324,8 @@ class _FeelingButtonState extends State<FeelingButton>
               const SizedBox(height: 10),
               Text(
                 widget.label,
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                style:
+                    const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -340,8 +347,7 @@ class BokehPainter extends CustomPainter {
     final paint = Paint();
     for (int i = 0; i < 25; i++) {
       final x = random.nextDouble() * size.width;
-      final y = (random.nextDouble() * size.height +
-              (animation.value * 100)) %
+      final y = (random.nextDouble() * size.height + (animation.value * 100)) %
           size.height;
       final opacity = 0.5 + 0.5 * sin(animation.value * 2 * pi + i);
       paint.color = Colors.white.withOpacity(opacity);

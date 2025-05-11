@@ -65,30 +65,85 @@ class _QuizAScreenState extends State<QuizAScreen> {
   Duration timeLeft = Duration(minutes: 3);
   Timer? timer;
   Timer? recordingTimer;
+  String parentId = "";
 
   @override
   void initState() {
     super.initState();
-    fetchChildId();
+    fetchParentId();
     startTimer();
   }
 
-  Future<void> fetchChildId() async {
-    // Fetch child ID from Firebase (Assume FirebaseAuth is already set up and authenticated)
-    var user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      var snapshot = await FirebaseFirestore.instance
+  Future<void> fetchParentId() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+
+      parentId = user.uid;
+
+      final parentRef =
+          FirebaseFirestore.instance.collection('parents').doc(parentId);
+      final parentDoc = await parentRef.get();
+
+      if (!parentDoc.exists) {
+        await parentRef.set({
+          'createdAt': FieldValue.serverTimestamp(),
+          'email': user.email,
+        });
+        print("Parent ID created successfully!");
+      }
+    } catch (e) {
+      print("Error creating parent ID: $e");
+    }
+  }
+
+  Future<String?> fetchChildId() async {
+    try {
+      if (parentId.isEmpty) return null;
+
+      final childrenSnapshot = await FirebaseFirestore.instance
           .collection('parents')
-          .doc(user.uid) // Assuming user is the parent
+          .doc(parentId)
           .collection('children')
-          .limit(1) // Assuming one child for now
           .get();
 
-      if (snapshot.docs.isNotEmpty) {
-        setState(() {
-          childId = snapshot.docs.first.id; // Get child ID
-        });
+      if (childrenSnapshot.docs.isNotEmpty) {
+        return childrenSnapshot.docs.first.id;
+      } else {
+        print("No children found for this parent.");
+        return null;
       }
+    } catch (e) {
+      print("Error fetching child ID: $e");
+      return null;
+    }
+  }
+
+  Future<void> saveScoreToFirebase(String childId, double score) async {
+    try {
+      if (parentId.isEmpty) {
+        print("Parent ID not set yet.");
+        return;
+      }
+
+      await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(parentId)
+          .collection('children')
+          .doc(childId)
+          .collection('scores')
+          .doc('Arabic') // Replace with specific subject if necessary
+          .collection('quiz')
+          .doc(
+              'arabicQuiz') // This should be your document name, you can also use `.add()` if needed
+          .set({
+        'score': score,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      print("Quiz score saved successfully!");
+    } catch (e) {
+      print("Error saving score: $e");
     }
   }
 
@@ -210,7 +265,7 @@ class _QuizAScreenState extends State<QuizAScreen> {
     return matrix[s.length][t.length];
   }
 
-  void _showFinalScore() {
+  Future<void> _showFinalScore() async {
     double percent = (score / quizData.length) * 100;
     String emoji = percent >= 100
         ? "💯"
@@ -220,8 +275,10 @@ class _QuizAScreenState extends State<QuizAScreen> {
                 ? "👍"
                 : "🙂";
 
-    // Save score to Firebase
-    saveScoreToFirebase(percent);
+    String? childId = await fetchChildId();
+    if (childId != null) {
+      saveScoreToFirebase(childId, percent);
+    }
 
     showDialog(
       context: context,
@@ -243,22 +300,6 @@ class _QuizAScreenState extends State<QuizAScreen> {
         ],
       ),
     );
-  }
-
-  Future<void> saveScoreToFirebase(double score) async {
-    if (childId != null) {
-      // Assuming the child collection has a `quizScores` sub-collection
-      await FirebaseFirestore.instance
-          .collection('parents')
-          .doc(FirebaseAuth.instance.currentUser?.uid) // Parent UID
-          .collection('children')
-          .doc(childId)
-          .collection('quizScores')
-          .add({
-        'score': score,
-        'timestamp': FieldValue.serverTimestamp(),
-      });
-    }
   }
 
   @override

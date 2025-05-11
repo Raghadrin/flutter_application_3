@@ -113,8 +113,7 @@ class _MathVideosScreenState extends State<MathVideosScreen>
       Navigator.push(
         context,
         MaterialPageRoute(
-          //builder: (_) => YoutubePlayerScreen(videoUrl: url)),
-          builder: (_) => YoutubePlayerScreen(videoUrl: 'url'),
+          builder: (_) => YoutubePlayerScreen(videoUrl: url),
         ),
       );
     }
