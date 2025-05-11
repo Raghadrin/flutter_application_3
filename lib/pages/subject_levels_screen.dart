@@ -41,9 +41,9 @@ class SubjectLevelsScreen extends StatelessWidget {
           const SizedBox(height: 40),
           Image.asset("images/subject_fox.jpg", height: 280),
           const SizedBox(height: 30),
-          _buildLevelButton(context, tr('practice')),
-          _buildLevelButton(context, tr('quiz')),
-          _buildLevelButton(context, tr('library')),
+          _buildLevelButton(context, tr('Practice')),
+          _buildLevelButton(context, tr('Quiz')),
+          _buildLevelButton(context, tr('Library')),
           const Spacer(),
         ],
       ),
@@ -55,44 +55,44 @@ class SubjectLevelsScreen extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 50.0),
       child: GestureDetector(
         onTap: () {
-          if (text == tr('practice')) {
+          if (text == tr('Practice')) {
             Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => PracticeLevelsScreen(subject: subject),
               ),
             );
-          } else if (text == tr('quiz')) {
-            if (subject == tr('arabic')) {
+          } else if (text == tr('Quiz')) {
+            if (subject == tr('Arabic')) {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => QuizAScreen()),
               );
-            } else if (subject == tr('math')) {
+            } else if (subject == tr('Math')) {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => QuizForAll()),
               );
             }
-              else if (subject == tr('english')) {
+              else if (subject == tr('English')) {
                Navigator.push(
                  context,
                  MaterialPageRoute(builder: (context) => QuizEScreen(subject: '',)),
                );
             }
-          } else if (text == tr('library')) {
-            if (subject == tr('arabic')) {
+          } else if (text == tr('Library')) {
+            if (subject == tr('Arabic')) {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => ArabicLibraryScreen()),
               );
-            } else if (subject == tr('math')) {
+            } else if (subject == tr('Math')) {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) =>LibraryScreen()),
               );
             }
-              else if (subject == tr('english')) {
+              else if (subject == tr('English')) {
                Navigator.push(
                  context,
                  MaterialPageRoute(builder: (context) =>EnglishLibraryScreen()),
