@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'youtube_player_screen.dart';
+import 'package:flutter_application_3/math/library/youtube_player_screen.dart';
+import 'package:flutter_application_3/pages/YoutubePlayerScreen.dart';
 
 class EnglishVideosTabbedScreen extends StatelessWidget {
   const EnglishVideosTabbedScreen({super.key});
@@ -43,7 +44,8 @@ class EnglishVideosTabbedScreen extends StatelessWidget {
       {
         "title": "Basic English Conversation",
         "description": "Hello, How are you? Practice for kids.",
-        "url": "https://youtu.be/by1QAoRcc-U?list=PL0HMo9RIVkowrkFRF4SFE8OQ3VDlt-wwt",
+        "url":
+            "https://youtu.be/by1QAoRcc-U?list=PL0HMo9RIVkowrkFRF4SFE8OQ3VDlt-wwt",
         "thumbnail": "https://img.youtube.com/vi/by1QAoRcc-U/0.jpg",
       },
     ],
@@ -86,23 +88,26 @@ class EnglishVideosTabbedScreen extends StatelessWidget {
           title: const Text("📺 English Teaching Videos"),
           bottom: TabBar(
             isScrollable: true,
-            labelStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            labelStyle:
+                const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             indicatorColor: Colors.white,
-            tabs: englishVideos.keys.map((category) => Tab(text: category)).toList(),
+            tabs: englishVideos.keys
+                .map((category) => Tab(text: category))
+                .toList(),
           ),
         ),
         body: TabBarView(
           children: englishVideos.keys.map((category) {
             final videos = englishVideos[category]!;
             return Padding(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(10),
               child: GridView.builder(
                 itemCount: videos.length,
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   mainAxisSpacing: 16,
-                  crossAxisSpacing: 16,
-                  childAspectRatio: 0.8,
+                  crossAxisSpacing: 10,
+                  childAspectRatio: 0.5,
                 ),
                 itemBuilder: (context, index) {
                   final video = videos[index];
@@ -111,14 +116,18 @@ class EnglishVideosTabbedScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => YoutubePlayerScreen(videoUrl: video['url']!),
+                          builder: (_) => YoutubePlayerScreen(
+                            videoUrl: video['url']!,
+                          ),
+                          //builder: (_) => YoutubePlayerScreen(videoUrl: video['url']!),
                         ),
                       );
                     },
                     child: Container(
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        border: Border.all(color: const Color(0xFFFFA726), width: 2),
+                        border: Border.all(
+                            color: const Color(0xFFFFA726), width: 2),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       padding: const EdgeInsets.all(12),
@@ -138,7 +147,8 @@ class EnglishVideosTabbedScreen extends StatelessWidget {
                           Text(
                             video['title']!,
                             textAlign: TextAlign.center,
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 16),
                           ),
                           const SizedBox(height: 6),
                           Text(

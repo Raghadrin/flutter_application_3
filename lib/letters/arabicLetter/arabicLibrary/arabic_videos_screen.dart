@@ -106,7 +106,6 @@ class ArabicVideosTabbedScreen extends StatelessWidget {
                         context,
                         MaterialPageRoute(
                           builder: (_) => YoutubePlayerScreen(
-                            //title: video['title']!.tr(),
                             videoUrl: video['url']!,
                           ),
                         ),
