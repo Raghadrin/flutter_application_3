@@ -28,13 +28,13 @@ class _SentenceLearningScreenState extends State<SentenceLearningScreen> {
   final ConfettiController confettiController = ConfettiController(duration: Duration(seconds: 2));
 
   bool isListening = false;
+  bool isEvaluating = false;
   String recognizedText = '';
   double sentenceScore = 0;
   double wordScore = 0;
   int stars = 0;
   int currentWordIndex = -1;
   Color feedbackColor = Colors.transparent;
-
   List<String> words = [];
 
   @override
@@ -76,12 +76,15 @@ class _SentenceLearningScreenState extends State<SentenceLearningScreen> {
       localeId: "en_US",
       partialResults: false,
       listenMode: stt.ListenMode.dictation,
-      listenFor: Duration(seconds: 8),
-      onResult: (val) {
+      listenFor: Duration(seconds: 12),
+      onResult: (val) async {
         setState(() {
           recognizedText = val.recognizedWords;
         });
+        setState(() => isEvaluating = true);
+        await Future.delayed(const Duration(seconds: 2)); // Buffer before scoring
         _evaluateSpeech(isSentence);
+        setState(() => isEvaluating = false);
       },
     );
   }
@@ -251,28 +254,32 @@ class _SentenceLearningScreenState extends State<SentenceLearningScreen> {
                     label: const Text("Record Word"),
                   ),
                   const SizedBox(height: 20),
-                  Text("You said: $recognizedText", style: const TextStyle(fontSize: 18)),
-                  const SizedBox(height: 10),
-                  Text(
-                    "Score: ${sentenceScore.toStringAsFixed(1)}%",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: feedbackColor,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(
-                      3,
-                      (i) => Icon(
-                        i < stars ? Icons.star : Icons.star_border,
-                        color: Colors.amber,
-                        size: 32,
+                  if (isEvaluating)
+                    const CircularProgressIndicator(),
+                  if (!isEvaluating) ...[
+                    Text("You said: $recognizedText", style: const TextStyle(fontSize: 18)),
+                    const SizedBox(height: 10),
+                    Text(
+                      "Score: ${sentenceScore.toStringAsFixed(1)}%",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: feedbackColor,
                       ),
                     ),
-                  ),
+                    const SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(
+                        3,
+                        (i) => Icon(
+                          i < stars ? Icons.star : Icons.star_border,
+                          color: Colors.amber,
+                          size: 32,
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class KaraokeSentenceScreen extends StatefulWidget {
   const KaraokeSentenceScreen({super.key});
@@ -22,7 +21,6 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
   int currentSentenceIndex = 0;
   int currentWordIndex = 0;
   List<String> matchedWords = [];
-  String parentId = "";
 
   List<Map<String, String>> sentences = [
     {
@@ -49,79 +47,6 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
     super.initState();
     audioPlayer = AudioPlayer();
     speech = stt.SpeechToText();
-    fetchParentId();
-  }
-
-  Future<void> fetchParentId() async {
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) return;
-
-      parentId = user.uid;
-
-      final parentRef =
-          FirebaseFirestore.instance.collection('parents').doc(parentId);
-      final parentDoc = await parentRef.get();
-
-      if (!parentDoc.exists) {
-        await parentRef.set({
-          'createdAt': FieldValue.serverTimestamp(),
-          'email': user.email,
-        });
-        print("Parent ID created successfully!");
-      }
-    } catch (e) {
-      print("Error creating parent ID: $e");
-    }
-  }
-
-  Future<String?> fetchChildId() async {
-    try {
-      if (parentId.isEmpty) return null;
-
-      final childrenSnapshot = await FirebaseFirestore.instance
-          .collection('parents')
-          .doc(parentId)
-          .collection('children')
-          .get();
-
-      if (childrenSnapshot.docs.isNotEmpty) {
-        return childrenSnapshot.docs.first.id;
-      } else {
-        print("No children found for this parent.");
-        return null;
-      }
-    } catch (e) {
-      print("Error fetching child ID: $e");
-      return null;
-    }
-  }
-
-  Future<void> saveScore(
-      String childId, int sentenceIndex, double score) async {
-    try {
-      if (parentId.isEmpty) {
-        print("Parent ID not set yet.");
-        return;
-      }
-
-      await FirebaseFirestore.instance
-          .collection('parents')
-          .doc(parentId)
-          .collection('children')
-          .doc(childId)
-          .collection('scores')
-          .doc('Arabic')
-          .set({
-        'level1': {
-          'sentence_$sentenceIndex': score,
-        },
-      }, SetOptions(merge: true));
-
-      print("Score saved successfully!");
-    } catch (e) {
-      print("Error saving score: $e");
-    }
   }
 
   Future<void> playAudio(String path) async {
@@ -177,7 +102,7 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
     }
   }
 
-  void evaluateResult() async {
+  void evaluateResult() {
     String expected = currentSentence["text"] ?? "";
     List<String> expectedWords = expected.split(RegExp(r'\s+'));
 
@@ -197,30 +122,18 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
       stars = 0;
     }
 
-    // Fetch the child ID before saving the score
-    String? childId = await fetchChildId();
-    if (childId != null) {
-      saveScore(childId, currentSentenceIndex, score);
-    }
-
     setState(() {});
   }
 
   void nextSentence() {
     setState(() {
-      if (currentSentenceIndex < sentences.length - 1) {
-        currentSentenceIndex++;
-        recognizedText = "";
-        matchedWords = [];
-        score = 0.0;
-        stars = 0;
-        currentWordIndex = 0;
-      } else {
-        print("All sentences completed.");
-      }
+      currentSentenceIndex = (currentSentenceIndex + 1) % sentences.length;
+      recognizedText = "";
+      score = 0.0;
+      stars = 0;
+      matchedWords = [];
+      currentWordIndex = 0;
     });
-
-    playAudio(currentSentence["audio"]!);
   }
 
   List<Widget> buildStars() {
@@ -234,11 +147,28 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
     );
   }
 
+  List<TextSpan> buildHighlightedSentence() {
+    List<String> words = currentSentence["text"]!.split(RegExp(r'\s+'));
+    return words.asMap().entries.map((entry) {
+      int index = entry.key;
+      String word = entry.value;
+      return TextSpan(
+        text: '$word ',
+        style: TextStyle(
+          fontSize: 22,
+          fontWeight: FontWeight.bold,
+          fontFamily: 'Arial',
+          color: index == currentWordIndex ? Colors.red : Colors.black,
+        ),
+      );
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('karaoke_title'.tr()),
+        title: const Text('🎤 كاريوكي الجمل'),
         backgroundColor: Colors.teal,
       ),
       body: Padding(
@@ -248,12 +178,12 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                height: MediaQuery.of(context).size.height * 0.48,
+                height: MediaQuery.of(context).size.height * 0.28,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: Colors.teal.shade50,
                   borderRadius: BorderRadius.circular(20),
-                  boxShadow: const [
+                  boxShadow: [
                     BoxShadow(
                       color: Colors.black12,
                       blurRadius: 6,
@@ -261,60 +191,80 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
                     ),
                   ],
                 ),
-                child: Column(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  textDirection: TextDirection.rtl,
                   children: [
-                    Image.asset(
-                      currentSentence["image"]!,
-                      width: 180,
-                      height: 180,
-                      fit: BoxFit.fill,
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.asset(
+                        currentSentence["image"]!,
+                        width: 150,
+                        height: 300,
+                        fit: BoxFit.cover,
+                      ),
                     ),
-                    const SizedBox(height: 40),
-                    Text(
-                      currentSentence["text"]!,
-                      style: const TextStyle(
-                          fontSize: 22, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Center(
+                        child: RichText(
+                          textAlign: TextAlign.center,
+                          textDirection: TextDirection.rtl,
+                          text: TextSpan(children: buildHighlightedSentence()),
+                        ),
+                      ),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 16),
               ElevatedButton.icon(
-                icon: const Icon(Icons.play_arrow),
-                label: Text('play_sentence'.tr()),
+                icon: const Icon(Icons.play_arrow, size: 22),
+                label: const Text('استمع للجملة',
+                    style: TextStyle(fontSize: 18, fontFamily: 'Arial')),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                  backgroundColor: Colors.blueAccent,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
                 onPressed: () => playAudio(currentSentence["audio"]!),
               ),
               const SizedBox(height: 12),
               ElevatedButton.icon(
-                icon: Icon(isListening ? Icons.stop : Icons.mic),
-                label: Text(isListening ? 'stop'.tr() : 'start_speaking'.tr()),
-                onPressed: isListening
-                    ? () {
-                        speech.stop();
-                        setState(() {
-                          isListening = false;
-                          evaluateResult();
-                        });
-                      }
-                    : startListening,
+                icon: Icon(isListening ? Icons.stop : Icons.mic, size: 22),
+                label: Text(isListening ? 'إيقاف' : 'ابدأ التحدث',
+                    style: const TextStyle(fontSize: 18, fontFamily: 'Arial')),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                  backgroundColor: isListening ? Colors.red : Colors.green,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: () {
+                  if (isListening) {
+                    speech.stop();
+                    setState(() => isListening = false);
+                    evaluateResult();
+                  } else {
+                    startListening();
+                  }
+                },
               ),
               const SizedBox(height: 24),
-              Text('spoken_text'.tr(),
-                  style: const TextStyle(
-                      fontSize: 20, fontWeight: FontWeight.bold)),
+              const Text('النص الذي قلته',
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      fontFamily: 'Arial')),
               const SizedBox(height: 10),
               Text(
                 recognizedText,
-                style: const TextStyle(fontSize: 18),
+                style: const TextStyle(fontSize: 18, fontFamily: 'Arial'),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
               if (!isListening && recognizedText.isNotEmpty) ...[
-                Text(
-                  '${'evaluation'.tr()}: ${score.toStringAsFixed(1)}%',
-                  style: const TextStyle(fontSize: 20),
-                ),
+                Text(' % التقييم: ${score.toStringAsFixed(1)}',
+                    style: const TextStyle(fontSize: 20, fontFamily: 'Arial')),
                 const SizedBox(height: 8),
                 Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -322,8 +272,16 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
                 const SizedBox(height: 12),
                 ElevatedButton.icon(
                   onPressed: nextSentence,
-                  icon: const Icon(Icons.navigate_next),
-                  label: Text('new_sentence'.tr()),
+                  icon: const Icon(Icons.navigate_next, size: 22),
+                  label: const Text('جملة جديدة',
+                      style: TextStyle(fontSize: 18, fontFamily: 'Arial')),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.amber,
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 12, horizontal: 24),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
+                  ),
                 ),
               ],
             ],

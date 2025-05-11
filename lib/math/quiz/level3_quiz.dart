@@ -35,7 +35,8 @@ class _Level3QuizState extends State<Level3Quiz> with TickerProviderStateMixin {
     _confettiController = ConfettiController(duration: const Duration(seconds: 3));
     _backgroundController = AnimationController(vsync: this, duration: const Duration(seconds: 5))..repeat();
     _floatingController = AnimationController(vsync: this, duration: const Duration(seconds: 3))..repeat(reverse: true);
-    _floatingAnimation = Tween<Offset>(begin: Offset(0, -0.02), end: Offset(0, 0.02)).animate(CurvedAnimation(parent: _floatingController, curve: Curves.easeInOut));
+    _floatingAnimation = Tween<Offset>(begin: Offset(0, -0.02), end: Offset(0, 0.02))
+        .animate(CurvedAnimation(parent: _floatingController, curve: Curves.easeInOut));
     GameAudioHelper.speak("Question: ${_questions[_currentIndex]["question"]}");
   }
 
@@ -85,26 +86,52 @@ class _Level3QuizState extends State<Level3Quiz> with TickerProviderStateMixin {
     await _audioPlayer.play(AssetSource('audio/kids_cheering.mp3'));
     _confettiController.play();
     GameAudioHelper.sayQuizComplete();
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        backgroundColor: Colors.white,
-        title: const Text("🎉 You Are Great! 🎉", style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: Colors.green), textAlign: TextAlign.center),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 20),
-            Text("You completed all questions!", style: const TextStyle(fontSize: 32), textAlign: TextAlign.center),
-            const SizedBox(height: 20),
-            ConfettiWidget(confettiController: _confettiController, blastDirectionality: BlastDirectionality.explosive),
-          ],
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => Scaffold(
+          backgroundColor: const Color(0xFFFFE0B2),
+          body: Stack(
+            children: [
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ConfettiWidget(
+                        confettiController: _confettiController,
+                        blastDirectionality: BlastDirectionality.explosive,
+                      ),
+                      const Text(
+                        "🎉 You Are Great!",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 44,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.deepOrange,
+                        ),
+                      ),
+                      const SizedBox(height: 30),
+                      ElevatedButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orange,
+                          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        child: const Text("Back", style: TextStyle(fontSize: 26)),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-        actions: [
-          TextButton(onPressed: () {
-            Navigator.pop(context);
-            Navigator.pop(context);
-          }, child: const Text("Back", style: TextStyle(fontSize: 28))),
-        ],
       ),
     );
   }
@@ -115,7 +142,8 @@ class _Level3QuizState extends State<Level3Quiz> with TickerProviderStateMixin {
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
-          gradient: LinearGradient(colors: [Color(0xFFFFF3E0), Color(0xFFFFCC80)], begin: Alignment.topCenter, end: Alignment.bottomCenter),
+          gradient: LinearGradient(colors: [Color(0xFFFFF3E0), Color(0xFFFFCC80)],
+              begin: Alignment.topCenter, end: Alignment.bottomCenter),
         ),
         child: Stack(
           children: [
@@ -126,7 +154,7 @@ class _Level3QuizState extends State<Level3Quiz> with TickerProviderStateMixin {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text("Question ${_currentIndex + 1}", style: TextStyle(fontSize: 34, fontWeight: FontWeight.bold)),
+                    Text("Question ${_currentIndex + 1}", style: const TextStyle(fontSize: 34, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 20),
                     SlideTransition(
                       position: _floatingAnimation,

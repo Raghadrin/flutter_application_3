@@ -98,7 +98,11 @@ class _Level2QuizState extends State<Level2Quiz> with TickerProviderStateMixin {
       barrierDismissible: false,
       builder: (_) => AlertDialog(
         backgroundColor: Colors.white,
-        title: const Text("🎉 You Are Great!", textAlign: TextAlign.center, style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: Colors.orange)),
+        title: const Text(
+          "🎉 You Are Great!",
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: Colors.orange),
+        ),
         content: ConfettiWidget(
           confettiController: _confettiController,
           blastDirectionality: BlastDirectionality.explosive,
@@ -109,7 +113,7 @@ class _Level2QuizState extends State<Level2Quiz> with TickerProviderStateMixin {
             child: ElevatedButton(
               onPressed: () {
                 Navigator.pop(context);
-                Navigator.pop(context);
+                Navigator.pop(context); // ✅ Goes back to MathLevel2Screen
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.amber,
@@ -149,7 +153,11 @@ class _Level2QuizState extends State<Level2Quiz> with TickerProviderStateMixin {
         width: double.infinity,
         height: double.infinity,
         decoration: const BoxDecoration(
-          gradient: LinearGradient(colors: [Color(0xFFFFF3E0), Color(0xFFFFCC80)], begin: Alignment.topCenter, end: Alignment.bottomCenter),
+          gradient: LinearGradient(
+            colors: [Color(0xFFFFF3E0), Color(0xFFFFCC80)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
         ),
         child: Stack(
           children: [
@@ -188,7 +196,7 @@ class _Level2QuizState extends State<Level2Quiz> with TickerProviderStateMixin {
                     const SizedBox(height: 30),
                     if (feedback.isNotEmpty)
                       _buildTextBox(feedback, textColor: feedback.startsWith("✅") ? Colors.green : Colors.red),
-                    if (showNext)
+                    if (showNext && _currentIndex < _questions.length - 1)
                       Padding(
                         padding: const EdgeInsets.only(top: 30),
                         child: ElevatedButton(

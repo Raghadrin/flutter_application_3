@@ -1,9 +1,11 @@
+/// Localization applied for English and Arabic
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:confetti/confetti.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class QuizEScreen extends StatefulWidget {
   final String subject;
@@ -50,10 +52,10 @@ class _QuizEScreenState extends State<QuizEScreen> {
   Timer? timer;
 
   final List<String> messages = [
-    "Excellent!",
-    "Well done!",
-    "Great pronunciation!",
-    "Try again!"
+    "excellent_feedback",
+    "well_done_feedback",
+    "great_pronunciation",
+    "try_again_feedback"
   ];
 
   @override
@@ -108,11 +110,11 @@ class _QuizEScreenState extends State<QuizEScreen> {
 
         if ((wordScore >= 80 || sentenceScore >= 80)) {
           score += 1;
-          motivationalMessage = messages[Random().nextInt(messages.length - 1)];
+          motivationalMessage = tr(messages[Random().nextInt(messages.length)]);
           showNext = true;
           if (score == quizData.length) confettiController.play();
         } else {
-          motivationalMessage = "Try again!";
+          motivationalMessage = tr("try_again_feedback");
         }
 
         setState(() => isListening = false);
@@ -160,17 +162,17 @@ class _QuizEScreenState extends State<QuizEScreen> {
   void _showFinalScore() {
     String emoji = score == quizData.length ? "🏆" : "✅";
     String message = score == quizData.length
-        ? "Excellent!"
-        : "Well done! Your score is ${score.toInt()} / ${quizData.length}";
+        ? tr("excellent_feedback")
+        : "${tr("well_done_feedback")} ${score.toInt()} / ${quizData.length}";
 
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text("$emoji Final Score"),
+        title: Text("$emoji ${tr("final_score_title")}"),
         content: Text(message),
         actions: [
           TextButton(
-            child: Text("Return"),
+            child: Text(tr("return")),
             onPressed: () => Navigator.popUntil(context, (r) => r.isFirst),
           ),
         ],
@@ -197,7 +199,7 @@ class _QuizEScreenState extends State<QuizEScreen> {
     return Scaffold(
       backgroundColor: Colors.orange.shade50,
       appBar: AppBar(
-        title: Text("Quiz - ${widget.subject}"),
+        title: Text("${tr("quiz_title")} - ${widget.subject}"),
         backgroundColor: Colors.orange,
         centerTitle: true,
         actions: [
@@ -227,7 +229,7 @@ class _QuizEScreenState extends State<QuizEScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text("Score: ${score.toInt()} / ${quizData.length}",
+                  Text("${tr("score")}: ${score.toInt()} / ${quizData.length}",
                       style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 10),
                   Container(
@@ -265,13 +267,13 @@ class _QuizEScreenState extends State<QuizEScreen> {
                   ElevatedButton(
                     onPressed: () => flutterTts.speak(paragraph),
                     style: ElevatedButton.styleFrom(backgroundColor: Colors.orange.shade100),
-                    child: const Text("🔊 Listen to Sentence"),
+                    child: Text(tr("listen_sentence")),
                   ),
                   const SizedBox(height: 10),
                   ElevatedButton(
                     onPressed: () => flutterTts.speak(target),
                     style: ElevatedButton.styleFrom(backgroundColor: Colors.orange.shade200),
-                    child: const Text("🔊 Listen to Word"),
+                    child: Text(tr("listen_word")),
                   ),
                   const SizedBox(height: 20),
                   Row(
@@ -280,26 +282,26 @@ class _QuizEScreenState extends State<QuizEScreen> {
                       ElevatedButton(
                         onPressed: () => evaluate(target, ""),
                         style: ElevatedButton.styleFrom(backgroundColor: Colors.orange.shade100),
-                        child: const Text("🎤 Record Word"),
+                        child: Text(tr("record_word")),
                       ),
                       const SizedBox(width: 12),
                       ElevatedButton(
                         onPressed: () => evaluate("", paragraph),
                         style: ElevatedButton.styleFrom(backgroundColor: Colors.orange.shade200),
-                        child: const Text("📢 Record Sentence"),
+                        child: Text(tr("record_sentence_btn")),
                       ),
                     ],
                   ),
                   const SizedBox(height: 16),
                   if (spokenText.isNotEmpty)
-                    Text("You said: \"$spokenText\"", textAlign: TextAlign.center),
+                    Text("${tr("you_said")} \"$spokenText\"", textAlign: TextAlign.center),
                   if (wordScore > 0)
-                    Text("Word Score: ${wordScore.toStringAsFixed(1)}%",
+                    Text("${tr("score")}: ${wordScore.toStringAsFixed(1)}%",
                         style: TextStyle(
                             color: wordScore >= 80 ? Colors.green : Colors.red,
                             fontWeight: FontWeight.bold)),
                   if (sentenceScore > 0)
-                    Text("Sentence Score: ${sentenceScore.toStringAsFixed(1)}%",
+                    Text("${tr("score")}: ${sentenceScore.toStringAsFixed(1)}%",
                         style: TextStyle(
                             color: sentenceScore >= 80 ? Colors.green : Colors.red,
                             fontWeight: FontWeight.bold)),
@@ -311,7 +313,9 @@ class _QuizEScreenState extends State<QuizEScreen> {
                         style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: motivationalMessage == "Try again!" ? Colors.red : Colors.green),
+                            color: motivationalMessage == tr("try_again_feedback")
+                                ? Colors.red
+                                : Colors.green),
                       ),
                     ),
                   const SizedBox(height: 16),
@@ -337,8 +341,8 @@ class _QuizEScreenState extends State<QuizEScreen> {
                             ? Colors.deepOrangeAccent.shade100
                             : Colors.grey.shade400),
                     child: Text(currentIndex == quizData.length - 1
-                        ? "🏁 Finish Quiz"
-                        : "➡️ Next"),
+                        ? tr("finish_quiz")
+                        : tr("next_question")),
                   )
                 ],
               ),
