@@ -170,73 +170,10 @@ class _KaraokeSentenceLevel3ScreenState
       stars = 0;
     }
 
-    // Save score to Firestore
     await saveScoreToFirestore(score, stars);
 
-    setState(() {}); // Update UI if needed
+    setState(() {});
   }
-
-  // void evaluateResult() async {
-  //   String expected = currentSentence["text"] ?? "";
-  //   List<String> expectedWords = expected.split(RegExp(r'\s+'));
-
-  //   score = (matchedWords.length / expectedWords.length) * 100;
-
-  //   if (score >= 90) {
-  //     stars = 5;
-  //   } else if (score >= 75) {
-  //     stars = 4;
-  //   } else if (score >= 60) {
-  //     stars = 3;
-  //   } else if (score >= 40) {
-  //     stars = 2;
-  //   } else if (score > 0) {
-  //     stars = 1;
-  //   } else {
-  //     stars = 0;
-  //   }
-
-  //   // Save score to Firestore
-  //   try {
-  //     final userId = FirebaseAuth.instance.currentUser?.uid;
-  //     if (userId == null) return;
-
-  //     // Fetch child ID
-  //     final snapshot = await FirebaseFirestore.instance
-  //         .collection('parents')
-  //         .doc(userId)
-  //         .collection('children')
-  //         .limit(1)
-  //         .get();
-
-  //     if (snapshot.docs.isNotEmpty) {
-  //       final childId = snapshot.docs.first.id;
-  //       final sentencePath = 'level3/sentence_$currentSentenceIndex';
-  //       String quizId = 'quiz_' + DateTime.now().toIso8601String();
-
-  //       await FirebaseFirestore.instance
-  //           .collection('parents')
-  //           .doc(userId)
-  //           .collection('children')
-  //           .doc(childId)
-  //           .collection('scores')
-  //           .doc('arabic')
-  //           .collection('quiz')
-  //           .doc(quizId)
-  //           .set({
-  //         'score': score,
-  //         'stars': stars,
-  //         'timestamp': FieldValue.serverTimestamp(),
-  //       });
-
-  //       print('Score saved successfully for $sentencePath');
-  //     }
-  //   } catch (e) {
-  //     print('Error saving score: $e');
-  //   }
-
-  //   setState(() {});
-  // }
 
   void nextSentence() {
     setState(() {
