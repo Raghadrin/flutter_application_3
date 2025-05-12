@@ -2,46 +2,65 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 class LanguageScreen extends StatelessWidget {
-  const LanguageScreen({super.key});
+  final bool isDarkMode;
+
+  const LanguageScreen({
+    super.key,
+    required this.isDarkMode,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
-      backgroundColor:
-          isDarkMode ? const Color.fromARGB(255, 110, 44, 185) : Colors.white,
       appBar: AppBar(
+        centerTitle: true,
         title: Text(
           'language'.tr(),
-          style: TextStyle(fontSize: 32),
-        ), // Translation for the title
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 26,
+            color: isDarkMode ? Colors.white : const Color(0xFFEC5417),
+          ),
         ),
-        backgroundColor: isDarkMode
-            ? const Color.fromARGB(255, 110, 44, 185)
-            : const Color.fromARGB(255, 255, 114, 26),
+        backgroundColor: isDarkMode ? const Color(0xFF6E2CB9) : Colors.white,
+        iconTheme: IconThemeData(
+          color: isDarkMode ? Colors.white : const Color(0xFFEC5417),
+        ),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _buildLanguageTile(
-              context: context,
-              label: "English",
-              locale: const Locale('en'),
-              isSelected: context.locale.languageCode == 'en',
-            ),
-            const SizedBox(height: 20),
-            _buildLanguageTile(
-              context: context,
-              label: "العربية",
-              locale: const Locale('ar'),
-              isSelected: context.locale.languageCode == 'ar',
-            ),
-          ],
+      body: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          gradient: isDarkMode
+              ? const LinearGradient(
+                  colors: [Color(0xFF571E99), Color(0xFF7E3FF2)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                )
+              : const LinearGradient(
+                  colors: [Color(0xFFFFFEFD), Color(0xFFFFF0E4)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildLanguageTile(
+                context: context,
+                label: "English",
+                locale: const Locale('en'),
+                isSelected: context.locale.languageCode == 'en',
+              ),
+              const SizedBox(height: 20),
+              _buildLanguageTile(
+                context: context,
+                label: "العربية",
+                locale: const Locale('ar'),
+                isSelected: context.locale.languageCode == 'ar',
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -53,13 +72,10 @@ class LanguageScreen extends StatelessWidget {
     required Locale locale,
     required bool isSelected,
   }) {
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
     return GestureDetector(
       onTap: () {
-        context
-            .setLocale(locale); // Use easy_localization's method to set locale
-        Navigator.pop(context); // Close the language screen after changing
+        context.setLocale(locale);
+        Navigator.pop(context);
       },
       child: Container(
         width: 250,
@@ -67,8 +83,12 @@ class LanguageScreen extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
           color: isSelected
-              ? (isDarkMode ? Colors.deepPurple : const Color(0xFFEC5417))
-              : (isDarkMode ? Colors.deepPurple[800] : Colors.white),
+              ? (isDarkMode
+                  ? const Color.fromARGB(255, 204, 177, 255)
+                  : const Color(0xFFEC5417))
+              : (isDarkMode
+                  ? const Color.fromARGB(255, 242, 242, 242)
+                  : const Color.fromARGB(255, 255, 255, 255)),
           border: Border.all(
             color: isDarkMode ? Colors.white70 : const Color(0xFFEC5417),
             width: 2,
@@ -82,15 +102,18 @@ class LanguageScreen extends StatelessWidget {
             ),
           ],
         ),
-        child: Text(
-          label,
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 32,
-            color: isSelected
-                ? Colors.white
-                : (isDarkMode ? Colors.white : const Color(0xFFEC5417)),
-            fontWeight: FontWeight.bold,
+        child: Center(
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w600,
+              color: isSelected
+                  ? (isDarkMode ? const Color(0xFF7E3FF2) : Colors.white)
+                  : (isDarkMode
+                      ? const Color(0xFF7E3FF2)
+                      : const Color(0xFFEC5417)),
+            ),
           ),
         ),
       ),

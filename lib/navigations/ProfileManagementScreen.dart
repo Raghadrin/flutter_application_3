@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_application_3/navigations/child_info.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProfileManagementScreen extends StatefulWidget {
   final bool isDarkMode;
@@ -37,15 +38,37 @@ class _ProfileManagementScreenState extends State<ProfileManagementScreen> {
           .orderBy('timestamp', descending: true)
           .get();
 
+      final fetchedChildren = snapshot.docs
+          .map((doc) => doc.data() as Map<String, dynamic>)
+          .toList();
+
       setState(() {
-        children = snapshot.docs
-            .map((doc) => doc.data() as Map<String, dynamic>)
-            .toList();
-        if (children.isNotEmpty) {
-          selectedChild = children[0];
-        }
+        children = fetchedChildren;
       });
+
+      // Load the last selected child if available
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? lastSelectedChildName = prefs.getString('lastSelectedChild');
+
+      if (lastSelectedChildName != null) {
+        selectedChild = children.firstWhere(
+          (child) => child['name'] == lastSelectedChildName,
+          orElse: () => children.isNotEmpty ? children[0] : {},
+        );
+      } else if (children.isNotEmpty) {
+        selectedChild = children[0];
+      }
     }
+  }
+
+  void _setSelectedChild(Map<String, dynamic> child) async {
+    setState(() {
+      selectedChild = child;
+    });
+
+    // Save the selected child's name
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('lastSelectedChild', child['name']);
   }
 
   void _navigateToAddChild() async {
@@ -108,21 +131,19 @@ class _ProfileManagementScreenState extends State<ProfileManagementScreen> {
                           final isSelected = selectedChild == child;
 
                           return GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                selectedChild = child;
-                              });
-                            },
+                            onTap: () => _setSelectedChild(child),
                             child: Container(
                               margin: const EdgeInsets.only(bottom: 16),
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
                                 color: isSelected
                                     ? (isDarkMode
-                                        ? Colors.deepPurple[600]
+                                        ? const Color.fromARGB(
+                                            255, 255, 255, 255)
                                         : Colors.orange[100])
                                     : (isDarkMode
-                                        ? Colors.deepPurple[800]
+                                        ? const Color.fromARGB(
+                                            255, 242, 242, 242)
                                         : Colors.white),
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
@@ -141,7 +162,7 @@ class _ProfileManagementScreenState extends State<ProfileManagementScreen> {
                                         ? const Color(0xFFEC5417)
                                         : Colors.grey,
                                     child: const Icon(Icons.person,
-                                        size: 50, color: Colors.white),
+                                        size: 60, color: Colors.white),
                                   ),
                                   const SizedBox(width: 20),
                                   Expanded(
@@ -151,7 +172,7 @@ class _ProfileManagementScreenState extends State<ProfileManagementScreen> {
                                         fontSize: 22,
                                         fontWeight: FontWeight.w600,
                                         color: isDarkMode
-                                            ? Colors.white
+                                            ? Color(0xFF7E3FF2)
                                             : Colors.black87,
                                       ),
                                     ),
@@ -175,7 +196,9 @@ class _ProfileManagementScreenState extends State<ProfileManagementScreen> {
                         'noChildrenAdded'.tr(),
                         style: TextStyle(
                           fontSize: 18,
-                          color: isDarkMode ? Colors.white70 : Colors.black54,
+                          color: isDarkMode
+                              ? const Color.fromARGB(179, 111, 105, 105)
+                              : Colors.black54,
                         ),
                       ),
                     ),
@@ -191,8 +214,8 @@ class _ProfileManagementScreenState extends State<ProfileManagementScreen> {
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFEC5417),
-                  foregroundColor: Colors.white,
+                  backgroundColor:
+                      isDarkMode ? Colors.white : const Color(0xFFEC5417),
                   padding:
                       const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                   shape: RoundedRectangleBorder(

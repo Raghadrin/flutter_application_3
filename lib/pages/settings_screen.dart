@@ -108,7 +108,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 onTap: () => Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const LanguageScreen(),
+                    builder: (context) =>
+                        LanguageScreen(isDarkMode: isDarkMode),
                   ),
                 ),
               ),
@@ -169,7 +170,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: isDarkMode ? Colors.deepPurple[700] : Colors.white,
+          color: isDarkMode
+              ? const Color.fromARGB(255, 245, 244, 247)
+              : Colors.white,
           borderRadius: BorderRadius.circular(10), // more squared look
           boxShadow: [
             BoxShadow(
@@ -183,7 +186,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           children: [
             Icon(
               icon,
-              color: isDarkMode ? Colors.white70 : const Color(0xFFEC5417),
+              color: isDarkMode
+                  ? const Color.fromARGB(255, 143, 81, 250)
+                  : const Color(0xFFEC5417),
               size: 60,
             ),
             const SizedBox(width: 20),
@@ -193,7 +198,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w600,
-                  color: isDarkMode ? Colors.white : Colors.black,
+                  color: isDarkMode
+                      ? const Color.fromARGB(255, 143, 81, 250)
+                      : Colors.black,
                 ),
               ),
             ),

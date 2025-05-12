@@ -152,7 +152,14 @@
   "finish": "إنهاء",
   "final_score": "النتيجة النهائية: {{score}} / {{total}}",
   "retry": "إعادة المحاولة",
-  "time_remaining": "الوقت المتبقي: {{time}}"
+  "time_remaining": "الوقت المتبقي: {{time}}",
+    "notifications": "الإشعارات",
+  "notificationSettings": "إعدادات الإشعارات",
+  "practiceReminders": "تذكيرات التدريب",
+  "practiceRemindersDesc": "تلقي تذكيرات للتدريب اليومي",
+  "smartScheduling": "الجدولة الذكية",
+  "smartSchedulingDesc": "استقبال الإشعارات بناءً على التقدم",
+  "notificationsComingSoon": "الإشعارات قادمة قريبًا!"
 
   }
   

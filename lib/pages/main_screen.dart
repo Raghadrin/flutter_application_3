@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_3/navigations/ProfileManagementScreen.dart';
 import 'package:flutter_application_3/pages/settings_screen.dart';
 import 'package:flutter_application_3/pages/subjects_screen.dart';
 import 'package:flutter_application_3/parents/parent_dashboard_screen.dart';
@@ -13,7 +14,6 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   bool isDarkMode = false;
-  bool isArabic = false;
 
   void toggleDarkMode() {
     setState(() {
@@ -29,13 +29,16 @@ class _MainScreenState extends State<MainScreen> {
           isDarkMode: isDarkMode,
         ),
       ),
-    );
+    ).then((_) {
+      // Force a rebuild when returning from settings to apply language change
+      setState(() {});
+    });
   }
 
   void onSubjectsButtonPressed() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => SubjectsScreen()),
+      MaterialPageRoute(builder: (context) => const SubjectsScreen()),
     );
   }
 
@@ -72,7 +75,6 @@ class _MainScreenState extends State<MainScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Settings Icon & Text Column
                   GestureDetector(
                     onTap: openSettingsMenu,
                     child: Column(
@@ -96,10 +98,17 @@ class _MainScreenState extends State<MainScreen> {
                       ],
                     ),
                   ),
-
-                  // Profile Avatar
                   GestureDetector(
-                    onTap: openSettingsMenu,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ProfileManagementScreen(
+                            isDarkMode: isDarkMode,
+                          ),
+                        ),
+                      );
+                    },
                     child: Column(
                       children: [
                         const CircleAvatar(
@@ -119,8 +128,6 @@ class _MainScreenState extends State<MainScreen> {
                       ],
                     ),
                   ),
-
-                  // Dark Mode Icon & Text Column
                   GestureDetector(
                     onTap: toggleDarkMode,
                     child: Column(
@@ -150,11 +157,9 @@ class _MainScreenState extends State<MainScreen> {
             const SizedBox(height: 60),
             Image.asset('images/fox_main_screen2.png', height: 300),
             const SizedBox(height: 40),
-            // Buttons
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Subjects button
                 GestureDetector(
                   onTap: onSubjectsButtonPressed,
                   child: Container(
@@ -183,13 +188,13 @@ class _MainScreenState extends State<MainScreen> {
                   ),
                 ),
                 const SizedBox(width: 30),
-                // Parent button
                 GestureDetector(
                   onTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => const ParentDashboardScreen()),
+                        builder: (context) => const ParentDashboardScreen(),
+                      ),
                     );
                   },
                   child: Container(
@@ -220,12 +225,6 @@ class _MainScreenState extends State<MainScreen> {
               ],
             ),
             const Spacer(),
-            // Container(
-            //   height: 50,
-            //   color: isDarkMode
-            //       ? const Color(0xFF5C25C2)
-            //       : const Color(0xFFFEAF6E),
-            // ),
           ],
         ),
       ),

@@ -121,7 +121,14 @@
   "finish": "Finish",
   "final_score": "Final Score: {{score}} / {{total}}",
   "retry": "Retry",
-  "time_remaining": "Time Remaining: {{time}}"
+  "time_remaining": "Time Remaining: {{time}}",
+    "notifications": "Notifications",
+  "notificationSettings": "Notification Settings",
+  "practiceReminders": "Practice Reminders",
+  "practiceRemindersDesc": "Get reminders to practice daily",
+  "smartScheduling": "Smart Scheduling",
+  "smartSchedulingDesc": "Receive notifications based on progress",
+  "notificationsComingSoon": "Notifications coming soon!"
 
   }
   
