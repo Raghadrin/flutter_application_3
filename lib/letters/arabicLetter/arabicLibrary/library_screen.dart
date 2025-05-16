@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'full_library_screen.dart';
-import 'arabic_videos_screen.dart'; // تأكد أنك أنشأت هذا الملف
+import 'arabic_videos_screen.dart';
+import 'FeelingsScreen.dart';
 
 class ArabicLibraryScreen extends StatelessWidget {
   const ArabicLibraryScreen({super.key});
@@ -15,35 +16,49 @@ class ArabicLibraryScreen extends StatelessWidget {
         centerTitle: true,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.all(16),
         child: GridView.count(
           crossAxisCount: 2,
-          mainAxisSpacing: 8,
-          crossAxisSpacing: 8,
+          mainAxisSpacing: 16,
+          crossAxisSpacing: 16,
           childAspectRatio: 0.85,
           children: [
             _buildTile(
               context,
               title: "تمارين لغوية",
-              description: "تمرن على القضايا اللغوية ",
+              description: "تمرن على القضايا اللغوية.",
               imagePath: "images/one.png",
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (_) => const FullLibraryScreen(
                     title: "تمارين لغوية",
-                     ),
+                  ),
                 ),
               ),
             ),
             _buildTile(
               context,
               title: "فيديوهات تعليمية",
-              description: "شاهد فيديوهات تشرح العربية",
+              description: "شاهد فيديوهات تشرح العربية.",
               imagePath: "images/two.png",
               onTap: () => Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const ArabicVideosTabbedScreen()),
+                MaterialPageRoute(
+                  builder: (_) => const ArabicVideosTabbedScreen(),
+                ),
+              ),
+            ),
+            _buildTile(
+              context,
+              title: "تحديات والغاز",
+              description: "العب وتحدى نفسك",
+              imagePath: "images/feelings_icon.png",
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const ArabicMotivationHomeScreen(),
+                ),
               ),
             ),
           ],
@@ -52,7 +67,8 @@ class ArabicLibraryScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTile(BuildContext context, {
+  Widget _buildTile(
+    BuildContext context, {
     required String title,
     required String description,
     required String imagePath,
@@ -66,7 +82,7 @@ class ArabicLibraryScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: const Color(0xFFFFA726), width: 2),
         ),
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.all(12),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

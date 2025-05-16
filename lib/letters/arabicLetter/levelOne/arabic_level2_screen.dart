@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
-
-class ArabicLevel1Screen extends StatefulWidget {
+ 
+ 
+  class ArabicLevel2Screen extends StatefulWidget {
   final String sentence;
-  const ArabicLevel1Screen({super.key, required this.sentence});
+  const ArabicLevel2Screen({super.key, required this.sentence});
 
   @override
-  State<ArabicLevel1Screen> createState() => _ArabicLevel1ScreenState();
+  State<ArabicLevel2Screen> createState() => _ArabicLevel2ScreenState();
 }
-
-class _ArabicLevel1ScreenState extends State<ArabicLevel1Screen> {
+class _ArabicLevel2ScreenState extends State<ArabicLevel2Screen> {
 late FlutterTts flutterTts;
   late stt.SpeechToText speech;
   late PageController pageController;
