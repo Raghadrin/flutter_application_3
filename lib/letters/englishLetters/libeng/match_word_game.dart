@@ -105,8 +105,7 @@ class _MatchWordGameState extends State<MatchWordGame> {
                   children: [
                     const Text(
                       "Which word matches this sound?",
-                      style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 12),
@@ -126,20 +125,17 @@ class _MatchWordGameState extends State<MatchWordGame> {
               ),
               const SizedBox(height: 40),
               Wrap(
-                spacing: 40,
+                spacing: 20,
                 alignment: WrapAlignment.center,
                 children: data.map((pair) {
                   return ElevatedButton(
                     onPressed: () => checkAnswer(pair.word),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFFFCC80),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 48, vertical: 28),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16)),
+                      padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 18),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     ),
-                    child:
-                        Text(pair.word, style: const TextStyle(fontSize: 20)),
+                    child: Text(pair.word, style: const TextStyle(fontSize: 20)),
                   );
                 }).toList(),
               ),

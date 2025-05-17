@@ -93,6 +93,8 @@ flutter:
     - assets/sounds/
     - assets/audio/
     - assets/langs/
+    -  images/new_images/
+    
   
 
 
