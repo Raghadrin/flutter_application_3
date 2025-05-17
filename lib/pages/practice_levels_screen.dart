@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter_application_3/letters/arabicLetter/ArabicLevel3/arabic_level3_screen.dart';
-import 'package:flutter_application_3/letters/arabicLetter/arabicLevel2/arabic_level2_screen.dart';
+import 'package:flutter_application_3/letters/arabicLetter/levelOne/arabic_level3_screen.dart';
+import 'package:flutter_application_3/letters/arabicLetter/levelOne/arabic_level2_screen.dart';
 import 'package:flutter_application_3/letters/arabicLetter/levelOne/arabic_level1_screen.dart';
+import 'package:flutter_application_3/letters/arabicLetter/levelOne/sentence_selection_level2_screen.dart';
+import 'package:flutter_application_3/letters/arabicLetter/levelOne/sentence_selection_level3_screen.dart';
+import 'package:flutter_application_3/letters/arabicLetter/levelOne/sentence_selection_screen.dart';
 import 'package:flutter_application_3/letters/englishLetters/practice/english_level1_screen.dart';
 import 'package:flutter_application_3/letters/englishLetters/practice/english_level2_screen.dart';
 import 'package:flutter_application_3/letters/englishLetters/practice/english_level3_screen.dart';
@@ -73,33 +76,35 @@ class PracticeLevelsScreen extends StatelessWidget {
           final isEnglish = subject == tr('English');
           final isMath = subject == tr('Math');
 
-          if (level == tr("Level 1")) {
-            if (isArabic) {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => KaraokeSentenceScreen()));
-            } else if (isEnglish) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => EnglishLevel1Screen() ,
-                ),
-              );
-            } else if (isMath) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => MathLevel1Screen()),
-              );
-            }
-          }
+         if (level == tr("Level 1")) {
+ if (isArabic) {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => SentenceSelectionScreen(), // ✅ استخدم شاشة الاختيار
+    ),
+  );
+}
+else if (isEnglish) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => EnglishLevel1Screen()),
+    );
+  } else if (isMath) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => MathLevel1Screen()),
+    );
+  }
+}
+
 
           if (level == tr("Level 2")) {
             if (isArabic) {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => KaraokeSentenceLevel2Screen()),
+                    builder: (context) => SentenceSelectionLevel2Screen()),
               );
             } else if (isEnglish) {
               Navigator.push(
@@ -129,7 +134,7 @@ class PracticeLevelsScreen extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => KaraokeSentenceLevel3Screen()),
+                    builder: (context) => SentenceSelectionLevel3Screen()),
               );
             }
           }

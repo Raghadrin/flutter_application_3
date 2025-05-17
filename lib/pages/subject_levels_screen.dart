@@ -6,7 +6,7 @@ import 'package:flutter_application_3/math/library/library_screen.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_application_3/math/quiz/quiz_for_all.dart';
 import 'practice_levels_screen.dart';
-import '../letters/arabicLetter/arabicLevel2/quiz_all_screen.dart';
+import '../letters/arabicLetter/quiz/quiz_all_screen.dart';
 
 class SubjectLevelsScreen extends StatelessWidget {
   final String subject;
