@@ -8,18 +8,13 @@ class ArabicMotivationHomeScreen extends StatelessWidget {
   const ArabicMotivationHomeScreen({super.key});
 
   final List<Map<String, dynamic>> activities = const [
-        {
+    {
       "title": "وين الكلمة؟",
       "icon": Icons.image_search,
       "color": Color(0xFFA5D6A7),
       "route": "image"
     },
-    {
-      "title": "كلمات تتراقص",
-      "icon": Icons.animation,
-      "color": Color(0xFFFFAB91),
-      "route": "karaoke"
-    },
+    
     {
       "title": "احكِلي وأنا أكمل",
       "icon": Icons.auto_stories,
@@ -32,6 +27,12 @@ class ArabicMotivationHomeScreen extends StatelessWidget {
       "color": Color(0xFFE6EE9C),
       "route": "puzzle"
     },
+    {
+      "title": "الكلمة الصحيحة ✅",
+      "icon": Icons.spellcheck,
+      "color": Color(0xFFD1C4E9),
+      "route": "correctWord"
+    },
   ];
 
   void _navigateTo(BuildContext context, String route) {
@@ -39,18 +40,20 @@ class ArabicMotivationHomeScreen extends StatelessWidget {
 
     switch (route) {
       case "image":
-        page = const ImageWordMatchScreen();
+        page = const AdvancedImageWordMatchScreen();
         break;
-      case "karaoke":
-        page = const KaraokeWordsScreen();
-        break;
+      
       case "story":
-        page = const StoryCompleteScreen();
+        page = const AdvancedStoryCompleteScreen();
         break;
       case "puzzle":
         page = const ArabicRiddleScreen();
         break;
+      case "correctWord":
+        page = const FindCorrectWordScreen();
+        break;
       default:
+       
         page = const Scaffold(
           body: Center(child: Text("الشاشة غير متوفرة")),
         );

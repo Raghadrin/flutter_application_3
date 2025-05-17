@@ -1,8 +1,6 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:confetti/confetti.dart';
-import 'package:audioplayers/audioplayers.dart';
-import 'dart:math';
-import '../game_audio_helper.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 
 class Level3Quiz extends StatefulWidget {
   const Level3Quiz({super.key});
@@ -12,244 +10,221 @@ class Level3Quiz extends StatefulWidget {
 }
 
 class _Level3QuizState extends State<Level3Quiz> with TickerProviderStateMixin {
-  int _currentIndex = 0;
-  String feedback = "";
+  final FlutterTts flutterTts = FlutterTts();
+  int currentIndex = 0;
+  int score = 0;
+  bool finished = false;
+  bool showWarning = false;
   String? selected;
-  bool showNext = false;
-  late ConfettiController _confettiController;
-  late AnimationController _backgroundController;
-  late AnimationController _floatingController;
-  late Animation<Offset> _floatingAnimation;
-  final AudioPlayer _audioPlayer = AudioPlayer();
+  Timer? countdownTimer;
+  int remainingSeconds = 180;
 
   final List<Map<String, dynamic>> _questions = [
-    {"question": "Solve: 2 × 3 + 4", "options": ["10", "12", "14"], "answer": "10"},
-    {"question": "Find x: 18 = x × 3 + 3", "options": ["4", "5", "6"], "answer": "5"},
-    {"question": "What comes first in: 10 - 2 × 3 + 1?", "options": ["Subtraction", "Multiplication", "Addition"], "answer": "Multiplication"},
-    {"question": "Find x: 24 = 2 × x + 4", "options": ["10", "8", "9"], "answer": "10"},
+    {
+      'question': '(6 + 2) × 3 = ?',
+      'spoken': 'What is the answer to: open parentheses 6 plus 2 close parentheses times 3',
+      'options': ['24', '18', '30'],
+      'answer': '24'
+    },
+    {
+      'question': 'Which number completes: ? ÷ 2 = 4',
+      'spoken': 'Which number divided by 2 equals 4?',
+      'options': ['6', '8', '10'],
+      'answer': '8'
+    },
+    {
+      'question': 'Lina started with 5 apples, then bought 3 more, gave 2 away, and finally found 1 extra. How many apples does she have now?',
+      'spoken': 'Lina had 5 apples, bought 3, gave away 2, and found 1 more. How many does she have now?',
+      'options': ['6', '7', '8'],
+      'answer': '7'
+    },
+    {
+      'question': '(12 - 4) ÷ 2 = ?',
+      'spoken': 'What is the result of open parentheses 12 minus 4 close parentheses divided by 2?',
+      'options': ['2', '4', '6'],
+      'answer': '4'
+    },
+    {
+      'question': '7 = ? - 3\nWhat number minus 3 equals 7?',
+      'spoken': 'What number minus 3 equals 7?',
+      'options': ['10', '9', '8'],
+      'answer': '10'
+    },
   ];
 
   @override
   void initState() {
     super.initState();
-    _confettiController = ConfettiController(duration: const Duration(seconds: 3));
-    _backgroundController = AnimationController(vsync: this, duration: const Duration(seconds: 5))..repeat();
-    _floatingController = AnimationController(vsync: this, duration: const Duration(seconds: 3))..repeat(reverse: true);
-    _floatingAnimation = Tween<Offset>(begin: Offset(0, -0.02), end: Offset(0, 0.02))
-        .animate(CurvedAnimation(parent: _floatingController, curve: Curves.easeInOut));
-    GameAudioHelper.speak("Question: ${_questions[_currentIndex]["question"]}");
+    _startTimer();
+    _speak("Let's start the quiz!");
+    Future.delayed(const Duration(seconds: 2), () => _speakCurrent());
+  }
+
+  void _startTimer() {
+    countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        remainingSeconds--;
+        if (remainingSeconds == 30 && !showWarning) {
+          showWarning = true;
+          _speak("Only 30 seconds left");
+        }
+        if (remainingSeconds <= 0) {
+          timer.cancel();
+          _speak("Time is up!");
+          finished = true;
+        }
+      });
+    });
+  }
+
+  Future<void> _speak(String text) async {
+    await flutterTts.setLanguage("en-US");
+    await flutterTts.setSpeechRate(0.48);
+    await flutterTts.speak(text);
+  }
+
+  void _speakCurrent() {
+    final spoken = _questions[currentIndex]['spoken'] ?? _questions[currentIndex]['question'];
+    _speak(spoken);
+  }
+
+  void _checkAnswer(String option) {
+    if (finished) return;
+    setState(() {
+      selected = option;
+      if (option == _questions[currentIndex]['answer']) {
+        score++;
+        _speak("Correct!");
+        Future.delayed(const Duration(milliseconds: 800), () {
+          setState(() {
+            currentIndex++;
+            selected = null;
+          });
+          if (currentIndex >= _questions.length) {
+            countdownTimer?.cancel();
+            finished = true;
+          } else {
+            _speakCurrent();
+          }
+        });
+      } else {
+        _speak("Try again");
+      }
+    });
+  }
+
+  void _restartQuiz() {
+    setState(() {
+      currentIndex = 0;
+      score = 0;
+      remainingSeconds = 180;
+      showWarning = false;
+      finished = false;
+      selected = null;
+    });
+    _startTimer();
+    _speak("Quiz restarted!");
+    Future.delayed(const Duration(seconds: 1), () => _speakCurrent());
   }
 
   @override
   void dispose() {
-    _confettiController.dispose();
-    _backgroundController.dispose();
-    _floatingController.dispose();
-    _audioPlayer.dispose();
+    countdownTimer?.cancel();
     super.dispose();
-  }
-
-  Future<void> _check(String value) async {
-    if (selected == _questions[_currentIndex]["answer"]) return;
-    final correct = value == _questions[_currentIndex]["answer"];
-    if (correct) {
-      setState(() {
-        selected = value;
-        feedback = "✅ Correct!";
-        showNext = true;
-      });
-      await GameAudioHelper.sayCorrectAnswer();
-    } else {
-      setState(() {
-        selected = null;
-        feedback = "❌ Wrong!";
-      });
-      await GameAudioHelper.sayWrongAnswer();
-    }
-  }
-
-  Future<void> _nextQuestion() async {
-    if (_currentIndex < _questions.length - 1) {
-      setState(() {
-        _currentIndex++;
-        selected = null;
-        feedback = "";
-        showNext = false;
-      });
-      GameAudioHelper.speak("Question: ${_questions[_currentIndex]["question"]}");
-    } else {
-      _showResult();
-    }
-  }
-
-  Future<void> _showResult() async {
-    await _audioPlayer.play(AssetSource('audio/kids_cheering.mp3'));
-    _confettiController.play();
-    GameAudioHelper.sayQuizComplete();
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => Scaffold(
-          backgroundColor: const Color(0xFFFFE0B2),
-          body: Stack(
-            children: [
-              Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(32.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ConfettiWidget(
-                        confettiController: _confettiController,
-                        blastDirectionality: BlastDirectionality.explosive,
-                      ),
-                      const Text(
-                        "🎉 You Are Great!",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 44,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.deepOrange,
-                        ),
-                      ),
-                      const SizedBox(height: 30),
-                      ElevatedButton(
-                        onPressed: () => Navigator.pop(context),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.orange,
-                          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                        child: const Text("Back", style: TextStyle(fontSize: 26)),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final q = _questions[_currentIndex];
+    final question = currentIndex < _questions.length ? _questions[currentIndex] : null;
+    int stars = (score >= 5) ? 3 : (score >= 3) ? 2 : 1;
+
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(colors: [Color(0xFFFFF3E0), Color(0xFFFFCC80)],
-              begin: Alignment.topCenter, end: Alignment.bottomCenter),
-        ),
-        child: Stack(
-          children: [
-            CustomPaint(painter: BokehPainter(_backgroundController), child: Container()),
-            Center(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text("Question ${_currentIndex + 1}", style: const TextStyle(fontSize: 34, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 20),
-                    SlideTransition(
-                      position: _floatingAnimation,
-                      child: const Text("Read Carefully:", style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+      backgroundColor: const Color(0xFFFFF6ED),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFFFFA726),
+        title: const Text('Level 3 Quiz'),
+        centerTitle: true,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: finished
+            ? Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text("🎉 Quiz Finished!", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 20),
+                  Text("Score: $score / ${_questions.length}", style: const TextStyle(fontSize: 24)),
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(
+                      stars,
+                      (i) => const Icon(Icons.star, color: Colors.orange, size: 36),
                     ),
-                    const SizedBox(height: 20),
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      margin: const EdgeInsets.symmetric(vertical: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.85),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Text(q["question"], textAlign: TextAlign.center, style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold)),
+                  ),
+                  const SizedBox(height: 30),
+                  ElevatedButton(
+                    onPressed: _restartQuiz,
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.deepOrange),
+                    child: const Text("Start Again", style: TextStyle(fontSize: 20, color: Colors.white)),
+                  ),
+                ],
+              )
+            : Column(
+                children: [
+                  Text("⏱ Time Left: ${remainingSeconds ~/ 60}:${(remainingSeconds % 60).toString().padLeft(2, '0')}",
+                      style: const TextStyle(fontSize: 24, color: Colors.red)),
+                  if (showWarning)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 8),
+                      child: Text("⚠️ Hurry up!", style: TextStyle(fontSize: 20, color: Colors.orange)),
                     ),
-                    const SizedBox(height: 20),
-                    ...q["options"].map<Widget>((opt) {
-                      final bool isCorrect = selected == q["answer"] && opt == q["answer"];
-                      final bool isWrong = selected == opt && opt != q["answer"];
-                      Color bgColor = Colors.orange;
-                      if (isCorrect) bgColor = Colors.green;
-                      if (isWrong) bgColor = Colors.redAccent;
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: ElevatedButton(
-                          onPressed: showNext ? null : () => _check(opt),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: bgColor,
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          ),
-                          child: Text(opt, style: const TextStyle(fontSize: 32, color: Colors.white)),
-                        ),
-                      );
-                    }).toList(),
-                    const SizedBox(height: 20),
-                    if (feedback.isNotEmpty)
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        margin: const EdgeInsets.only(top: 20),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.85),
-                          borderRadius: BorderRadius.circular(16),
+                  const SizedBox(height: 24),
+
+                  // Question white box
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
+                    margin: const EdgeInsets.only(bottom: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(color: Colors.deepOrange, width: 2),
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(color: Colors.black26, blurRadius: 5, offset: Offset(0, 3)),
+                      ],
+                    ),
+                    child: Text(
+                      question!['question'],
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+
+                  ...List.generate(
+                    question['options'].length,
+                    (i) => Container(
+                      width: double.infinity,
+                      margin: const EdgeInsets.symmetric(vertical: 8),
+                      child: ElevatedButton(
+                        onPressed: () => _checkAnswer(question['options'][i]),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: selected == question['options'][i]
+                              ? Colors.orangeAccent
+                              : Colors.white,
+                          side: const BorderSide(color: Colors.deepOrange, width: 2),
+                          padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
                         child: Text(
-                          feedback,
-                          style: TextStyle(
-                            fontSize: 30,
-                            fontWeight: FontWeight.bold,
-                            color: feedback.startsWith("✅") ? Colors.green : Colors.redAccent,
-                          ),
-                          textAlign: TextAlign.center,
+                          question['options'][i],
+                          style: const TextStyle(fontSize: 22, color: Colors.black),
                         ),
                       ),
-                    if (showNext)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 30),
-                        child: ElevatedButton(
-                          onPressed: _nextQuestion,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color.fromARGB(255, 252, 232, 180),
-                            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          ),
-                          child: const Text("Next", style: TextStyle(fontSize: 28)),
-                        ),
-                      ),
-                  ],
-                ),
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
       ),
     );
   }
-}
-
-class BokehPainter extends CustomPainter {
-  final Animation<double> animation;
-  final random = Random();
-  BokehPainter(this.animation) : super(repaint: animation);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint();
-    for (int i = 0; i < 25; i++) {
-      final x = random.nextDouble() * size.width;
-      final y = random.nextDouble() * size.height;
-      final opacity = 0.5 + 0.5 * sin(animation.value * 2 * pi + i);
-      paint.color = Colors.white.withOpacity(opacity);
-      canvas.drawCircle(Offset(x, y), 5, paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }

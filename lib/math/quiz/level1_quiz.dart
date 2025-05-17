@@ -1,7 +1,6 @@
-import 'dart:math';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:confetti/confetti.dart';
 
 class Level1Quiz extends StatefulWidget {
   const Level1Quiz({super.key});
@@ -10,235 +9,275 @@ class Level1Quiz extends StatefulWidget {
   State<Level1Quiz> createState() => _Level1QuizState();
 }
 
-class _Level1QuizState extends State<Level1Quiz> with TickerProviderStateMixin {
-  final FlutterTts flutterTts = FlutterTts();
-  late ConfettiController _confettiController;
-  late AnimationController _backgroundController;
-
-  int _currentIndex = 0;
-  bool finished = false;
-  String feedback = "";
-  String? selected;
+class _Level1QuizState extends State<Level1Quiz> with SingleTickerProviderStateMixin {
+  final FlutterTts tts = FlutterTts();
+  int currentQuestion = 0;
+  int score = 0;
+  int stars = 0;
+  bool isCorrect = false;
   bool showNext = false;
+  String? selectedAnswer;
+  late Timer timer;
+  int remainingTime = 180;
+  bool warned = false;
 
-  final List<Map<String, dynamic>> _questions = [
+  late AnimationController _controller;
+  late Animation<Color?> _colorAnimation;
+
+  final List<Map<String, dynamic>> questions = [
     {
-      'question': 'What is missing? 8 - _ = 5',
-      'options': ['2', '3', '5'],
-      'answer': '3',
+      'question': 'How many apples are in the image?',
+      'image': 'images/new_images/3_apples.png',
+      'options': ['2', '3', '4'],
+      'answer': '3'
     },
     {
-      'question': 'Which operation makes 5 ☐ 5 = 10?',
-      'options': ['+', '-', '*'],
-      'answer': '+',
+      'question': 'Which number is shown in the image?',
+      'image': 'images/new_images/Number2_hand.PNG',
+      'options': ['1', '2', '5'],
+      'answer': '2'
     },
     {
-      'question': 'What is missing? 6 + _ = 10',
-      'options': ['2', '4', '6'],
-      'answer': '4',
+      'question': 'Complete: 1 + _ = 4',
+      'options': ['2', '3', '4'],
+      'answer': '3'
     },
     {
-      'question': 'Which operation makes 10 ☐ 2 = 5?',
-      'options': ['+', '/', '-'],
-      'answer': '/',
-    },
-    {
-      'question': 'What is missing? 7 - _ = 5',
-      'options': ['1', '2', '3'],
-      'answer': '2',
-    },
-    {
-      'question': 'Which operation makes 6 ☐ 2 = 12?',
-      'options': ['+', '*', '-'],
-      'answer': '*',
-    },
-    {
-      'question': 'What is 4 + 3?',
-      'options': ['5', '6', '7'],
-      'answer': '7',
+      'question': 'Which of these is number 5?',
+      'image': 'images/new_images/number_shapes.png',
+      'options': ['5', '2', '9'],
+      'answer': '5'
     },
   ];
 
   @override
   void initState() {
     super.initState();
-    _confettiController = ConfettiController(duration: const Duration(seconds: 4));
-    _backgroundController = AnimationController(vsync: this, duration: const Duration(seconds: 5))..repeat();
-    _speak(_questions[_currentIndex]['question']);
+    tts.setLanguage("en-US");
+    tts.setSpeechRate(0.5);
+    _startTimer();
+    _speak(questions[currentQuestion]['question']);
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    )..repeat(reverse: true);
+
+    _colorAnimation = ColorTween(
+      begin: Colors.black,
+      end: Colors.red,
+    ).animate(_controller);
   }
 
-  @override
-  void dispose() {
-    _confettiController.dispose();
-    _backgroundController.dispose();
-    flutterTts.stop();
-    super.dispose();
-  }
-
-  Future<void> _speak(String text) async {
-    await flutterTts.setSpeechRate(0.5);
-    await flutterTts.speak(text);
-  }
-
-  void _check(String value) async {
-    if (showNext) return;
-
-    final correct = value == _questions[_currentIndex]['answer'];
-
-    if (correct) {
+  void _startTimer() {
+    timer = Timer.periodic(const Duration(seconds: 1), (t) {
       setState(() {
-        selected = value;
-        feedback = "✅ Correct!";
+        remainingTime--;
+        if (remainingTime == 30 && !warned) {
+          warned = true;
+          _speak("Only 30 seconds left!");
+        }
+        if (remainingTime == 0) {
+          timer.cancel();
+          _speak("Time is up");
+          _showResult();
+        }
+      });
+    });
+  }
+
+  void _speak(String text) async {
+    await tts.speak(text);
+  }
+
+  void _checkAnswer(String selected) {
+    final correctAnswer = questions[currentQuestion]['answer'];
+    setState(() {
+      selectedAnswer = selected;
+      if (selected == correctAnswer) {
+        score++;
+        isCorrect = true;
         showNext = true;
-      });
-      await flutterTts.speak("Excellent!");
-    } else {
-      setState(() {
-        selected = null;
-        feedback = "❌ Try Again!";
-      });
-      await flutterTts.speak("Try again");
-    }
+        _speak("Correct");
+      } else {
+        isCorrect = false;
+        _speak("Try again");
+      }
+    });
   }
 
   void _nextQuestion() {
-    if (_currentIndex < _questions.length - 1) {
+    if (currentQuestion < questions.length - 1) {
       setState(() {
-        _currentIndex++;
-        selected = null;
-        feedback = "";
+        currentQuestion++;
+        isCorrect = false;
         showNext = false;
+        selectedAnswer = null;
       });
-      _speak(_questions[_currentIndex]['question']);
+      _speak(questions[currentQuestion]['question']);
     } else {
-      setState(() => finished = true);
-      _confettiController.play();
-      flutterTts.speak("You are great!");
+      timer.cancel();
+      _showResult();
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final q = _questions[_currentIndex];
-    final screenWidth = MediaQuery.of(context).size.width;
+  void _showResult() {
+    setState(() {
+      if (score == questions.length) {
+        stars = 3;
+      } else if (score >= questions.length - 1) {
+        stars = 2;
+      } else if (score >= 1) {
+        stars = 1;
+      } else {
+        stars = 0;
+      }
+    });
 
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text("Level 1 Quiz", style: TextStyle(color: Colors.black, fontSize: 26)),
-        centerTitle: true,
-        leading: BackButton(color: Colors.black),
-      ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(colors: [Color(0xFFFFF3E0), Color(0xFFFFCC80)], begin: Alignment.topCenter, end: Alignment.bottomCenter),
-        ),
-        child: Stack(
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("Quiz Result", textAlign: TextAlign.center),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            CustomPaint(painter: BokehPainter(_backgroundController), child: Container()),
-            Center(
-              child: finished
-                  ? Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ConfettiWidget(confettiController: _confettiController, blastDirectionality: BlastDirectionality.explosive),
-                        const SizedBox(height: 40),
-                        Container(
-                          padding: const EdgeInsets.all(30),
-                          decoration: BoxDecoration(color: Colors.white.withOpacity(0.9), borderRadius: BorderRadius.circular(20)),
-                          child: const Text("🎉 You Are Great! 🎉", style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: Colors.green), textAlign: TextAlign.center),
-                        ),
-                        const SizedBox(height: 30),
-                        ElevatedButton(
-                          onPressed: () => Navigator.pop(context),
-                          style: ElevatedButton.styleFrom(backgroundColor: Colors.amber, padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20)),
-                          child: const Text("Return", style: TextStyle(fontSize: 28)),
-                        ),
-                      ],
-                    )
-                  : SingleChildScrollView(
-                      padding: const EdgeInsets.fromLTRB(24, 100, 24, 24),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text("Question ${_currentIndex + 1} of ${_questions.length}", style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 20),
-                          Container(
-                            padding: const EdgeInsets.all(20),
-                            width: screenWidth * 0.9,
-                            decoration: BoxDecoration(color: Colors.white.withOpacity(0.95), borderRadius: BorderRadius.circular(20)),
-                            child: Text(q['question'], textAlign: TextAlign.center, style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
-                          ),
-                          const SizedBox(height: 30),
-                          ...q['options'].map<Widget>((opt) {
-                            final isCorrect = selected == q['answer'] && opt == q['answer'];
-                            final isWrong = selected == opt && opt != q['answer'];
-                            Color bgColor = Colors.deepOrangeAccent.shade100;
-                            if (isCorrect) bgColor = Colors.green;
-                            if (isWrong) bgColor = Colors.redAccent;
-                            return Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 8),
-                              child: ElevatedButton(
-                                onPressed: showNext ? null : () => _check(opt),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: bgColor,
-                                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 18),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                                ),
-                                child: Text(opt, style: const TextStyle(fontSize: 28)),
-                              ),
-                            );
-                          }).toList(),
-                          const SizedBox(height: 20),
-                          if (feedback.isNotEmpty)
-                            Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(color: Colors.white.withOpacity(0.9), borderRadius: BorderRadius.circular(20)),
-                              child: Text(
-                                feedback,
-                                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: feedback.startsWith('✅') ? Colors.green : Colors.redAccent),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          if (showNext)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 20),
-                              child: ElevatedButton(
-                                onPressed: _nextQuestion,
-                                style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20)),
-                                child: const Text("Next", style: TextStyle(fontSize: 26)),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
+            Text("Score: $score / ${questions.length}", style: const TextStyle(fontSize: 20)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                3,
+                (i) => Icon(Icons.star, color: i < stars ? Colors.orange : Colors.grey, size: 36),
+              ),
             ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _restartQuiz();
+              },
+              child: const Text("Start Again"),
+            )
           ],
         ),
       ),
     );
   }
-}
 
-class BokehPainter extends CustomPainter {
-  final Animation<double> animation;
-  final random = Random();
-  BokehPainter(this.animation) : super(repaint: animation);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint();
-    for (int i = 0; i < 25; i++) {
-      final x = random.nextDouble() * size.width;
-      final y = random.nextDouble() * size.height;
-      final opacity = 0.5 + 0.5 * sin(animation.value * 2 * pi + i);
-      paint.color = Colors.white.withOpacity(opacity);
-      canvas.drawCircle(Offset(x, y), 5, paint);
-    }
+  void _restartQuiz() {
+    setState(() {
+      currentQuestion = 0;
+      score = 0;
+      stars = 0;
+      showNext = false;
+      isCorrect = false;
+      remainingTime = 180;
+      warned = false;
+      selectedAnswer = null;
+    });
+    _startTimer();
+    _speak(questions[0]['question']);
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
+  void dispose() {
+    timer.cancel();
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final q = questions[currentQuestion];
+    final minutes = remainingTime ~/ 60;
+    final seconds = (remainingTime % 60).toString().padLeft(2, '0');
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFFFF6ED),
+      appBar: AppBar(
+        title: const Text("Level 1 Quiz", style: TextStyle(color: Colors.white)),
+        backgroundColor: const Color(0xFFFFA726),
+        centerTitle: true,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            AnimatedBuilder(
+              animation: _colorAnimation,
+              builder: (context, child) => Text(
+                "Time left: $minutes:$seconds",
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: remainingTime <= 30 ? _colorAnimation.value : Colors.black,
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            if (q['image'] != null)
+              Container(
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.deepOrange, width: 3),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.asset(q['image'], height: 160),
+                ),
+              ),
+
+            // Question box with shadow
+            Container(
+              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.only(bottom: 20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Text(
+                q['question'],
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+            ),
+
+            // Options
+            ...q['options'].map<Widget>((opt) => Container(
+              width: double.infinity,
+              margin: const EdgeInsets.symmetric(vertical: 6),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: selectedAnswer == opt ? Colors.orangeAccent : Colors.white,
+                  side: const BorderSide(color: Colors.deepOrange, width: 2),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+                onPressed: showNext ? null : () => _checkAnswer(opt),
+                child: Text(opt, style: const TextStyle(fontSize: 22, color: Colors.black)),
+              ),
+            )),
+
+            const SizedBox(height: 12),
+            if (isCorrect)
+              const Text("✅ Correct!", style: TextStyle(fontSize: 22, color: Colors.green)),
+
+            const SizedBox(height: 12),
+            if (showNext)
+              ElevatedButton(
+                onPressed: _nextQuestion,
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.amber),
+                child: const Text("Next", style: TextStyle(fontSize: 20)),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
 }

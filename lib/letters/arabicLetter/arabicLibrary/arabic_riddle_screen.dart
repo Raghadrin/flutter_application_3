@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
@@ -36,6 +37,30 @@ class _ArabicRiddleScreenState extends State<ArabicRiddleScreen> {
         {"text": "الباب", "isCorrect": false},
       ]
     },
+    {
+      "riddle": "شيء إذا وضعته في الثلاجة لا يبرد، ما هو؟",
+      "answers": [
+        {"text": "الفلفل", "isCorrect": true},
+        {"text": "الثلج", "isCorrect": false},
+        {"text": "الهواء", "isCorrect": false},
+      ]
+    },
+    {
+      "riddle": "ما هو الشيء الذي لديه أسنان ولا يعض؟",
+      "answers": [
+        {"text": "المشط", "isCorrect": true},
+        {"text": "الفرشاة", "isCorrect": false},
+        {"text": "السكين", "isCorrect": false},
+      ]
+    },
+    {
+      "riddle": "ما هو الشيء الذي يسمع بدون أذن ويتكلم بدون لسان؟",
+      "answers": [
+        {"text": "الهاتف", "isCorrect": true},
+        {"text": "الراديو", "isCorrect": false},
+        {"text": "الروبوت", "isCorrect": false},
+      ]
+    },
   ];
 
   int currentRiddleIndex = 0;
@@ -52,7 +77,7 @@ class _ArabicRiddleScreenState extends State<ArabicRiddleScreen> {
     flutterTts.setLanguage("ar-SA");
     flutterTts.setSpeechRate(0.45);
     _speak(currentRiddle);
-    currentAnswers.shuffle();
+    currentAnswers.shuffle(Random());
   }
 
   Future<void> _speak(String text) async {
@@ -62,7 +87,7 @@ class _ArabicRiddleScreenState extends State<ArabicRiddleScreen> {
 
   void _handleAnswer(Map<String, dynamic> answer) {
     setState(() {
-      feedback = answer["isCorrect"] ? "إجابة صحيحة ✅" : "إجابة خاطئة ❌";
+      feedback = answer["isCorrect"] ? "✅ إجابة صحيحة!" : "❌ إجابة خاطئة!";
     });
     _speak(answer["text"]);
   }
@@ -71,7 +96,7 @@ class _ArabicRiddleScreenState extends State<ArabicRiddleScreen> {
     setState(() {
       currentRiddleIndex = (currentRiddleIndex + 1) % riddles.length;
       feedback = null;
-      currentAnswers.shuffle();
+      currentAnswers.shuffle(Random());
     });
     _speak(currentRiddle);
   }
@@ -87,43 +112,37 @@ class _ArabicRiddleScreenState extends State<ArabicRiddleScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFFFF6ED),
       appBar: AppBar(
-        title: const Text("كلمة السر", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text("ألغاز التفكير المتقدم", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
         centerTitle: true,
         backgroundColor: const Color(0xFFFFA726),
       ),
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(28),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text("اللغز:",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500)),
-              const SizedBox(height: 12),
+              const Text("🔍 اللغز", style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 20),
               Text(
                 currentRiddle,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                    fontSize: 22,
-                    color: Colors.orange,
-                    fontWeight: FontWeight.bold),
+                style: const TextStyle(fontSize: 30, color: Colors.orange, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 40),
               ...currentAnswers.map((answer) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
                     child: ElevatedButton(
                       onPressed: () => _handleAnswer(answer),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
-                        side: const BorderSide(color: Colors.orange, width: 2),
-                        padding: const EdgeInsets.all(12),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12)),
+                        side: const BorderSide(color: Colors.orange, width: 3),
+                        padding: const EdgeInsets.symmetric(vertical: 18),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       ),
                       child: Text(
                         answer["text"],
-                        style: const TextStyle(
-                            fontSize: 18, color: Colors.black87),
+                        style: const TextStyle(fontSize: 24, color: Colors.black87, fontWeight: FontWeight.w600),
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -133,26 +152,32 @@ class _ArabicRiddleScreenState extends State<ArabicRiddleScreen> {
                 Text(
                   feedback!,
                   style: TextStyle(
-                    fontSize: 22,
-                    color:
-                        feedback!.contains("✅") ? Colors.green : Colors.red,
+                    fontSize: 26,
+                    color: feedback!.contains("✅") ? Colors.green : Colors.red,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 30),
               ElevatedButton.icon(
                 onPressed: () => _speak(currentRiddle),
-                icon: const Icon(Icons.volume_up),
-                label: const Text("أعد سماع اللغز"),
-                style:
-                    ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+                icon: const Icon(Icons.volume_up, size: 30),
+                label: const Text("🔊 أعد سماع اللغز", style: TextStyle(fontSize: 22)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 12),
               ElevatedButton.icon(
                 onPressed: _nextRiddle,
-                icon: const Icon(Icons.refresh),
-                label: const Text("لغز جديد"),
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                icon: const Icon(Icons.refresh, size: 28),
+                label: const Text("🔁 لغز جديد", style: TextStyle(fontSize: 22)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                ),
               ),
             ],
           ),

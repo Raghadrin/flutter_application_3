@@ -1,89 +1,107 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:lottie/lottie.dart';
 
 import '../games/multi_step_equation_game.dart';
 import '../games/reverse_equation_game.dart';
+import '../games/word_story_math_game.dart';
 import '../quiz/level3_quiz.dart';
-import '../game_audio_helper.dart';
 
+class MathLevel3Screen extends StatefulWidget {
+  const MathLevel3Screen({super.key});
 
-class MathLevel3Screen extends StatelessWidget {
+  @override
+  State<MathLevel3Screen> createState() => _MathLevel3ScreenState();
+}
+
+class _MathLevel3ScreenState extends State<MathLevel3Screen> {
   final FlutterTts tts = FlutterTts();
 
-  MathLevel3Screen({super.key});
+  @override
+  void initState() {
+    super.initState();
+    _speak("Welcome to Math Level 3. Let's solve multi-step equations, reverse operations, and word story problems together.");
+  }
 
-  void _speak(String text) async {
+  Future<void> _speak(String text) async {
     await tts.setLanguage("en-US");
-    await tts.setPitch(1.0);
+    await tts.setSpeechRate(0.45);
     await tts.speak(text);
+  }
+
+  void _onTileTap(String title, Widget screen) {
+    _speak(title);
+    Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
   }
 
   @override
   Widget build(BuildContext context) {
-    _speak("Welcome to Level 3. Let's solve advanced math equations.");
-
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFFFF6ED),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFFFFA726),
         elevation: 0,
-        leading: BackButton(color: Colors.black),
-        title: Text(
+        leading: BackButton(color: Colors.white),
+        title: const Text(
           "Math - Level 3",
           style: TextStyle(
-            color: Colors.black,
+            color: Colors.white,
             fontSize: 24,
             fontWeight: FontWeight.bold,
             fontFamily: 'Arial',
           ),
         ),
       ),
-      body: ListView(
-        padding: EdgeInsets.all(20),
+      body: GridView.count(
+        crossAxisCount: 2,
+        padding: const EdgeInsets.all(16),
+        mainAxisSpacing: 16,
+        crossAxisSpacing: 16,
+        childAspectRatio: 0.9,
         children: [
-          Image.asset("images/subject_fox.PNG", height: 140),
-          SizedBox(height: 20),
-          _buildGameButton(context, "Solve Multi-Step Equations", () {
-            GameAudioHelper.speak("Solve multi-step equations with multiple operations.");
-            Navigator.push(context, MaterialPageRoute(builder: (_) => MultiStepEquationGame()));
+          _buildGameTile("Multi-Step Equations", "images/new_images/Multi-Step.json", () {
+            _onTileTap("Multi-Step Equations", const MultiStepEquationGame());
           }),
-          _buildGameButton(context, "Find the Missing Part in Reverse Equations", () {
-            GameAudioHelper.speak("Find the missing part in equations like 18 = x * 3 + 3.");
-            Navigator.push(context, MaterialPageRoute(builder: (_) => ReverseEquationGame()));
+          _buildGameTile("Reverse Equation", "images/new_images/equation.json", () {
+            _onTileTap("Reverse Equation", const ReverseEquationGame());
           }),
-          Divider(height: 40),
-          _buildGameButton(context, "Test What You Learned", () {
-            GameAudioHelper.sayStartQuiz();
-            Navigator.push(context, MaterialPageRoute(builder: (_) => Level3Quiz()));
+          _buildGameTile("Word Story Problem", "images/new_images/think.json", () {
+            _onTileTap("Word Story Problem", const WordStoryMathGame());
+          }),
+          _buildGameTile("Level 3 Quiz", "images/new_images/Quiz.json", () {
+            _onTileTap("Level 3 Quiz", const Level3Quiz());
           }),
         ],
       ),
     );
   }
 
-  Widget _buildGameButton(BuildContext context, String title, VoidCallback onTap) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10.0),
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          height: 65,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(15),
-            gradient: const LinearGradient(
-              colors: [Color(0xFFFBD1B2), Color(0xFFFEE5D3)],
-            ),
-          ),
-          child: Center(
-            child: Text(
+  Widget _buildGameTile(String title, String jsonPath, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: Colors.deepOrange, width: 3),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Lottie.asset(jsonPath, height: 100),
+            const SizedBox(height: 12),
+            Text(
               title,
-              style: TextStyle(
-                fontSize: 18,
+              style: const TextStyle(
                 fontWeight: FontWeight.bold,
-                fontFamily: 'Arial',
+                fontSize: 18,
+                color: Colors.deepOrange,
               ),
+              textAlign: TextAlign.center,
             ),
-          ),
+          ],
         ),
       ),
     );

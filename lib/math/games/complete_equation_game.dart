@@ -1,7 +1,5 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:confetti/confetti.dart';
-import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter_application_3/math/theme.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
 class CompleteEquationGame extends StatefulWidget {
@@ -11,388 +9,246 @@ class CompleteEquationGame extends StatefulWidget {
   State<CompleteEquationGame> createState() => _CompleteEquationGameState();
 }
 
-class _CompleteEquationGameState extends State<CompleteEquationGame> with TickerProviderStateMixin {
-  final FlutterTts flutterTts = FlutterTts();
-  final AudioPlayer _audioPlayer = AudioPlayer();
+class _CompleteEquationGameState extends State<CompleteEquationGame> {
+  final FlutterTts tts = FlutterTts();
+  int currentIndex = 0;
+  int score = 0;
+  String? droppedValue;
+  bool showNext = false;
+  int currentSpokenIndex = -1;
 
   final List<Map<String, dynamic>> _questions = [
     {
-      'parts': [3, '+', 2, '=', 5],
-      'hint': [
-        {'text': 'You have three 🍊.', 'emoji': '🍊', 'count': 3},
-        {'text': 'You add two more 🍊.', 'emoji': '🍊', 'count': 2},
-        {'text': 'Now you have five 🍊.', 'emoji': '🍊', 'count': 5},
-      ],
+      "equationParts": ["3", "+", "_", "=", "5"],
+      "answer": "2",
+      "options": ["1", "2", "3"],
+      "image": "3_plus_question_equals_5.png",
     },
     {
-      'parts': [8, '-', 3, '=', 5],
-      'hint': [
-        {'text': 'You have eight 🍉.', 'emoji': '🍉', 'count': 8},
-        {'text': 'You remove three 🍉.', 'emoji': '🍉', 'count': 3},
-        {'text': 'Now you have five 🍉.', 'emoji': '🍉', 'count': 5},
-      ],
+      "equationParts": ["4", "+", "_", "=", "7"],
+      "answer": "3",
+      "options": ["2", "3", "4"],
+      "image": "4_plus_question_equals_7.png",
     },
     {
-      'parts': [6, '+', 4, '=', 10],
-      'hint': [
-        {'text': 'You have six 🍎.', 'emoji': '🍎', 'count': 6},
-        {'text': 'You add four more 🍎.', 'emoji': '🍎', 'count': 4},
-        {'text': 'Now you have ten 🍎.', 'emoji': '🍎', 'count': 10},
-      ],
-    },
-    {
-      'parts': [9, '-', 2, '=', 7],
-      'hint': [
-        {'text': 'You have nine 🚌.', 'emoji': '🚌', 'count': 9},
-        {'text': 'You remove two 🚌.', 'emoji': '🚌', 'count': 2},
-        {'text': 'Now you have seven 🚌.', 'emoji': '🚌', 'count': 7},
-      ],
+      "equationParts": ["_", "+", "2", "=", "6"],
+      "answer": "4",
+      "options": ["3", "4", "5"],
+      "image": "question_plus_2_equals_6.png",
     },
   ];
-
-  int _currentIndex = 0;
-  String feedback = '';
-  bool showHint = false;
-  bool finished = false;
-  final TextEditingController _controller = TextEditingController();
-  late AnimationController _twinkleController;
-  late AnimationController _cardAnimationController;
-  late Animation<double> _cardScaleAnimation;
-  late AnimationController _playAgainGlowController;
-  late Animation<double> _playAgainAnimation;
-  late ConfettiController _confettiController;
 
   @override
   void initState() {
     super.initState();
-    _twinkleController = AnimationController(vsync: this, duration: const Duration(seconds: 5))..repeat();
-    _cardAnimationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 700));
-    _cardScaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(CurvedAnimation(parent: _cardAnimationController, curve: Curves.elasticOut));
-    _playAgainGlowController = AnimationController(vsync: this, duration: const Duration(seconds: 2))..repeat(reverse: true);
-    _playAgainAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(CurvedAnimation(parent: _playAgainGlowController, curve: Curves.easeInOut));
-    _confettiController = ConfettiController(duration: const Duration(seconds: 4));
-    _speakInstruction();
+    _speakCurrentQuestionKaraoke();
   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    _twinkleController.dispose();
-    _cardAnimationController.dispose();
-    _playAgainGlowController.dispose();
-    _confettiController.dispose();
-    _audioPlayer.dispose();
-    flutterTts.stop();
-    super.dispose();
+  Future<void> _speak(String text) async {
+    await tts.setLanguage("en-US");
+    await tts.setSpeechRate(0.45);
+    await tts.speak(text);
   }
 
-  Future<void> _speakInstruction() async {
-    await Future.delayed(const Duration(milliseconds: 400));
-    await flutterTts.speak("Solve the below question");
-    _cardAnimationController.forward();
-  }
+  Future<void> _speakCurrentQuestionKaraoke() async {
+    final parts = _questions[currentIndex]['equationParts'] as List<String>;
 
-  Future<void> _playCheeringSound() async {
-    try {
-      await _audioPlayer.play(AssetSource('audio/kids_cheering.mp3'));
-    } catch (e) {
-      print("Error playing cheering sound: $e");
-    }
-  }
+    final Map<String, String> speakMap = {
+      '+': 'plus',
+      '-': 'minus',
+      '=': 'equals',
+      '_': 'blank',
+      '1': 'one', '2': 'two', '3': 'three',
+      '4': 'four', '5': 'five', '6': 'six',
+      '7': 'seven', '8': 'eight', '9': 'nine',
+      '0': 'zero',
+    };
 
-  Future<void> _checkAnswer() async {
-    final userAnswer = _controller.text.trim();
-    final correctAnswer = _questions[_currentIndex]['parts'][2].toString();
-
-    if (userAnswer == correctAnswer) {
-      setState(() {
-        feedback = "✅ Great Job!";
-      });
-      await flutterTts.speak("Excellent!");
+    for (int i = 0; i < parts.length; i++) {
+      final part = parts[i];
+      setState(() => currentSpokenIndex = i);
+      await _speak(speakMap[part] ?? part);
       await Future.delayed(const Duration(milliseconds: 500));
-      _nextQuestion();
+    }
+    setState(() => currentSpokenIndex = -1);
+  }
+
+  void _checkAnswer(String value) {
+    final correct = _questions[currentIndex]['answer'];
+    setState(() => droppedValue = value);
+
+    if (value == correct) {
+      score++;
+      showNext = true;
+      _speak("Correct!");
+      Future.delayed(const Duration(seconds: 2), _nextQuestion);
     } else {
-      setState(() {
-        feedback = "❌ Try Again!";
-      });
-      await flutterTts.speak("Try again");
+      _speak("Try again!");
     }
   }
 
-  void _nextQuestion() async {
-    if (_currentIndex < _questions.length - 1) {
+  void _nextQuestion() {
+    if (currentIndex < _questions.length - 1) {
       setState(() {
-        _currentIndex++;
-        feedback = '';
-        _controller.clear();
-        showHint = false;
+        currentIndex++;
+        droppedValue = null;
+        showNext = false;
       });
-      await _speakInstruction();
+      _speakCurrentQuestionKaraoke();
     } else {
-      setState(() {
-        finished = true;
-      });
-      _confettiController.play();
-      await flutterTts.speak("You did very well");
-      await _playCheeringSound();
+      _speak("Excellent! You completed all equations.");
+      _showFinalDialog();
     }
   }
 
-  void _restartGame() {
+  void _resetGame() {
     setState(() {
-      _currentIndex = 0;
-      feedback = '';
-      showHint = false;
-      finished = false;
-      _controller.clear();
+      currentIndex = 0;
+      score = 0;
+      droppedValue = null;
+      showNext = false;
     });
-    _speakInstruction();
+    _speakCurrentQuestionKaraoke();
+    Navigator.pop(context);
   }
 
-  Future<void> _readFullHint(List<dynamic> hints) async {
-    for (var hint in hints) {
-      await flutterTts.speak(hint['text']);
-      await Future.delayed(const Duration(milliseconds: 600));
-    }
-    await flutterTts.speak(
-      "${_questions[_currentIndex]['parts'][0]} ${_questions[_currentIndex]['parts'][1]} blank ${_questions[_currentIndex]['parts'][3]} ${_questions[_currentIndex]['parts'][4]}",
-    );
+  String _getStars(int score, int total) {
+    double ratio = score / total;
+    if (ratio == 1.0) return "🌟🌟🌟";
+    if (ratio >= 0.66) return "🌟🌟";
+    if (ratio >= 0.33) return "🌟";
+    return "⭐";
   }
 
-  Widget _buildEquationBox(dynamic content) {
-    return ScaleTransition(
-      scale: _cardScaleAnimation,
-      child: GestureDetector(
-        onTap: () async {
-          await flutterTts.speak(content.toString());
-        },
-        child: Container(
-          margin: const EdgeInsets.all(10),
-          padding: const EdgeInsets.all(22),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.85),
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [BoxShadow(color: Colors.orangeAccent.withOpacity(0.5), blurRadius: 8)],
-          ),
-          child: Text(
-            content.toString(),
-            style: const TextStyle(fontSize: 42, fontWeight: FontWeight.bold, color: Colors.black87),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHintBox(List<dynamic> hints) {
-    return Container(
-      margin: const EdgeInsets.only(top: 20),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.85),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 8)],
-      ),
-      child: Column(
-        children: hints.map((hint) {
-          return Column(
-            children: [
-              Text(List.generate(hint['count'], (_) => hint['emoji']).join(), style: const TextStyle(fontSize: 44)),
-              const SizedBox(height: 8),
-              Text(hint['text'], style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w500, color: Colors.black87), textAlign: TextAlign.center),
-            ],
-          );
-        }).toList(),
-      ),
-    );
-  }
-  @override
-  Widget build(BuildContext context) {
-    final current = _questions[_currentIndex];
-    final parts = current['parts'] as List<dynamic>;
-    final hints = current['hint'] as List<dynamic>;
-
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text(
-          "Complete the Equation",
-          style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: Colors.black87),
-        ),
-        centerTitle: true,
-      ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFFFFE0B2), Color(0xFFFFB347)],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: Stack(
+  void _showFinalDialog() {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("🎉 Good Job!", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            CustomPaint(
-              painter: BokehPainter(_twinkleController),
-              child: Container(),
-            ),
-            Center(
-              child: finished
-                  ? Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ConfettiWidget(
-                          confettiController: _confettiController,
-                          blastDirectionality: BlastDirectionality.explosive,
-                          numberOfParticles: 50,
-                          shouldLoop: false,
-                        ),
-                        Container(
-                          padding: const EdgeInsets.all(20),
-                          margin: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.85),
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [BoxShadow(color: Colors.orangeAccent.withOpacity(0.4), blurRadius: 8)],
-                          ),
-                          child: const Text(
-                            "🎉 You Did Very Well! 🎉",
-                            style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: Colors.green),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        const SizedBox(height: 30),
-                        ScaleTransition(
-                          scale: _playAgainAnimation,
-                          child: ElevatedButton(
-                            onPressed: _restartGame,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.amber,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-                              padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20),
-                            ),
-                            child: const Text("Play Again", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
-                          ),
-                        ),
-                      ],
-                    )
-                  : SingleChildScrollView(
-                      padding: const EdgeInsets.fromLTRB(24, 100, 24, 24),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(20),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.85),
-                              borderRadius: BorderRadius.circular(20),
-                              boxShadow: [BoxShadow(color: Colors.orangeAccent.withOpacity(0.5), blurRadius: 8)],
-                            ),
-                            child: const Text(
-                              "Solve the below question",
-                              style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: Colors.black87),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                          const SizedBox(height: 30),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              _buildEquationBox(parts[0]),
-                              _buildEquationBox(parts[1]),
-                              _buildEquationBox('_'),
-                              _buildEquationBox(parts[3]),
-                              _buildEquationBox(parts[4]),
-                            ],
-                          ),
-                          const SizedBox(height: 30),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.9),
-                              borderRadius: BorderRadius.circular(18),
-                            ),
-                            child: TextField(
-                              controller: _controller,
-                              keyboardType: TextInputType.number,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(fontSize: 40),
-                              decoration: const InputDecoration(
-                                hintText: '?',
-                                border: InputBorder.none,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          ElevatedButton(
-                            onPressed: _checkAnswer,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.amber,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 18),
-                            ),
-                            child: const Text("Check Answer", style: TextStyle(fontSize: 30)),
-                          ),
-                          const SizedBox(height: 20),
-                          if (feedback.isNotEmpty)
-                            Container(
-                              padding: const EdgeInsets.all(14),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.75),
-                                borderRadius: BorderRadius.circular(18),
-                              ),
-                              child: Text(
-                                feedback,
-                                style: TextStyle(
-                                  fontSize: 34,
-                                  fontWeight: FontWeight.bold,
-                                  color: feedback.startsWith('✅') ? Colors.green : Colors.redAccent,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                          const SizedBox(height: 30),
-                          ElevatedButton(
-                            onPressed: () async {
-                              setState(() => showHint = !showHint);
-                              if (showHint) await _readFullHint(hints);
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.orangeAccent,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 18),
-                            ),
-                            child: Text(showHint ? "Hide Hint" : "Show Hint", style: const TextStyle(fontSize: 30)),
-                          ),
-                          if (showHint) _buildHintBox(hints),
-                        ],
-                      ),
-                    ),
+            Text("Your Score: $score / ${_questions.length}", style: const TextStyle(fontSize: 22)),
+            const SizedBox(height: 10),
+            Text(_getStars(score, _questions.length), style: const TextStyle(fontSize: 40)),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _resetGame,
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+              child: const Text("🔁 Play Again", style: TextStyle(fontSize: 20)),
             ),
           ],
         ),
       ),
     );
   }
-}
-
-class BokehPainter extends CustomPainter {
-  final Animation<double> animation;
-  BokehPainter(this.animation) : super(repaint: animation);
 
   @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint();
-    final random = Random();
-    for (int i = 0; i < 25; i++) {
-      final opacity = 0.5 + 0.5 * sin(animation.value * 2 * pi + i);
-      paint.color = Colors.white.withOpacity(opacity);
-      final x = random.nextDouble() * size.width;
-      final y = random.nextDouble() * size.height;
-      canvas.drawCircle(Offset(x, y), 5, paint);
-    }
+  Widget build(BuildContext context) {
+    final q = _questions[currentIndex];
+    final parts = q['equationParts'] as List<String>;
+
+    return Scaffold(
+      backgroundColor: AppTheme.backgroundColor,
+      appBar: AppBar(
+        title: const Text("Complete the Equation"),
+        backgroundColor: AppTheme.appBarColor,
+        centerTitle: true,
+      ),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.orange[100],
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text("🏆 Score: $score", style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+              ),
+              Wrap(
+                alignment: WrapAlignment.center,
+                children: List.generate(parts.length, (index) {
+                  final part = parts[index];
+                  final isHighlighted = index == currentSpokenIndex;
+
+                  if (part == "_") {
+                    return DragTarget<String>(
+                      builder: (context, candidate, rejected) => Container(
+                        width: 60,
+                        height: 50,
+                        margin: const EdgeInsets.symmetric(horizontal: 8),
+                        decoration: BoxDecoration(
+                          color: droppedValue != null ? Colors.greenAccent : Colors.white,
+                          border: Border.all(color: Colors.deepOrange, width: 2),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(droppedValue ?? "_", style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+                      ),
+                      onAccept: _checkAnswer,
+                    );
+                  }
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    child: Text(
+                      part,
+                      style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: isHighlighted ? Colors.orange : Colors.black,
+                      ),
+                    ),
+                  );
+                }),
+              ),
+              const SizedBox(height: 20),
+              if (q['image'] != null)
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.9),
+                    border: Border.all(color: Colors.deepOrange, width: 3),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  padding: const EdgeInsets.all(8),
+                  margin: const EdgeInsets.only(bottom: 20),
+                  child: Image.asset("images/new_images/${q['image']}", height: 160),
+                ),
+              Wrap(
+                spacing: 20,
+                runSpacing: 20,
+                children: (q['options'] as List<String>).map((opt) {
+                  return Draggable<String>(
+                    data: opt,
+                    feedback: Material(
+                      color: Colors.transparent,
+                      child: _buildOption(opt, dragging: true),
+                    ),
+                    childWhenDragging: Opacity(opacity: 0.4, child: _buildOption(opt)),
+                    child: _buildOption(opt),
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
-  @override
-  bool shouldRepaint(covariant BokehPainter oldDelegate) => true;
+  Widget _buildOption(String value, {bool dragging = false}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+      decoration: BoxDecoration(
+        color: dragging ? Colors.amber : Colors.orangeAccent,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: dragging ? [] : [BoxShadow(color: Colors.black26, blurRadius: 4)],
+      ),
+      child: Text(value, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+    );
+  }
 }

@@ -1,7 +1,4 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:confetti/confetti.dart';
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
 class HardEquationGame extends StatefulWidget {
@@ -11,292 +8,223 @@ class HardEquationGame extends StatefulWidget {
   State<HardEquationGame> createState() => _HardEquationGameState();
 }
 
-class _HardEquationGameState extends State<HardEquationGame> with TickerProviderStateMixin {
-  final FlutterTts flutterTts = FlutterTts();
-  final AudioPlayer _audioPlayer = AudioPlayer();
+class _HardEquationGameState extends State<HardEquationGame> {
+  final FlutterTts tts = FlutterTts();
+  int currentIndex = 0;
+  int score = 0;
+  bool isCorrect = false;
+  bool showNext = false;
 
   final List<Map<String, dynamic>> _questions = [
     {
-      'equation': ['_', '*', 3, '=', 12],
-      'answer': 4,
-      'hint': [
-        {'text': 'Think: What number times three equals twelve?', 'emoji': '🔢', 'count': 3},
-        {'text': 'Divide twelve by three.', 'emoji': '➗', 'count': 3},
-      ],
+      "question": "(2 + 3) × 2 = ?",
+      "image": "2_plus_3_times_2.png",
+      "options": ["8", "10", "12"],
+      "answer": "10"
     },
     {
-      'equation': [20, '=', '_', '*', 4],
-      'answer': 5,
-      'hint': [
-        {'text': 'What number times four makes twenty?', 'emoji': '🔢', 'count': 4},
-        {'text': 'Divide twenty by four.', 'emoji': '➗', 'count': 4},
-      ],
+      "question": "6 + 4 × 2 = ?",
+      "image": "6_plus_4_times_2.png",
+      "options": ["14", "20", "18"],
+      "answer": "14"
     },
     {
-      'equation': [18, '=', 2, '*', '_', '+', 2],
-      'answer': 8,
-      'hint': [
-        {'text': 'First subtract two from eighteen.', 'emoji': '➖', 'count': 2},
-        {'text': 'Then divide by two.', 'emoji': '➗', 'count': 2},
-      ],
-    },
-    {
-      'equation': [30, '=', 5, '*', '_', '+', 5],
-      'answer': 5,
-      'hint': [
-        {'text': 'Subtract five from thirty.', 'emoji': '➖', 'count': 5},
-        {'text': 'Now divide by five.', 'emoji': '➗', 'count': 5},
-      ],
-    },
-    {
-      'equation': [50, '=', '_', '*', 5, '+', 10],
-      'answer': 8,
-      'hint': [
-        {'text': 'Subtract ten from fifty.', 'emoji': '➖', 'count': 10},
-        {'text': 'Divide by five.', 'emoji': '➗', 'count': 5},
-      ],
+      "question": "8 - 2 × 3 = ?",
+      "image": "8_minus_2_times_3.png",
+      "options": ["2", "6", "18"],
+      "answer": "2"
     },
   ];
-
-  int _currentIndex = 0;
-  String feedback = '';
-  bool showHint = false;
-  bool finished = false;
-  final TextEditingController _controller = TextEditingController();
-  late AnimationController _twinkleController;
-  late AnimationController _cardAnimationController;
-  late Animation<double> _cardScaleAnimation;
-  late AnimationController _playAgainGlowController;
-  late Animation<double> _playAgainAnimation;
-  late ConfettiController _confettiController;
 
   @override
   void initState() {
     super.initState();
-    _twinkleController = AnimationController(vsync: this, duration: const Duration(seconds: 5))..repeat();
-    _cardAnimationController = AnimationController(vsync: this, duration: const Duration(milliseconds: 700));
-    _cardScaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(CurvedAnimation(parent: _cardAnimationController, curve: Curves.elasticOut));
-    _playAgainGlowController = AnimationController(vsync: this, duration: const Duration(seconds: 2))..repeat(reverse: true);
-    _playAgainAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(CurvedAnimation(parent: _playAgainGlowController, curve: Curves.easeInOut));
-    _confettiController = ConfettiController(duration: const Duration(seconds: 4));
-    _speakInstruction();
+    _speakCurrent();
   }
 
-  @override
-  void dispose() {
-    _controller.dispose();
-    _twinkleController.dispose();
-    _cardAnimationController.dispose();
-    _playAgainGlowController.dispose();
-    _confettiController.dispose();
-    _audioPlayer.dispose();
-    flutterTts.stop();
-    super.dispose();
+  Future<void> _speak(String text) async {
+    await tts.setLanguage("en-US");
+    await tts.setSpeechRate(0.45);
+    await tts.speak(text);
   }
 
-  Future<void> _speakInstruction() async {
-    await Future.delayed(const Duration(milliseconds: 400));
-    await flutterTts.speak("Solve the below question");
-    _cardAnimationController.forward();
+  void _speakCurrent() {
+    _speak("What is the answer for: ${_questions[currentIndex]['question']}");
   }
 
-  Future<void> _playCheeringSound() async {
-    try {
-      await _audioPlayer.play(AssetSource('audio/kids_cheering.mp3'));
-    } catch (e) {
-      print("Error playing cheering sound: $e");
-    }
-  }
-
-  Future<void> _checkAnswer() async {
-    final userAnswer = int.tryParse(_controller.text.trim());
-    final correctAnswer = _questions[_currentIndex]['answer'];
-
-    if (userAnswer == correctAnswer) {
-      setState(() => feedback = "✅ Great Job!");
-      await flutterTts.speak("Excellent!");
-      await Future.delayed(const Duration(milliseconds: 500));
-      _nextQuestion();
-    } else {
-      setState(() => feedback = "❌ Try Again!");
-      await flutterTts.speak("Try again");
-    }
-  }
-
-  void _nextQuestion() async {
-    if (_currentIndex < _questions.length - 1) {
-      setState(() {
-        _currentIndex++;
-        feedback = '';
-        _controller.clear();
-        showHint = false;
-      });
-      await _speakInstruction();
-    } else {
-      setState(() => finished = true);
-      _confettiController.play();
-      await flutterTts.speak("You did very well");
-      await _playCheeringSound();
-    }
-  }
-
-  void _restartGame() {
+  void _check(String value) {
+    final correct = _questions[currentIndex]['answer'];
     setState(() {
-      _currentIndex = 0;
-      feedback = '';
-      showHint = false;
-      finished = false;
-      _controller.clear();
+      isCorrect = (value == correct);
+      showNext = isCorrect;
+      if (isCorrect) score++;
     });
-    _speakInstruction();
+
+    _speak(isCorrect ? "Correct!" : "Try again!");
   }
 
-  Future<void> _readFullHint(List<dynamic> hints) async {
-    for (var hint in hints) {
-      await flutterTts.speak(hint['text']);
-      await Future.delayed(const Duration(milliseconds: 600));
+  void _next() {
+    if (currentIndex < _questions.length - 1) {
+      setState(() {
+        currentIndex++;
+        isCorrect = false;
+        showNext = false;
+      });
+      _speakCurrent();
+    } else {
+      _speak("You completed all advanced equations. Great job!");
+      _showFinalDialog();
     }
   }
 
-  Widget _buildEquationBox(dynamic content) {
-    return ScaleTransition(
-      scale: _cardScaleAnimation,
-      child: GestureDetector(
-        onTap: () async => await flutterTts.speak(content.toString()),
-        child: Container(
-          margin: const EdgeInsets.all(10),
-          padding: const EdgeInsets.all(22),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.85),
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [BoxShadow(color: Colors.orangeAccent.withOpacity(0.5), blurRadius: 8)],
-          ),
-          child: Text(
-            content.toString(),
-            style: const TextStyle(fontSize: 42, fontWeight: FontWeight.bold, color: Colors.black87),
-          ),
-        ),
-      ),
-    );
+  void _resetGame() {
+    setState(() {
+      currentIndex = 0;
+      score = 0;
+      isCorrect = false;
+      showNext = false;
+    });
+    _speakCurrent();
+    Navigator.pop(context);
   }
 
-  Widget _buildHintBox(List<dynamic> hints) {
-    return Container(
-      margin: const EdgeInsets.only(top: 20),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.85),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 8)],
-      ),
-      child: Column(
-        children: hints.map((hint) => Column(
+  String _getStars(int score, int total) {
+    double ratio = score / total;
+    if (ratio == 1.0) return "🌟🌟🌟";
+    if (ratio >= 0.66) return "🌟🌟";
+    if (ratio >= 0.33) return "🌟";
+    return "⭐";
+  }
+
+  void _showFinalDialog() {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("🎉 Finished!", style: TextStyle(fontSize: 26)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Text(List.generate(hint['count'], (_) => hint['emoji']).join(), style: const TextStyle(fontSize: 44)),
-            const SizedBox(height: 8),
-            Text(hint['text'], style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w500, color: Colors.black87), textAlign: TextAlign.center),
+            Text("You solved all hard equations!", style: const TextStyle(fontSize: 20)),
+            const SizedBox(height: 10),
+            Text("Score: $score / ${_questions.length}", style: const TextStyle(fontSize: 20)),
+            const SizedBox(height: 10),
+            Text(_getStars(score, _questions.length), style: const TextStyle(fontSize: 36)),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _resetGame,
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+              child: const Text("🔁 Play Again", style: TextStyle(fontSize: 20)),
+            )
           ],
-        )).toList(),
+        ),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final current = _questions[_currentIndex];
-    final equation = current['equation'] as List<dynamic>;
-    final hints = current['hint'] as List<dynamic>;
+    final q = _questions[currentIndex];
+    final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text("Hard Equation Game", style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: Colors.black87)),
+        title: const Text("Hard Equations"),
+        backgroundColor: Colors.orange,
         centerTitle: true,
       ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(colors: [Color(0xFFFFE0B2), Color(0xFFFFB347)], begin: Alignment.topCenter, end: Alignment.bottomCenter),
-        ),
-        child: Stack(
-          children: [
-            CustomPaint(painter: BokehPainter(_twinkleController), child: Container()),
-            Center(
-              child: finished
-                  ? Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ConfettiWidget(confettiController: _confettiController, blastDirectionality: BlastDirectionality.explosive, numberOfParticles: 50),
-                        Container(
-                          padding: const EdgeInsets.all(20),
-                          margin: const EdgeInsets.all(20),
-                          decoration: BoxDecoration(color: Colors.white.withOpacity(0.85), borderRadius: BorderRadius.circular(20), boxShadow: [BoxShadow(color: Colors.orangeAccent.withOpacity(0.4), blurRadius: 8)]),
-                          child: const Text("🎉 You Did Very Well! 🎉", style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold, color: Colors.green), textAlign: TextAlign.center),
-                        ),
-                        const SizedBox(height: 30),
-                        ScaleTransition(
-                          scale: _playAgainAnimation,
-                          child: ElevatedButton(
-                            onPressed: _restartGame,
-                            style: ElevatedButton.styleFrom(backgroundColor: Colors.amber, padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 20), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18))),
-                            child: const Text("Play Again", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
-                          ),
-                        ),
-                      ],
-                    )
-                  : SingleChildScrollView(
-                      padding: const EdgeInsets.fromLTRB(24, 100, 24, 24),
-                      child: Column(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(20),
-                            decoration: BoxDecoration(color: Colors.white.withOpacity(0.85), borderRadius: BorderRadius.circular(20)),
-                            child: const Text("Solve the below question", style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: Colors.black87), textAlign: TextAlign.center),
-                          ),
-                          const SizedBox(height: 30),
-                          Wrap(alignment: WrapAlignment.center, children: equation.map((e) => _buildEquationBox(e)).toList()),
-                          const SizedBox(height: 30),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            decoration: BoxDecoration(color: Colors.white.withOpacity(0.9), borderRadius: BorderRadius.circular(18)),
-                            child: TextField(controller: _controller, keyboardType: TextInputType.number, textAlign: TextAlign.center, style: const TextStyle(fontSize: 40), decoration: const InputDecoration(hintText: '?', border: InputBorder.none)),
-                          ),
-                          const SizedBox(height: 20),
-                          ElevatedButton(onPressed: _checkAnswer, style: ElevatedButton.styleFrom(backgroundColor: Colors.amber, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))), child: const Text("Check Answer", style: TextStyle(fontSize: 30))),
-                          const SizedBox(height: 20),
-                          if (feedback.isNotEmpty) Container(padding: const EdgeInsets.all(14), decoration: BoxDecoration(color: Colors.white.withOpacity(0.75), borderRadius: BorderRadius.circular(18)), child: Text(feedback, style: TextStyle(fontSize: 34, fontWeight: FontWeight.bold, color: feedback.startsWith('✅') ? Colors.green : Colors.redAccent), textAlign: TextAlign.center)),
-                          const SizedBox(height: 30),
-                          ElevatedButton(onPressed: () async { setState(() => showHint = !showHint); if (showHint) await _readFullHint(hints); }, style: ElevatedButton.styleFrom(backgroundColor: Colors.orangeAccent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14))), child: Text(showHint ? "Hide Hint" : "Show Hint", style: const TextStyle(fontSize: 30))),
-                          if (showHint) _buildHintBox(hints),
-                        ],
-                      ),
+      backgroundColor: const Color(0xFFFFF6ED),
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Score tracker
+              Container(
+                padding: const EdgeInsets.all(12),
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.orange[100],
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text("🏆 Score: $score", style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+              ),
+              // Question box
+              Container(
+                width: screenWidth * 0.85,
+                padding: const EdgeInsets.all(16),
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 4)],
+                ),
+                child: Text(
+                  "What is the result of this equation?",
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              ),
+              // Transparent equation
+              Container(
+                padding: const EdgeInsets.all(16),
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: Colors.deepOrange.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  q['question'],
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.deepOrange),
+                ),
+              ),
+              // Image visual
+              if (q['image'] != null)
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.9),
+                    border: Border.all(color: Colors.deepOrange, width: 3),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  padding: const EdgeInsets.all(8),
+                  margin: const EdgeInsets.only(bottom: 20),
+                  child: Image.asset("images/new_images/${q['image']}", height: 160),
+                ),
+              // Options
+              Wrap(
+                spacing: 20,
+                runSpacing: 16,
+                alignment: WrapAlignment.center,
+                children: q["options"].map<Widget>((opt) {
+                  final correct = opt == q["answer"];
+                  final bgColor = isCorrect && correct
+                      ? Colors.green
+                      : Colors.orangeAccent.shade100;
+                  return ElevatedButton(
+                    onPressed: showNext ? null : () => _check(opt),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: bgColor,
+                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
-            ),
-          ],
+                    child: Text(opt, style: const TextStyle(fontSize: 24)),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 20),
+              if (isCorrect)
+                const Text("✅ Correct!", style: TextStyle(fontSize: 22, color: Colors.green)),
+              if (showNext)
+                ElevatedButton(
+                  onPressed: _next,
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.amber),
+                  child: const Text("Next", style: TextStyle(fontSize: 22)),
+                ),
+            ],
+          ),
         ),
       ),
     );
   }
-}
-
-class BokehPainter extends CustomPainter {
-  final Animation<double> animation;
-  BokehPainter(this.animation) : super(repaint: animation);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint();
-    final random = Random();
-    for (int i = 0; i < 25; i++) {
-      final opacity = 0.5 + 0.5 * sin(animation.value * 2 * pi + i);
-      paint.color = Colors.white.withOpacity(opacity);
-      final x = random.nextDouble() * size.width;
-      final y = random.nextDouble() * size.height;
-      canvas.drawCircle(Offset(x, y), 5, paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant BokehPainter oldDelegate) => true;
 }

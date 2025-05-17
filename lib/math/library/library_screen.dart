@@ -13,8 +13,7 @@ class LibraryScreen extends StatelessWidget {
       backgroundColor: const Color(0xFFFFF6ED),
       appBar: AppBar(
         backgroundColor: const Color(0xFFFFA726),
-        title: const Text("Math Library",
-            style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text("Math Library", style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
       ),
       body: Padding(
@@ -23,7 +22,7 @@ class LibraryScreen extends StatelessWidget {
           crossAxisCount: 2,
           mainAxisSpacing: 16,
           crossAxisSpacing: 16,
-          childAspectRatio: 0.55,
+          childAspectRatio: 0.85,
           children: [
             _buildTile(
               context,
@@ -47,26 +46,21 @@ class LibraryScreen extends StatelessWidget {
               title: "Skill Videos",
               description: "Watch helpful math videos to learn better.",
               imagePath: "images/video_icon.png",
-              onTap: () => Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => const MathVideosScreen())),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MathVideosScreen())),
             ),
             _buildTile(
               context,
               title: "How Are You Feeling?",
               description: "Tell the fox how you feel today.",
               imagePath: "images/feelings_icon.png",
-              onTap: () => Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => const FeelingsScreen())),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const FeelingsScreen())),
             ),
             _buildTile(
               context,
               title: "Confidence Messages",
               description: "Get positive messages from the fox.",
               imagePath: "images/confidence_icon.png",
-              onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => const ConfidenceMessagesScreen())),
+              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ConfidenceMessagesScreen())),
             ),
           ],
         ),

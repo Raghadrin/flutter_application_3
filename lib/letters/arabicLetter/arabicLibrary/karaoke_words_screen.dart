@@ -1,95 +1,169 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
-class KaraokeWordsScreen extends StatefulWidget {
-  const KaraokeWordsScreen({super.key});
+class FindCorrectWordScreen extends StatefulWidget {
+  const FindCorrectWordScreen({super.key});
 
   @override
-  State<KaraokeWordsScreen> createState() => _KaraokeWordsScreenState();
+  State<FindCorrectWordScreen> createState() => _FindCorrectWordScreenState();
 }
 
-class _KaraokeWordsScreenState extends State<KaraokeWordsScreen> {
+class _FindCorrectWordScreenState extends State<FindCorrectWordScreen> {
   final FlutterTts flutterTts = FlutterTts();
 
-  // جملة عربية للتدريب
-  List<String> sentenceWords = "أنا أحب اللغة العربية كثيرًا لأنها جميلة!".split(" ").reversed.toList();
-  int highlightedIndex = -1;
+  final List<Map<String, dynamic>> questions = [
+  {
+    "word": "مكتبة",
+    "options": ["مكتبه", "مكتنه", "مكتبا", "مكتبة", "مكنبة", "متكبة"]
+  },
+  {
+    "word": "استثناء",
+    "options": ["استسناء", "استهزاء", "استثناء", "استثنا", "استيناء", "استناء"]
+  },
+  {
+    "word": "مسؤولية",
+    "options": ["مسؤولية", "مسوولية", "مسؤوليا", "مسيولية", "مسووليه", "مسولية"]
+  },
+  {
+    "word": "احتراف",
+    "options": ["احتراف", "احتراغ", "احترافه", "احترافن", "اختراف", "احتراغ"]
+  },
+  {
+    "word": "استراتيجية",
+    "options": ["استراتيجيه", "استراجية", "استراتيجية", "استرتجية", "ستراتيجية", "استراذيجية"]
+  },
+];
+
+
+  int currentIndex = 0;
+  String? feedback;
+  bool isAnswered = false;
 
   @override
   void initState() {
     super.initState();
     flutterTts.setLanguage("ar-SA");
     flutterTts.setSpeechRate(0.4);
+    _speakCurrentWord();
   }
 
-  Future<void> speakWord(int index) async {
+  Future<void> _speak(String text) async {
+    await flutterTts.stop();
+    await flutterTts.speak(text);
+  }
+
+  Future<void> _speakCurrentWord() async {
+    final word = questions[currentIndex]["word"];
+    await _speak("اختر الكلمة: $word");
+  }
+
+  void checkAnswer(String selected) async {
+    if (isAnswered) return;
+
+    final correct = questions[currentIndex]["word"];
     setState(() {
-      highlightedIndex = index;
+      isAnswered = true;
+      feedback = selected == correct
+          ? "✅ أحسنت! هذه الكلمة الصحيحة"
+          : "❌ الكلمة الصحيحة هي: $correct";
     });
-    await flutterTts.speak(sentenceWords[index]);
-    await Future.delayed(const Duration(seconds: 1));
+
+    await _speak(feedback!);
+
+    await Future.delayed(const Duration(milliseconds: 1800));
     setState(() {
-      highlightedIndex = -1;
+      currentIndex = (currentIndex + 1) % questions.length;
+      isAnswered = false;
+      feedback = null;
     });
+
+    _speakCurrentWord();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final current = questions[currentIndex];
+    final List<String> options = List<String>.from(current["options"]);
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFFFF6ED),
+      appBar: AppBar(
+        title: const Text("أين الكلمة الصحيحة؟", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+        centerTitle: true,
+        backgroundColor: Colors.orange,
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                "🎧 استمع للكلمة واضغط على الخيار الصحيح",
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 30),
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 16,
+                runSpacing: 16,
+                children: options.map((word) {
+                  return ElevatedButton(
+                    onPressed: () => checkAnswer(word),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      side: const BorderSide(color: Colors.orange, width: 2),
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    ),
+                    child: Text(
+                      word,
+                      style: const TextStyle(fontSize: 26, color: Colors.black87, fontWeight: FontWeight.bold),
+                    ),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 30),
+              if (feedback != null)
+                Container(
+                  padding: const EdgeInsets.all(18),
+                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: feedback!.contains("✅") ? Colors.green.shade100 : Colors.red.shade100,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Text(
+                    feedback!,
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: feedback!.contains("✅") ? Colors.green : Colors.red,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              const SizedBox(height: 40),
+              ElevatedButton.icon(
+                onPressed: _speakCurrentWord,
+                icon: const Icon(Icons.volume_up, size: 28),
+                label: const Text("🔊 إعادة سماع الكلمة", style: TextStyle(fontSize: 22)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
   void dispose() {
     flutterTts.stop();
     super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Directionality( // ← يجعل الشاشة بالكامل من اليمين لليسار
-      textDirection: TextDirection.rtl,
-      child: Scaffold(
-        backgroundColor: const Color(0xFFFFF6ED),
-        appBar: AppBar(
-          title: const Text("كلمات تتراقص", style: TextStyle(fontWeight: FontWeight.bold)),
-          centerTitle: true,
-          backgroundColor: const Color(0xFFFFA726),
-        ),
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Wrap(
-              alignment: WrapAlignment.center,
-              spacing: 10,
-              runSpacing: 20,
-              textDirection: TextDirection.rtl,
-              children: List.generate(sentenceWords.length, (index) {
-                final word = sentenceWords[index];
-                final isHighlighted = index == highlightedIndex;
-
-                return GestureDetector(
-                  onTap: () => speakWord(index),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: isHighlighted ? Colors.orange : Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.orange, width: 2),
-                      boxShadow: isHighlighted
-                          ? [const BoxShadow(color: Colors.orangeAccent, blurRadius: 8)]
-                          : [],
-                    ),
-                    child: Text(
-                      word,
-                      style: TextStyle(
-                        fontSize: 22,
-                        color: isHighlighted ? Colors.white : Colors.black87,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                );
-              }),
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }
