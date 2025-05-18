@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'arabic_level2_screen.dart';
 
@@ -38,7 +37,8 @@ class SentenceSelectionLevel2Screen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.orange,
         centerTitle: true,
-        title: const Text("📘 اختر جملة طويلة", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+        title: const Text("📘 اختر جملة طويلة",
+            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
@@ -46,9 +46,9 @@ class SentenceSelectionLevel2Screen extends StatelessWidget {
           itemCount: sentences.length,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
-            crossAxisSpacing: 20,
-            mainAxisSpacing: 20,
-            childAspectRatio: 1,
+            crossAxisSpacing: 30,
+            mainAxisSpacing: 30,
+            childAspectRatio: 0.5,
           ),
           itemBuilder: (context, index) {
             final sentence = sentences[index];
@@ -57,7 +57,8 @@ class SentenceSelectionLevel2Screen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => ArabicLevel2Screen(sentence: sentence["text"]!),
+                    builder: (_) =>
+                        ArabicLevel2Screen(sentence: sentence["text"]!),
                   ),
                 );
               },
@@ -67,14 +68,18 @@ class SentenceSelectionLevel2Screen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: Colors.orange, width: 2),
                   boxShadow: const [
-                    BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(2, 2)),
+                    BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 4,
+                        offset: Offset(2, 2)),
                   ],
                 ),
                 padding: const EdgeInsets.all(12),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(sentence["emoji"]!, style: const TextStyle(fontSize: 48)),
+                    Text(sentence["emoji"]!,
+                        style: const TextStyle(fontSize: 48)),
                     const SizedBox(height: 12),
                     Text(
                       sentence["title"]!,
