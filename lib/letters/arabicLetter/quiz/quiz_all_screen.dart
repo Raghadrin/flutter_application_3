@@ -182,16 +182,16 @@ class _QuizAScreenState extends State<QuizAScreen> {
 
   String normalize(String input) {
     return input
-        .replaceAll('ة', 'ه')
-        .replaceAll('ى', 'ي')
-        .replaceAll(RegExp(r'[\u064B-\u065F]'), '') // Remove diacritics
-        .replaceAll(RegExp(r'[،؟!.؛:\-ـ]'), '')
-        .replaceAll('أ', 'ا')
-        .replaceAll('إ', 'ا')
-        .replaceAll('آ', 'ا')
-        .replaceAll('ؤ', 'و')
-        .replaceAll('ئ', 'ي')
-        .trim();
+      .replaceAll('ة', 'ه')
+      .replaceAll('ى', 'ي')
+      .replaceAll(RegExp(r'[\u064B-\u065F]'), '') // Remove diacritics
+      .replaceAll(RegExp(r'[،؟!.؛:-ـ]'), '')
+      .replaceAll('أ', 'ا')
+      .replaceAll('إ', 'ا')
+      .replaceAll('آ', 'ا')
+      .replaceAll('ؤ', 'و')
+      .replaceAll('ئ', 'ي')
+      .trim();
   }
 
   @override
@@ -203,114 +203,113 @@ class _QuizAScreenState extends State<QuizAScreen> {
         backgroundColor: const Color(0xFFFFF8E1),
         appBar: AppBar(
           backgroundColor: Colors.deepOrange,
-          title: const Text('الكويز الشامل', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+          title: const Text('الكويز الشامل', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
           actions: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Center(child: Text('⏱ $remainingSeconds ثانية', style: const TextStyle(fontSize: 22))),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Center(child: Text('⏱ $remainingSeconds ثانية', style: const TextStyle(fontSize: 16))),
             ),
           ],
           bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(6),
+            preferredSize: const Size.fromHeight(4),
             child: LinearProgressIndicator(
               value: remainingSeconds / 180,
               backgroundColor: Colors.orange.shade100,
               valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
-              minHeight: 6,
+              minHeight: 4,
             ),
           ),
         ),
         body: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(12),
           child: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Question counter and score
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         'السؤال ${currentIndex + 1} من ${questions.length}',
-                        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.orange),
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.orange),
                       ),
                       Text(
                         'النقاط: $score',
-                        style: const TextStyle(fontSize: 24, color: Colors.brown, fontWeight: FontWeight.bold),
+                        style: const TextStyle(fontSize: 18, color: Colors.brown, fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
                 ),
-                
+
                 // Question box
                 Container(
                   width: double.infinity,
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  padding: const EdgeInsets.all(20),
+                  margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.grey.withOpacity(0.3),
-                        spreadRadius: 2,
-                        blurRadius: 5,
-                        offset: const Offset(0, 3),
+                        spreadRadius: 1,
+                        blurRadius: 3,
+                        offset: const Offset(0, 2),
                     )
                     ],
-
                   ),
                   child: Text(
                     question['prompt'],
-                    style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w600, color: Colors.brown),
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600, color: Colors.brown),
                     textAlign: TextAlign.center,
                   ),
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
                 
                 // Question content based on type
                 if (question['type'] == 'speak') ...[
                   Center(
                     child: ElevatedButton.icon(
                       onPressed: isListening ? null : startListening,
-                      icon: const Icon(Icons.mic, size: 36),
-                      label: const Text('ابدأ التسجيل', style: TextStyle(fontSize: 26)),
+                      icon: const Icon(Icons.mic, size: 24),
+                      label: const Text('ابدأ التسجيل', style: TextStyle(fontSize: 18)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orange,
-                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Center(
+                    child: ElevatedButton.icon(
+                      onPressed: isListening ? stopListening : null,
+                      icon: const Icon(Icons.stop_circle, size: 24),
+                      label: const Text('إيقاف', style: TextStyle(fontSize: 18)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.redAccent,
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Center(
-                    child: ElevatedButton.icon(
-                      onPressed: isListening ? stopListening : null,
-                      icon: const Icon(Icons.stop_circle, size: 36),
-                      label: const Text('إيقاف', style: TextStyle(fontSize: 26)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.redAccent,
-                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
                   Container(
                     width: double.infinity,
-                    margin: const EdgeInsets.symmetric(horizontal: 16),
-                    padding: const EdgeInsets.all(20),
+                    margin: const EdgeInsets.symmetric(horizontal: 12),
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: Colors.orange),
                     ),
                     child: Text(
                       recognizedText.isEmpty ? 'سيظهر النص المقروء هنا' : recognizedText,
                       style: TextStyle(
-                        fontSize: 24,
+                        fontSize: 18,
                         color: recognizedText.isEmpty ? Colors.grey : Colors.brown,
                       ),
                       textAlign: TextAlign.center,
@@ -318,163 +317,163 @@ class _QuizAScreenState extends State<QuizAScreen> {
                   ),
                 ] else if (question['type'] == 'choice') ...[
                   ...question['options'].map<Widget>((opt) => Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     child: Container(
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(10),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.grey.withOpacity(0.2),
                             spreadRadius: 1,
-                            blurRadius: 3,
-                            offset: const Offset(0, 2),
+                            blurRadius: 2,
+                            offset: const Offset(0, 1),
                           ),
                         ],
                       ),
                       child: RadioListTile<String>(
-                        title: Text(opt, style: const TextStyle(fontSize: 24)),
+                        title: Text(opt, style: const TextStyle(fontSize: 18)),
                         value: opt,
                         groupValue: selectedOption,
                         onChanged: (val) => setState(() => selectedOption = val),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12),
                         tileColor: Colors.white,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(10),
                         ),
                         controlAffinity: ListTileControlAffinity.trailing,
                       ),
                     ),
                   )),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   Center(
                     child: ElevatedButton(
                       onPressed: selectedOption != null ? validateAnswer : null,
-                      child: const Text('تحقق من الإجابة', style: TextStyle(fontSize: 26)),
+                      child: const Text('تحقق من الإجابة', style: TextStyle(fontSize: 18)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orange,
-                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                     ),
                   ),
                 ] else if (question['type'] == 'yesno') ...[
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     child: Container(
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(10),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.grey.withOpacity(0.2),
                             spreadRadius: 1,
-                            blurRadius: 3,
-                            offset: const Offset(0, 2),
+                            blurRadius: 2,
+                            offset: const Offset(0, 1),
                           ),
                         ],
                       ),
                       child: RadioListTile<String>(
-                        title: const Text('نعم', style: TextStyle(fontSize: 24)),
+                        title: const Text('نعم', style: TextStyle(fontSize: 18)),
                         value: 'نعم',
                         groupValue: selectedYesNo,
                         onChanged: (val) => setState(() => selectedYesNo = val),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12),
                         tileColor: Colors.white,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(10),
                         ),
                         controlAffinity: ListTileControlAffinity.trailing,
                       ),
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     child: Container(
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(10),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.grey.withOpacity(0.2),
                             spreadRadius: 1,
-                            blurRadius: 3,
-                            offset: const Offset(0, 2),
+                            blurRadius: 2,
+                            offset: const Offset(0, 1),
                           ),
                         ],
                       ),
                       child: RadioListTile<String>(
-                        title: const Text('لا', style: TextStyle(fontSize: 24)),
+                        title: const Text('لا', style: TextStyle(fontSize: 18)),
                         value: 'لا',
                         groupValue: selectedYesNo,
                         onChanged: (val) => setState(() => selectedYesNo = val),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12),
                         tileColor: Colors.white,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(10),
                         ),
                         controlAffinity: ListTileControlAffinity.trailing,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
                   Center(
                     child: ElevatedButton(
                       onPressed: selectedYesNo != null ? validateAnswer : null,
-                      child: const Text('تحقق من الإجابة', style: TextStyle(fontSize: 26)),
+                      child: const Text('تحقق من الإجابة', style: TextStyle(fontSize: 18)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orange,
-                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                     ),
                   ),
                 ] else if (question['type'] == 'reorder') ...[
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: ReorderableWrap(
-                      spacing: 16,
-                      runSpacing: 16,
+                      spacing: 12,
+                      runSpacing: 12,
                       needsLongPressDraggable: false,
                       onReorder: onReorder,
                       children: userOrder
                           .map((word) => Chip(
                                 key: ValueKey(word),
-                                label: Text(word, style: const TextStyle(fontSize: 24)),
-                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                label: Text(word, style: const TextStyle(fontSize: 18)),
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                 backgroundColor: Colors.orange.shade100,
                               ))
                           .toList(),
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 16),
                   Center(
                     child: ElevatedButton(
                       onPressed: validateAnswer,
-                      child: const Text('تحقق من الترتيب', style: TextStyle(fontSize: 26)),
+                      child: const Text('تحقق من الترتيب', style: TextStyle(fontSize: 18)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orange,
-                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                     ),
                   ),
                 ],
                 
                 // End quiz button
-                const SizedBox(height: 32),
+                const SizedBox(height: 24),
                 Center(
                   child: ElevatedButton.icon(
                     onPressed: () {
                       countdownTimer?.cancel();
                       showResult();
                     },
-                    icon: const Icon(Icons.exit_to_app, size: 32),
-                    label: const Text('إنهاء الكويز الآن', style: TextStyle(fontSize: 24)),
+                    icon: const Icon(Icons.exit_to_app, size: 24),
+                    label: const Text('إنهاء الكويز الآن', style: TextStyle(fontSize: 18)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.orange,
-                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
                   ),
                 ),
@@ -493,12 +492,12 @@ class _QuizAScreenState extends State<QuizAScreen> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
         title: const Center(
           child: Text(
             '🎯 النتيجة النهائية',
-            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
         ),
         content: SizedBox(
@@ -508,74 +507,74 @@ class _QuizAScreenState extends State<QuizAScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: Colors.orange.shade50,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                   child: Column(
                     children: [
                       Text(
                         'أحرزت $score من ${questions.length}',
-                        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                       ),
-                      const SizedBox(height: 8),
+                      const SizedBox(height: 6),
                       Text(
                         'النسبة: ${percentage.toStringAsFixed(1)}%',
-                        style: const TextStyle(fontSize: 24, color: Colors.teal, fontWeight: FontWeight.bold),
+                        style: const TextStyle(fontSize: 18, color: Colors.teal, fontWeight: FontWeight.bold),
                       ),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 8),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: List.generate(
                           stars,
-                          (index) => const Icon(Icons.star, color: Colors.orange, size: 40),
+                          (index) => const Icon(Icons.star, color: Colors.orange, size: 30),
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
                 const Padding(
-                  padding: EdgeInsets.only(right: 16),
+                  padding: EdgeInsets.only(right: 12),
                   child: Text(
                     '📋 تفاصيل إجاباتك:',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 ...answerLog.map((e) => Padding(
-                  padding: const EdgeInsets.only(right: 16, bottom: 16),
+                  padding: const EdgeInsets.only(right: 12, bottom: 12),
                   child: Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(10),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.grey.withOpacity(0.1),
                           spreadRadius: 1,
-                          blurRadius: 3,
-                          offset: const Offset(0, 2),
+                          blurRadius: 2,
+                          offset: const Offset(0, 1),
                         ),
                       ],
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(12),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             e['prompt'],
-                            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                           ),
-                          const SizedBox(height: 8),
-                          Text('إجابتك: ${e['yourAnswer']}', style: const TextStyle(fontSize: 20)),
-                          Text('الصحيح: ${e['correctAnswer']}', style: const TextStyle(fontSize: 20)),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 6),
+                          Text('إجابتك: ${e['yourAnswer']}', style: const TextStyle(fontSize: 16)),
+                          Text('الصحيح: ${e['correctAnswer']}', style: const TextStyle(fontSize: 16)),
+                          const SizedBox(height: 6),
                           Icon(
                             e['correct'] ? Icons.check_circle : Icons.cancel,
                             color: e['correct'] ? Colors.green : Colors.red,
-                            size: 28,
+                            size: 24,
                           ),
                         ],
                       ),
@@ -590,14 +589,14 @@ class _QuizAScreenState extends State<QuizAScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('إغلاق', style: TextStyle(fontSize: 22)),
+            child: const Text('إغلاق', style: TextStyle(fontSize: 18)),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
               restartQuiz();
             },
-            child: const Text('🔁 إعادة الاختبار', style: TextStyle(fontSize: 22)),
+            child: const Text('🔁 إعادة الاختبار', style: TextStyle(fontSize: 18)),
           ),
         ],
       ),
