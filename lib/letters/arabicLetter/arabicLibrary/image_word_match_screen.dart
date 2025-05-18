@@ -82,9 +82,7 @@ class _AdvancedImageWordMatchScreenState extends State<AdvancedImageWordMatchScr
   void _handleTap(bool isCorrect) {
     setState(() {
       feedback = isCorrect ? "أحسنت! ✅" : "حاول مرة أخرى ❌";
-      if (isCorrect) {
-        score++;
-      }
+      if (isCorrect) score++;
       attempts++;
       showHint = false;
     });
@@ -102,9 +100,7 @@ class _AdvancedImageWordMatchScreenState extends State<AdvancedImageWordMatchScr
       currentOptions.shuffle();
       showHint = false;
     });
-    if (!showScore) {
-      _speakWord();
-    }
+    if (!showScore) _speakWord();
   }
 
   void _resetGame() {
@@ -145,27 +141,27 @@ class _AdvancedImageWordMatchScreenState extends State<AdvancedImageWordMatchScr
             children: [
               const Text(
                 "🎉 النتيجة النهائية 🎉",
-                style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: Colors.orange),
-              ),
-              const SizedBox(height: 30),
-              Text(
-                "الإجابات الصحيحة: $score من ${questions.length}",
-                style: const TextStyle(fontSize: 28, color: Colors.green),
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.orange),
               ),
               const SizedBox(height: 20),
               Text(
-                "الدقة: ${(score / questions.length * 100).toStringAsFixed(1)}%",
-                style: const TextStyle(fontSize: 24, color: Colors.blue),
+                "الإجابات الصحيحة: $score من ${questions.length}",
+                style: const TextStyle(fontSize: 20, color: Colors.green),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 10),
+              Text(
+                "الدقة: ${(score / questions.length * 100).toStringAsFixed(1)}%",
+                style: const TextStyle(fontSize: 18, color: Colors.blue),
+              ),
+              const SizedBox(height: 30),
               ElevatedButton.icon(
                 onPressed: _resetGame,
-                icon: const Icon(Icons.refresh, size: 30),
-                label: const Text("إعادة اللعبة", style: TextStyle(fontSize: 24)),
+                icon: const Icon(Icons.refresh, size: 20),
+                label: const Text("إعادة اللعبة", style: TextStyle(fontSize: 16)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orange,
-                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 ),
               ),
             ],
@@ -177,13 +173,12 @@ class _AdvancedImageWordMatchScreenState extends State<AdvancedImageWordMatchScr
     return Scaffold(
       backgroundColor: const Color(0xFFFFF6ED),
       appBar: AppBar(
-        title: const Text("وين الكلمة؟ - المستوى المتقدم", 
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+        title: const Text("وين الكلمة؟", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         centerTitle: true,
         backgroundColor: const Color(0xFFFFA726),
         actions: [
           IconButton(
-            icon: const Icon(Icons.help_outline, size: 30),
+            icon: const Icon(Icons.help_outline, size: 20),
             onPressed: _toggleHint,
             tooltip: 'إظهار التلميح',
           ),
@@ -191,122 +186,120 @@ class _AdvancedImageWordMatchScreenState extends State<AdvancedImageWordMatchScr
       ),
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(16),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                "اختر الصورة المناسبة لكلمة:",
-                style: TextStyle(fontSize: 28, color: Colors.grey[700]),
+                "اختر الصورة لكلمة:",
+                style: TextStyle(fontSize: 20, color: Colors.grey[700]),
               ),
-              const SizedBox(height: 15),
+              const SizedBox(height: 10),
               Text(
                 currentWord,
-                style: const TextStyle(fontSize: 42, color: Colors.orange, fontWeight: FontWeight.bold),
+                style: const TextStyle(fontSize: 28, color: Colors.orange, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 15),
+              const SizedBox(height: 10),
               if (showHint)
                 Container(
-                  padding: const EdgeInsets.all(16),
-                  margin: const EdgeInsets.symmetric(vertical: 10),
+                  padding: const EdgeInsets.all(12),
+                  margin: const EdgeInsets.symmetric(vertical: 8),
                   decoration: BoxDecoration(
                     color: Colors.blue[50],
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(10),
                     border: Border.all(color: Colors.blue),
                   ),
                   child: Text(
                     "تلميح: $currentHint",
-                    style: const TextStyle(fontSize: 24, color: Colors.blue),
+                    style: const TextStyle(fontSize: 16, color: Colors.blue),
                     textAlign: TextAlign.center,
                   ),
                 ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 20),
               Wrap(
                 alignment: WrapAlignment.center,
-                spacing: 30,
-                runSpacing: 30,
+                spacing: 20,
+                runSpacing: 20,
                 children: currentOptions.map((option) {
                   return GestureDetector(
                     onTap: feedback == null ? () => _handleTap(option["isCorrect"]) : null,
                     child: Container(
-                      width: 150,
-                      height: 150,
+                      width: 100,
+                      height: 100,
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
                         color: Colors.white,
                         border: Border.all(
-                          color: feedback != null && option["isCorrect"] 
-                            ? Colors.green 
-                            : Colors.orange, 
-                          width: 3),
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: const [
-                          BoxShadow(color: Colors.black26, blurRadius: 8, offset: Offset(4, 4))
-                        ],
+                          color: feedback != null && option["isCorrect"] ? Colors.green : Colors.orange,
+                          width: 2,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(2, 2))],
                       ),
                       child: Text(
                         option["image"],
-                        style: const TextStyle(fontSize: 60),
+                        style: const TextStyle(fontSize: 36),
                       ),
                     ),
                   );
                 }).toList(),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 20),
               if (feedback != null)
                 Column(
                   children: [
                     Text(
                       feedback!,
                       style: TextStyle(
-                        fontSize: 32,
+                        fontSize: 22,
                         color: feedback!.contains("✅") ? Colors.green : Colors.red,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 10),
                     ElevatedButton.icon(
                       onPressed: _nextQuestion,
-                      icon: const Icon(Icons.arrow_forward, size: 30),
-                      label: const Text("التالي", style: TextStyle(fontSize: 24)),
+                      icon: const Icon(Icons.arrow_forward, size: 20),
+                      label: const Text("التالي", style: TextStyle(fontSize: 16)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
-                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                       ),
-                 ), ],
+                    ),
+                  ],
                 ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ElevatedButton.icon(
                     onPressed: _speakWord,
-                    icon: const Icon(Icons.volume_up, size: 30),
-                    label: const Text("كرر", style: TextStyle(fontSize: 22)),
+                    icon: const Icon(Icons.volume_up, size: 20),
+                    label: const Text("كرر", style: TextStyle(fontSize: 14)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.orange,
-                      padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     ),
                   ),
-                  const SizedBox(width: 20),
+                  const SizedBox(width: 12),
                   ElevatedButton.icon(
                     onPressed: _toggleHint,
-                    icon: Icon(showHint ? Icons.visibility_off : Icons.visibility, size: 30),
-                    label: Text(showHint ? "إخفاء التلميح" : "إظهار التلميح", style: const TextStyle(fontSize: 22)),
+                    icon: Icon(showHint ? Icons.visibility_off : Icons.visibility, size: 20),
+                    label: Text(showHint ? "إخفاء التلميح" : "إظهار التلميح", style: const TextStyle(fontSize: 14)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
-                      padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 10),
               Text(
                 "السؤال ${currentQuestionIndex + 1} من ${questions.length}",
-                style: const TextStyle(fontSize: 22, color: Colors.grey),
+                style: const TextStyle(fontSize: 14, color: Colors.grey),
               ),
             ],
           ),

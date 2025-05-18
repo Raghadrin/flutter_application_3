@@ -17,7 +17,7 @@ class _AdvancedStoryCompleteScreenState extends State<AdvancedStoryCompleteScree
   final List<Map<String, dynamic>> stories = [
     {
       "title": "رحلة إلى الحديقة",
-      "start": "في يوم مشمس جميل، قررت سلمى أن تذهب إلى الحديقة القريبة من منزلها. أخذت معها كيسًا صغيرًا وضعت فيه بعض الفواكه وزجاجة ماء...",
+      "start": "في يوم مشمس جميل، قررت سلمى أن تذهب إلى الحديقة القريبة من منزلها...",
       "hint": "ما هو التصرف الصحيح في الحديقة؟",
       "endings": [
         {"text": "فالتقت بصديقاتها ولعبت معهن بأمان وسعادة.", "isCorrect": true},
@@ -28,7 +28,7 @@ class _AdvancedStoryCompleteScreenState extends State<AdvancedStoryCompleteScree
     },
     {
       "title": "الواجب المدرسي",
-      "start": "عاد خالد من المدرسة متعبًا، وكان عليه إنهاء واجبه المدرسي قبل موعد النوم. جلس على مكتبه وفتح كتبه...",
+      "start": "عاد خالد من المدرسة متعبًا، وكان عليه إنهاء واجبه المدرسي...",
       "hint": "ما هو السلوك المسؤول؟",
       "endings": [
         {"text": "فبدأ بتركيز في حل الواجب حتى انتهى منه.", "isCorrect": true},
@@ -39,18 +39,18 @@ class _AdvancedStoryCompleteScreenState extends State<AdvancedStoryCompleteScree
     },
     {
       "title": "الكتاب الجديد",
-      "start": "حصلت ليلى على كتاب جديد هدية من عمتها. كان الكتاب يحتوي على قصص مشوقة ورسومات جميلة...",
+      "start": "حصلت ليلى على كتاب جديد هدية من عمتها...",
       "hint": "كيف نتعامل مع الكتب؟",
       "endings": [
         {"text": "فقرأته بعناية وحافظت عليه نظيفًا مرتبًا.", "isCorrect": true},
-        {"text": "فمزقت بعض الصفحات لتلصقها على حائط غرفتها.", "isCorrect": false},
+        {"text": "فمزقت بعض الصفحات لتلصقها على الحائط.", "isCorrect": false},
         {"text": "فنسيته تحت السرير ولم تفتحه أبدًا.", "isCorrect": false},
         {"text": "فأعطته لصديقتها دون أن تقرأه.", "isCorrect": false},
       ]
     },
     {
       "title": "الحيوان الأليف",
-      "start": "وجد ياسر قطة صغيرة تموء عند باب المنزل. بدت القطة جائعة وخائفة...",
+      "start": "وجد ياسر قطة صغيرة تموء عند باب المنزل...",
       "hint": "كيف نتعامل مع الحيوانات؟",
       "endings": [
         {"text": "فأحضر لها بعض الطعام والماء بلطف.", "isCorrect": true},
@@ -87,15 +87,15 @@ class _AdvancedStoryCompleteScreenState extends State<AdvancedStoryCompleteScree
   void _handleChoice(Map<String, dynamic> ending) {
     setState(() {
       feedback = ending["isCorrect"] ? "أحسنت! ✅" : "حاول مرة أخرى ❌";
-      if (ending["isCorrect"]) {
-        score++;
-      }
+      if (ending["isCorrect"]) score++;
       attempts++;
       showHint = false;
     });
-    _speakText(ending["isCorrect"] 
-      ? "إجابة صحيحة! ${ending["text"]}" 
-      : "للأسف هذه ليست الإجابة المثالية. ${ending["text"]}");
+    _speakText(
+      ending["isCorrect"]
+          ? "إجابة صحيحة! ${ending["text"]}"
+          : "للأسف هذه ليست الإجابة المثالية. ${ending["text"]}",
+    );
   }
 
   void _nextStory() {
@@ -109,9 +109,7 @@ class _AdvancedStoryCompleteScreenState extends State<AdvancedStoryCompleteScree
       currentEndings.shuffle();
       showHint = false;
     });
-    if (!showScore) {
-      _speakText(currentTitle + ". " + currentStart);
-    }
+    if (!showScore) _speakText(currentTitle + ". " + currentStart);
   }
 
   void _resetGame() {
@@ -130,9 +128,7 @@ class _AdvancedStoryCompleteScreenState extends State<AdvancedStoryCompleteScree
     setState(() {
       showHint = !showHint;
     });
-    if (showHint) {
-      _speakText("تلميح: $currentHint");
-    }
+    if (showHint) _speakText("تلميح: $currentHint");
   }
 
   @override
@@ -143,209 +139,155 @@ class _AdvancedStoryCompleteScreenState extends State<AdvancedStoryCompleteScree
 
   @override
   Widget build(BuildContext context) {
-    if (showScore) {
-      return Directionality(
-        textDirection: TextDirection.rtl,
-        child: Scaffold(
-          backgroundColor: const Color(0xFFFFF6ED),
-          body: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  "🎉 النتيجة النهائية 🎉",
-                  style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: Colors.orange),
-                ),
-                const SizedBox(height: 30),
-                Text(
-                  "الإجابات الصحيحة: $score من ${stories.length}",
-                  style: const TextStyle(fontSize: 28, color: Colors.green),
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  "الدقة: ${(score / stories.length * 100).toStringAsFixed(1)}%",
-                  style: const TextStyle(fontSize: 24, color: Colors.blue),
-                ),
-                const SizedBox(height: 40),
-                ElevatedButton.icon(
-                  onPressed: _resetGame,
-                  icon: const Icon(Icons.refresh, size: 30),
-                  label: const Text("إعادة اللعبة", style: TextStyle(fontSize: 24)),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: const Color(0xFFFFF6ED),
         appBar: AppBar(
-          title: const Text("احكِلي وأنا أكمل - المستوى المتقدم", 
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+          title: const Text("أكمل القصة", style: TextStyle(fontSize: 18)),
           centerTitle: true,
-          backgroundColor: const Color(0xFFFFA726),
+          backgroundColor: Colors.orange,
           actions: [
             IconButton(
-              icon: const Icon(Icons.help_outline, size: 30),
+              icon: const Icon(Icons.help_outline, size: 20),
               onPressed: _toggleHint,
-              tooltip: 'إظهار التلميح',
             ),
           ],
         ),
-        body: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  currentTitle,
-                  style: const TextStyle(fontSize: 28, color: Colors.orange, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 20),
-                const Text(
-                  "بداية القصة:",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
-                ),
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  margin: const EdgeInsets.symmetric(vertical: 10),
-                  decoration: BoxDecoration(
-                    color: Colors.orange[50],
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.orange, width: 2),
-                  ),
-                  child: Text(
-                    currentStart,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 22, color: Colors.brown),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                if (showHint)
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    margin: const EdgeInsets.symmetric(vertical: 10),
-                    decoration: BoxDecoration(
-                      color: Colors.blue[50],
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.blue),
-                    ),
-                    child: Text(
-                      "💡 تلميح: $currentHint",
-                      style: const TextStyle(fontSize: 20, color: Colors.blue),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                const SizedBox(height: 20),
-                const Text(
-                  "اختر النهاية المناسبة:",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
-                ),
-                const SizedBox(height: 20),
-                ...currentEndings.map((ending) => Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      child: ElevatedButton(
-                        onPressed: feedback == null ? () => _handleChoice(ending) : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white,
-                          foregroundColor: Colors.black87,
-                          side: BorderSide(
-                            color: feedback != null && ending["isCorrect"] 
-                              ? Colors.green 
-                              : Colors.orange, 
-                            width: 3),
-                          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                          elevation: 4,
-                        ),
-                        child: Text(
-                          ending["text"],
-                          style: const TextStyle(fontSize: 20),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                    )),
-                const SizedBox(height: 30),
-                if (feedback != null)
-                  Column(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: feedback!.contains("✅") ? Colors.green[50] : Colors.red[50],
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: feedback!.contains("✅") ? Colors.green : Colors.red, 
-                            width: 2),
-                        ),
-                        child: Text(
-                          feedback!,
-                          style: TextStyle(
-                            fontSize: 24,
-                            color: feedback!.contains("✅") ? Colors.green : Colors.red,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      ElevatedButton.icon(
-                        onPressed: _nextStory,
-                        icon: const Icon(Icons.arrow_forward, size: 30),
-                        label: const Text("التالي", style: TextStyle(fontSize: 24)),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                        ),
-                    ),  ],
-                  ),
-                const SizedBox(height: 20),
-                Row(
+        body: showScore
+            ? Center(
+                child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+                    const Text("🎉 النتيجة النهائية 🎉",
+                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.orange)),
+                    const SizedBox(height: 20),
+                    Text("الإجابات الصحيحة: $score من ${stories.length}",
+                        style: const TextStyle(fontSize: 18, color: Colors.green)),
+                    const SizedBox(height: 10),
+                    Text("الدقة: ${(score / stories.length * 100).toStringAsFixed(1)}%",
+                        style: const TextStyle(fontSize: 16, color: Colors.blue)),
+                    const SizedBox(height: 20),
                     ElevatedButton.icon(
-                      onPressed: () => _speakText(currentStart),
-                      icon: const Icon(Icons.volume_up, size: 28),
-                      label: const Text("سماع القصة", style: TextStyle(fontSize: 20)),
+                      onPressed: _resetGame,
+                      icon: const Icon(Icons.refresh, size: 20),
+                      label: const Text("إعادة", style: TextStyle(fontSize: 16)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orange,
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                     ),
-                    const SizedBox(width: 15),
-                    ElevatedButton.icon(
-                      onPressed: _toggleHint,
-                      icon: Icon(showHint ? Icons.visibility_off : Icons.visibility, size: 28),
-                      label: Text(showHint ? "إخفاء التلميح" : "تلميح", style: const TextStyle(fontSize: 20)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  ],
+                ),
+              )
+            : SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    Text(currentTitle,
+                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.orange)),
+                    const SizedBox(height: 10),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.orange[50],
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.orange),
                       ),
-                 ), ],
+                      child: Text(currentStart,
+                          style: const TextStyle(fontSize: 16, color: Colors.brown), textAlign: TextAlign.center),
+                    ),
+                    if (showHint) ...[
+                      const SizedBox(height: 10),
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.blue[50],
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: Colors.blue),
+                        ),
+                        child: Text("💡 $currentHint",
+                            style: const TextStyle(fontSize: 14, color: Colors.blue),
+                            textAlign: TextAlign.center),
+                      ),
+                    ],
+                    const SizedBox(height: 20),
+                    const Text("اختر النهاية:", style: TextStyle(fontSize: 18)),
+                    const SizedBox(height: 10),
+                    ...currentEndings.map(
+                      (ending) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 6),
+                        child: ElevatedButton(
+                          onPressed: feedback == null ? () => _handleChoice(ending) : null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.white,
+                            side: BorderSide(
+                              color: feedback != null && ending["isCorrect"] ? Colors.green : Colors.orange,
+                              width: 2,
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                          child: Text(ending["text"], style: const TextStyle(fontSize: 14)),
+                        ),
+                      ),
+                    ),
+                    if (feedback != null) ...[
+                      const SizedBox(height: 20),
+                      Text(
+                        feedback!,
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: feedback!.contains("✅") ? Colors.green : Colors.red,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      ElevatedButton.icon(
+                        onPressed: _nextStory,
+                        icon: const Icon(Icons.arrow_forward, size: 20),
+                        label: const Text("التالي", style: TextStyle(fontSize: 14)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: () => _speakText(currentStart),
+                          icon: const Icon(Icons.volume_up, size: 20),
+                          label: const Text("اسمع", style: TextStyle(fontSize: 14)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.orange,
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        ElevatedButton.icon(
+                          onPressed: _toggleHint,
+                          icon: Icon(showHint ? Icons.visibility_off : Icons.visibility, size: 20),
+                          label: Text(showHint ? "إخفاء" : "تلميح", style: const TextStyle(fontSize: 14)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Text("القصة ${currentStoryIndex + 1} من ${stories.length}",
+                        style: const TextStyle(fontSize: 14, color: Colors.grey)),
+                  ],
                 ),
-                const SizedBox(height: 20),
-                Text(
-                  "القصة ${currentStoryIndex + 1} من ${stories.length}",
-                  style: const TextStyle(fontSize: 20, color: Colors.grey),
-                ),
-              ],
-            ),
-          ),
-        ),
+              ),
       ),
     );
   }

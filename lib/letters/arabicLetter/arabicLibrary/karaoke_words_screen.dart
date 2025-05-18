@@ -12,28 +12,27 @@ class _FindCorrectWordScreenState extends State<FindCorrectWordScreen> {
   final FlutterTts flutterTts = FlutterTts();
 
   final List<Map<String, dynamic>> questions = [
-  {
-    "word": "مكتبة",
-    "options": ["مكتبه", "مكتنه", "مكتبا", "مكتبة", "مكنبة", "متكبة"]
-  },
-  {
-    "word": "استثناء",
-    "options": ["استسناء", "استهزاء", "استثناء", "استثنا", "استيناء", "استناء"]
-  },
-  {
-    "word": "مسؤولية",
-    "options": ["مسؤولية", "مسوولية", "مسؤوليا", "مسيولية", "مسووليه", "مسولية"]
-  },
-  {
-    "word": "احتراف",
-    "options": ["احتراف", "احتراغ", "احترافه", "احترافن", "اختراف", "احتراغ"]
-  },
-  {
-    "word": "استراتيجية",
-    "options": ["استراتيجيه", "استراجية", "استراتيجية", "استرتجية", "ستراتيجية", "استراذيجية"]
-  },
-];
-
+    {
+      "word": "مكتبة",
+      "options": ["مكتبه", "مكتنه", "مكتبا", "مكتبة", "مكنبة", "متكبة"]
+    },
+    {
+      "word": "استثناء",
+      "options": ["استسناء", "استهزاء", "استثناء", "استثنا", "استيناء", "استناء"]
+    },
+    {
+      "word": "مسؤولية",
+      "options": ["مسؤولية", "مسوولية", "مسؤوليا", "مسيولية", "مسووليه", "مسولية"]
+    },
+    {
+      "word": "احتراف",
+      "options": ["احتراف", "احتراغ", "احترافه", "احترافن", "اختراف", "احتراغ"]
+    },
+    {
+      "word": "استراتيجية",
+      "options": ["استراتيجيه", "استراجية", "استراتيجية", "استرتجية", "ستراتيجية", "استراذيجية"]
+    },
+  ];
 
   int currentIndex = 0;
   String? feedback;
@@ -59,7 +58,6 @@ class _FindCorrectWordScreenState extends State<FindCorrectWordScreen> {
 
   void checkAnswer(String selected) async {
     if (isAnswered) return;
-
     final correct = questions[currentIndex]["word"];
     setState(() {
       isAnswered = true;
@@ -69,8 +67,7 @@ class _FindCorrectWordScreenState extends State<FindCorrectWordScreen> {
     });
 
     await _speak(feedback!);
-
-    await Future.delayed(const Duration(milliseconds: 1800));
+    await Future.delayed(const Duration(milliseconds: 1600));
     setState(() {
       currentIndex = (currentIndex + 1) % questions.length;
       isAnswered = false;
@@ -85,76 +82,79 @@ class _FindCorrectWordScreenState extends State<FindCorrectWordScreen> {
     final current = questions[currentIndex];
     final List<String> options = List<String>.from(current["options"]);
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFFFF6ED),
-      appBar: AppBar(
-        title: const Text("أين الكلمة الصحيحة؟", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
-        centerTitle: true,
-        backgroundColor: Colors.orange,
-      ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text(
-                "🎧 استمع للكلمة واضغط على الخيار الصحيح",
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 30),
-              Wrap(
-                alignment: WrapAlignment.center,
-                spacing: 16,
-                runSpacing: 16,
-                children: options.map((word) {
-                  return ElevatedButton(
-                    onPressed: () => checkAnswer(word),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      side: const BorderSide(color: Colors.orange, width: 2),
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        backgroundColor: const Color(0xFFFFF6ED),
+        appBar: AppBar(
+          title: const Text("الكلمة الصحيحة", style: TextStyle(fontSize: 20)),
+          centerTitle: true,
+          backgroundColor: Colors.orange,
+        ),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  "🎧 استمع للكلمة واضغط على الخيار الصحيح",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 20),
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: options.map((word) {
+                    return ElevatedButton(
+                      onPressed: () => checkAnswer(word),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        side: const BorderSide(color: Colors.orange, width: 2),
+                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: Text(
+                        word,
+                        style: const TextStyle(fontSize: 16, color: Colors.black87),
+                      ),
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 20),
+                if (feedback != null)
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    margin: const EdgeInsets.symmetric(horizontal: 12),
+                    decoration: BoxDecoration(
+                      color: feedback!.contains("✅") ? Colors.green.shade100 : Colors.red.shade100,
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      word,
-                      style: const TextStyle(fontSize: 26, color: Colors.black87, fontWeight: FontWeight.bold),
+                      feedback!,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: feedback!.contains("✅") ? Colors.green : Colors.red,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 30),
-              if (feedback != null)
-                Container(
-                  padding: const EdgeInsets.all(18),
-                  margin: const EdgeInsets.symmetric(horizontal: 16),
-                  decoration: BoxDecoration(
-                    color: feedback!.contains("✅") ? Colors.green.shade100 : Colors.red.shade100,
-                    borderRadius: BorderRadius.circular(16),
                   ),
-                  child: Text(
-                    feedback!,
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: feedback!.contains("✅") ? Colors.green : Colors.red,
-                    ),
-                    textAlign: TextAlign.center,
+                const SizedBox(height: 20),
+                ElevatedButton.icon(
+                  onPressed: _speakCurrentWord,
+                  icon: const Icon(Icons.volume_up, size: 20),
+                  label: const Text("🔊 أعد سماع الكلمة", style: TextStyle(fontSize: 14)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                 ),
-              const SizedBox(height: 40),
-              ElevatedButton.icon(
-                onPressed: _speakCurrentWord,
-                icon: const Icon(Icons.volume_up, size: 28),
-                label: const Text("🔊 إعادة سماع الكلمة", style: TextStyle(fontSize: 22)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

@@ -68,7 +68,6 @@ class _ArabicRiddleScreenState extends State<ArabicRiddleScreen> {
 
   List<Map<String, dynamic>> get currentAnswers =>
       riddles[currentRiddleIndex]["answers"];
-
   String get currentRiddle => riddles[currentRiddleIndex]["riddle"];
 
   @override
@@ -109,77 +108,80 @@ class _ArabicRiddleScreenState extends State<ArabicRiddleScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFFFF6ED),
-      appBar: AppBar(
-        title: const Text("ألغاز التفكير المتقدم", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
-        centerTitle: true,
-        backgroundColor: const Color(0xFFFFA726),
-      ),
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(28),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text("🔍 اللغز", style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 20),
-              Text(
-                currentRiddle,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 30, color: Colors.orange, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 40),
-              ...currentAnswers.map((answer) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    child: ElevatedButton(
-                      onPressed: () => _handleAnswer(answer),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        side: const BorderSide(color: Colors.orange, width: 3),
-                        padding: const EdgeInsets.symmetric(vertical: 18),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                      ),
-                      child: Text(
-                        answer["text"],
-                        style: const TextStyle(fontSize: 24, color: Colors.black87, fontWeight: FontWeight.w600),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  )),
-              const SizedBox(height: 30),
-              if (feedback != null)
+    return Directionality(
+      textDirection: TextDirection.rtl,
+      child: Scaffold(
+        backgroundColor: const Color(0xFFFFF6ED),
+        appBar: AppBar(
+          title: const Text("ألغاز للأطفال", style: TextStyle(fontSize: 20)),
+          centerTitle: true,
+          backgroundColor: const Color(0xFFFFA726),
+        ),
+        body: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text("🔍 اللغز", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 12),
                 Text(
-                  feedback!,
-                  style: TextStyle(
-                    fontSize: 26,
-                    color: feedback!.contains("✅") ? Colors.green : Colors.red,
-                    fontWeight: FontWeight.bold,
+                  currentRiddle,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 20, color: Colors.orange, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 20),
+                ...currentAnswers.map((answer) => Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 6),
+                      child: ElevatedButton(
+                        onPressed: () => _handleAnswer(answer),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          side: const BorderSide(color: Colors.orange, width: 2),
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
+                        child: Text(
+                          answer["text"],
+                          style: const TextStyle(fontSize: 16, color: Colors.black87),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    )),
+                const SizedBox(height: 20),
+                if (feedback != null)
+                  Text(
+                    feedback!,
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: feedback!.contains("✅") ? Colors.green : Colors.red,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                const SizedBox(height: 20),
+                ElevatedButton.icon(
+                  onPressed: () => _speak(currentRiddle),
+                  icon: const Icon(Icons.volume_up, size: 20),
+                  label: const Text("🔊 أعد سماع اللغز", style: TextStyle(fontSize: 14)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                 ),
-              const SizedBox(height: 30),
-              ElevatedButton.icon(
-                onPressed: () => _speak(currentRiddle),
-                icon: const Icon(Icons.volume_up, size: 30),
-                label: const Text("🔊 أعد سماع اللغز", style: TextStyle(fontSize: 22)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                const SizedBox(height: 10),
+                ElevatedButton.icon(
+                  onPressed: _nextRiddle,
+                  icon: const Icon(Icons.refresh, size: 20),
+                  label: const Text("🔁 لغز جديد", style: TextStyle(fontSize: 14)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              ElevatedButton.icon(
-                onPressed: _nextRiddle,
-                icon: const Icon(Icons.refresh, size: 28),
-                label: const Text("🔁 لغز جديد", style: TextStyle(fontSize: 22)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
