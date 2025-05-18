@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'arabic_level2_screen.dart';
 
@@ -33,74 +34,86 @@ class SentenceSelectionLevel2Screen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFDF7E4),
+      backgroundColor: const Color(0xFFFFF8E1),
       appBar: AppBar(
-        backgroundColor: Colors.orange,
+        backgroundColor: const Color.fromARGB(255, 153, 203, 5),
+        elevation: 0,
         centerTitle: true,
-        title: const Text("📘 اختر جملة طويلة",
-            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+        title: const Text(
+          "📚 اختر جملتك",
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: GridView.builder(
-          itemCount: sentences.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 30,
-            mainAxisSpacing: 30,
-            childAspectRatio: 0.5,
-          ),
-          itemBuilder: (context, index) {
-            final sentence = sentences[index];
-            return GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        ArabicLevel2Screen(sentence: sentence["text"]!),
-                  ),
-                );
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.orange.shade100,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.orange, width: 2),
-                  boxShadow: const [
-                    BoxShadow(
-                        color: Colors.black26,
-                        blurRadius: 4,
-                        offset: Offset(2, 2)),
-                  ],
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Column(
+          children: [
+            const Text(
+              "👇 اضغط على الجملة التي تريد تعلمها",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Colors.orange,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            Expanded(
+              child: GridView.builder(
+                itemCount: sentences.length,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                  childAspectRatio: 0.85,
                 ),
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(sentence["emoji"]!,
-                        style: const TextStyle(fontSize: 48)),
-                    const SizedBox(height: 12),
-                    Text(
-                      sentence["title"]!,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.brown,
+                itemBuilder: (context, index) {
+                  final sentence = sentences[index];
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ArabicLevel2Screen(sentence: sentence["text"]!),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.orange.shade100,
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(color: Colors.orange, width: 2),
+                        boxShadow: const [
+                          BoxShadow(
+                              color: Colors.black26,
+                              blurRadius: 4,
+                              offset: Offset(2, 2)),
+                        ],
+                      ),
+                      padding: const EdgeInsets.all(10),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(sentence["emoji"]!, style: const TextStyle(fontSize: 40)),
+                          const SizedBox(height: 8),
+                          Text(
+                            sentence["title"]!,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.brown,
+                            ),
+                          ),
+                          // ✅ Removed the sentence text from view
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      sentence["text"]!,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 22, color: Colors.brown),
-                    ),
-                  ],
-                ),
+                  );
+                },
               ),
-            );
-          },
+            ),
+          ],
         ),
       ),
     );

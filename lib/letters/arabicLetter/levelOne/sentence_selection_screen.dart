@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'arabic_level1_screen.dart';
 
@@ -15,36 +16,36 @@ class SentenceSelectionScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFFFF8E1),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFA726),
+        backgroundColor: const Color.fromARGB(255, 153, 203, 5),
         elevation: 0,
         centerTitle: true,
         title: const Text(
           "📚 اختر جملتك",
-          style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Column(
           children: [
             const Text(
               "👇 اضغط على الجملة التي تريد تعلمها",
               style: TextStyle(
-                fontSize: 22,
+                fontSize: 18,
                 fontWeight: FontWeight.w600,
                 color: Colors.orange,
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
             Expanded(
               child: GridView.builder(
                 itemCount: sentences.length,
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
-                  crossAxisSpacing: 30,
-                  mainAxisSpacing: 30,
-                  childAspectRatio: 0.75,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                  childAspectRatio: 0.85,
                 ),
                 itemBuilder: (context, index) {
                   final sentence = sentences[index];
@@ -53,15 +54,14 @@ class SentenceSelectionScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) =>
-                              ArabicLevel1Screen(sentence: sentence["text"]!),
+                          builder: (_) => ArabicLevel1Screen(sentence: sentence["text"]!),
                         ),
                       );
                     },
                     child: Container(
                       decoration: BoxDecoration(
                         color: Colors.orange.shade100,
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(18),
                         border: Border.all(color: Colors.orange, width: 2),
                         boxShadow: const [
                           BoxShadow(
@@ -70,28 +70,22 @@ class SentenceSelectionScreen extends StatelessWidget {
                               offset: Offset(2, 2)),
                         ],
                       ),
-                      padding: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(10),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(sentence["emoji"]!,
-                              style: const TextStyle(fontSize: 48)),
-                          const SizedBox(height: 12),
+                          Text(sentence["emoji"]!, style: const TextStyle(fontSize: 40)),
+                          const SizedBox(height: 8),
                           Text(
                             sentence["title"]!,
+                            textAlign: TextAlign.center,
                             style: const TextStyle(
-                              fontSize: 24,
+                              fontSize: 20,
                               fontWeight: FontWeight.bold,
                               color: Colors.brown,
                             ),
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            sentence["text"]!,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                                fontSize: 22, color: Colors.brown),
-                          ),
+                          // ✅ Removed the sentence text from view
                         ],
                       ),
                     ),

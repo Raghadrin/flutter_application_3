@@ -12,8 +12,7 @@ class ArabicLibraryScreen extends StatelessWidget {
       backgroundColor: const Color(0xFFFFF6ED),
       appBar: AppBar(
         backgroundColor: const Color(0xFFFFA726),
-        title: const Text("مكتبة اللغة العربية",
-            style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text("مكتبة اللغة العربية", style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
       ),
       body: Padding(
@@ -22,7 +21,7 @@ class ArabicLibraryScreen extends StatelessWidget {
           crossAxisCount: 2,
           mainAxisSpacing: 16,
           crossAxisSpacing: 16,
-          childAspectRatio: 0.5,
+          childAspectRatio: 0.85,
           children: [
             _buildTile(
               context,
@@ -80,21 +79,21 @@ class ArabicLibraryScreen extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(20),
           border: Border.all(color: const Color(0xFFFFA726), width: 2),
         ),
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(12),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(imagePath, width: 68, height: 80),
-            //const SizedBox(height: 10),
+            Image.asset(imagePath, width: 48, height: 48),
+            const SizedBox(height: 16),
             Text(
               title,
               textAlign: TextAlign.center,
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
             ),
-            const SizedBox(height: 5),
+            const SizedBox(height: 12),
             Text(
               description,
               textAlign: TextAlign.center,
