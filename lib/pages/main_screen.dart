@@ -117,7 +117,7 @@ class _MainScreenState extends State<MainScreen> {
                         children: [
                           const SizedBox(height: 40),
                           const CircleAvatar(
-                            radius: 55,
+                            radius: 40,
                             backgroundImage: AssetImage('images/logo.jpg'),
                           ),
                           const SizedBox(height: 6),
@@ -161,7 +161,7 @@ class _MainScreenState extends State<MainScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 60),
+              const SizedBox(height: 45),
               Image.asset('images/fox_main_screen2.png',
                   height: screenHeight * 0.34),
               const SizedBox(height: 40),
