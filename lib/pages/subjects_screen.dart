@@ -34,7 +34,7 @@ class SubjectsScreen extends StatelessWidget {
           const SizedBox(height: 30),
           Image.asset(
             "images/subject_fox.jpg",
-            height: screenWidth * 0.8,
+            height: screenWidth * 0.7,
           ),
           const SizedBox(height: 20),
           Text(
