@@ -7,10 +7,12 @@ class ConfidenceMessagesScreen extends StatefulWidget {
   const ConfidenceMessagesScreen({super.key});
 
   @override
-  State<ConfidenceMessagesScreen> createState() => _ConfidenceMessagesScreenState();
+  State<ConfidenceMessagesScreen> createState() =>
+      _ConfidenceMessagesScreenState();
 }
 
-class _ConfidenceMessagesScreenState extends State<ConfidenceMessagesScreen> with TickerProviderStateMixin {
+class _ConfidenceMessagesScreenState extends State<ConfidenceMessagesScreen>
+    with TickerProviderStateMixin {
   final List<Map<String, String>> encouragements = [
     {
       "title": "Brave Explorer",
@@ -51,8 +53,11 @@ class _ConfidenceMessagesScreenState extends State<ConfidenceMessagesScreen> wit
   @override
   void initState() {
     super.initState();
-    _bgController = AnimationController(vsync: this, duration: const Duration(seconds: 6))..repeat();
-    _scaleController = AnimationController(vsync: this, duration: const Duration(milliseconds: 600));
+    _bgController =
+        AnimationController(vsync: this, duration: const Duration(seconds: 6))
+          ..repeat();
+    _scaleController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 600));
 
     selectedMessage = encouragements[0];
     WidgetsBinding.instance.addPostFrameCallback((_) => _selectRandomMessage());
@@ -110,8 +115,9 @@ class _ConfidenceMessagesScreenState extends State<ConfidenceMessagesScreen> wit
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Fox's Special Message", style: TextStyle(fontSize: 24)),
-        backgroundColor: const Color(0xFFFBCEB1), 
+        title:
+            const Text("Fox's Special Message", style: TextStyle(fontSize: 24)),
+        backgroundColor: const Color(0xFFFBCEB1),
       ),
       body: Stack(
         children: [
@@ -143,10 +149,12 @@ class _ConfidenceMessagesScreenState extends State<ConfidenceMessagesScreen> wit
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          border: Border.all(color: Colors.deepOrange, width: 2),
+                          border:
+                              Border.all(color: Colors.deepOrange, width: 2),
                           borderRadius: BorderRadius.circular(20),
                         ),
-                        child: Lottie.asset("images/happy_fox.json", width: 120, height: 120),
+                        child: Lottie.asset("images/happy_fox.json",
+                            width: 120, height: 120),
                       ),
                       const SizedBox(height: 20),
 
@@ -166,10 +174,13 @@ class _ConfidenceMessagesScreenState extends State<ConfidenceMessagesScreen> wit
 
                       // Main message card
                       ScaleTransition(
-                        scale: CurvedAnimation(parent: _scaleController, curve: Curves.easeOutBack),
+                        scale: CurvedAnimation(
+                            parent: _scaleController,
+                            curve: Curves.easeOutBack),
                         child: Card(
                           color: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20)),
                           elevation: 6,
                           margin: const EdgeInsets.symmetric(vertical: 12),
                           child: Padding(
@@ -177,7 +188,8 @@ class _ConfidenceMessagesScreenState extends State<ConfidenceMessagesScreen> wit
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Lottie.asset("images/Stars.json", width: 80, height: 80),
+                                Lottie.asset("images/Stars.json",
+                                    width: 80, height: 80),
                                 const SizedBox(height: 16),
                                 Text(
                                   selectedMessage['title']!,
@@ -202,7 +214,9 @@ class _ConfidenceMessagesScreenState extends State<ConfidenceMessagesScreen> wit
                                 if (favoriteMessage != null)
                                   Text(
                                     "Your Favorite Message:\n$favoriteMessage",
-                                    style: TextStyle(fontSize: 20, color: Colors.green.shade700),
+                                    style: TextStyle(
+                                        fontSize: 20,
+                                        color: Colors.green.shade700),
                                     textAlign: TextAlign.center,
                                   ),
                               ],
@@ -214,42 +228,58 @@ class _ConfidenceMessagesScreenState extends State<ConfidenceMessagesScreen> wit
                       const SizedBox(height: 24),
 
                       // Buttons
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          ElevatedButton.icon(
-                            onPressed: _playVoice,
-                            icon: const Icon(Icons.volume_up, size: 28),
-                            label: const Text("Hear Again", style: TextStyle(fontSize: 22)),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.deepOrange,
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Wrap(
+                          alignment: WrapAlignment.center,
+                          spacing: 20,
+                          runSpacing: 16,
+                          children: [
+                            ElevatedButton.icon(
+                              onPressed: _playVoice,
+                              icon: const Icon(Icons.volume_up, size: 28),
+                              label: const Text("Hear Again",
+                                  style: TextStyle(fontSize: 22)),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.deepOrange,
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 20, vertical: 14),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 20),
-                          ElevatedButton.icon(
-                            onPressed: _cheerAndChange,
-                            icon: const Icon(Icons.refresh, size: 28),
-                            label: const Text("Try Another", style: TextStyle(fontSize: 22)),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.orange,
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                            ElevatedButton.icon(
+                              onPressed: _cheerAndChange,
+                              icon: const Icon(Icons.refresh, size: 28),
+                              label: const Text("Try Another",
+                                  style: TextStyle(fontSize: 22)),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.orange,
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 20, vertical: 14),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 20),
-                          ElevatedButton.icon(
-                            onPressed: _saveFavoriteMessage,
-                            icon: const Icon(Icons.star, size: 28),
-                            label: const Text("Save Favorite", style: TextStyle(fontSize: 22)),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.amber,
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                            ElevatedButton.icon(
+                              onPressed: _saveFavoriteMessage,
+                              icon: const Icon(Icons.star, size: 28),
+                              label: const Text("Save Favorite",
+                                  style: TextStyle(fontSize: 22)),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.amber,
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 20, vertical: 14),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ],
                   ),

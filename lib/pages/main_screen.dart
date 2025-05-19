@@ -115,8 +115,9 @@ class _MainScreenState extends State<MainScreen> {
                       },
                       child: Column(
                         children: [
+                          const SizedBox(height: 40),
                           const CircleAvatar(
-                            radius: 60,
+                            radius: 55,
                             backgroundImage: AssetImage('images/logo.jpg'),
                           ),
                           const SizedBox(height: 6),
@@ -161,7 +162,8 @@ class _MainScreenState extends State<MainScreen> {
                 ),
               ),
               const SizedBox(height: 60),
-              Image.asset('images/fox_main_screen2.png', height: 300),
+              Image.asset('images/fox_main_screen2.png',
+                  height: screenHeight * 0.34),
               const SizedBox(height: 40),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
