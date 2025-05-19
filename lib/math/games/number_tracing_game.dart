@@ -56,7 +56,8 @@ class _NumberTracingGameState extends State<NumberTracingGame> {
     }
 
     totalStars += stars;
-    averageAccuracy = accuracyHistory.reduce((a, b) => a + b) / accuracyHistory.length;
+    averageAccuracy =
+        accuracyHistory.reduce((a, b) => a + b) / accuracyHistory.length;
 
     _speak(_getAccuracyComment(averageAccuracy));
 
@@ -92,7 +93,6 @@ class _NumberTracingGameState extends State<NumberTracingGame> {
     _speakCurrent();
   }
 
-
   String _getAccuracyComment(double avg) {
     double percent = avg * 100;
     if (percent >= 90) {
@@ -117,7 +117,8 @@ class _NumberTracingGameState extends State<NumberTracingGame> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text("You traced ${_items.length} numbers", style: const TextStyle(fontSize: 20)),
+            Text("You traced ${_items.length} numbers",
+                style: const TextStyle(fontSize: 20)),
             const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -134,15 +135,19 @@ class _NumberTracingGameState extends State<NumberTracingGame> {
               }),
             ),
             const SizedBox(height: 12),
-            Text(comment, textAlign: TextAlign.center, style: const TextStyle(fontSize: 18)),
+            Text(comment,
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 18)),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 Navigator.pop(context);
                 _resetGame();
               },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.deepOrange),
-              child: const Text("🔁 Start Again", style: TextStyle(fontSize: 18, color: Colors.white)),
+              style:
+                  ElevatedButton.styleFrom(backgroundColor: Colors.deepOrange),
+              child: const Text("🔁 Start Again",
+                  style: TextStyle(fontSize: 18, color: Colors.white)),
             )
           ],
         ),
@@ -164,7 +169,10 @@ class _NumberTracingGameState extends State<NumberTracingGame> {
         children: [
           const SizedBox(height: 20),
           Text("Trace number ${item['number']}",
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.deepOrange)),
+              style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepOrange)),
           const SizedBox(height: 10),
           Expanded(
             child: Container(
@@ -188,9 +196,11 @@ class _NumberTracingGameState extends State<NumberTracingGame> {
                     ),
                     GestureDetector(
                       onPanUpdate: (details) {
-                        RenderBox? renderBox = context.findRenderObject() as RenderBox?;
+                        RenderBox? renderBox =
+                            context.findRenderObject() as RenderBox?;
                         if (renderBox != null) {
-                          Offset localPosition = renderBox.globalToLocal(details.globalPosition);
+                          Offset localPosition =
+                              renderBox.globalToLocal(details.globalPosition);
                           setState(() => points.add(localPosition));
                         }
                       },
@@ -210,8 +220,10 @@ class _NumberTracingGameState extends State<NumberTracingGame> {
             children: [
               ElevatedButton(
                 onPressed: () => setState(() => points.clear()),
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.grey[300]),
-                child: const Text("🧽 Clear", style: TextStyle(fontSize: 18, color: Colors.black)),
+                style:
+                    ElevatedButton.styleFrom(backgroundColor: Colors.grey[300]),
+                child: const Text("🧽 Clear",
+                    style: TextStyle(fontSize: 18, color: Colors.black)),
               ),
             ],
           ),
@@ -243,7 +255,8 @@ class _NumberTracingGameState extends State<NumberTracingGame> {
             const SizedBox(height: 12),
             ElevatedButton(
               onPressed: _next,
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.deepOrange),
+              style:
+                  ElevatedButton.styleFrom(backgroundColor: Colors.deepOrange),
               child: const Text("Next", style: TextStyle(color: Colors.white)),
             ),
             const SizedBox(height: 20),

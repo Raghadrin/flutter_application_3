@@ -28,11 +28,11 @@ class MathLevel1Screen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xFFFFA726),
         elevation: 0,
-        leading: BackButton(color: Colors.white),
+        leading: BackButton(color: const Color.fromARGB(255, 0, 0, 0)),
         title: const Text(
           "Math - Level 1",
           style: TextStyle(
-            color: Colors.white,
+            color: Color.fromARGB(255, 0, 0, 0),
             fontSize: 24,
             fontWeight: FontWeight.bold,
             fontFamily: 'Arial',
@@ -44,7 +44,7 @@ class MathLevel1Screen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         mainAxisSpacing: 16,
         crossAxisSpacing: 16,
-        childAspectRatio: 0.9,
+        childAspectRatio: 0.59,
         children: [
           _buildGameTile(
             context,
@@ -52,7 +52,10 @@ class MathLevel1Screen extends StatelessWidget {
             jsonPath: "images/new_images/number_3.json",
             onTap: () {
               _speak("Let's recognize numbers.");
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const NumberRecognitionGame()));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const NumberRecognitionGame()));
             },
           ),
           _buildGameTile(
@@ -61,7 +64,10 @@ class MathLevel1Screen extends StatelessWidget {
             jsonPath: "images/new_images/apples.json",
             onTap: () {
               _speak("Match the number to the correct group.");
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const NumberQuantityMatchingGame()));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const NumberQuantityMatchingGame()));
             },
           ),
           _buildGameTile(
@@ -70,7 +76,8 @@ class MathLevel1Screen extends StatelessWidget {
             jsonPath: "images/new_images/tracing.json",
             onTap: () {
               _speak("Trace the number with your finger.");
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const NumberTracingGame()));
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const NumberTracingGame()));
             },
           ),
           _buildGameTile(
@@ -79,7 +86,10 @@ class MathLevel1Screen extends StatelessWidget {
             jsonPath: "images/new_images/equation.json",
             onTap: () {
               _speak("Let's complete the equation.");
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const CompleteEquationGame()));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const CompleteEquationGame()));
             },
           ),
           _buildGameTile(
@@ -88,7 +98,8 @@ class MathLevel1Screen extends StatelessWidget {
             jsonPath: "images/new_images/Quiz.json",
             onTap: () {
               _speak("Let's test what you learned.");
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const Level1Quiz()));
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const Level1Quiz()));
             },
           ),
         ],

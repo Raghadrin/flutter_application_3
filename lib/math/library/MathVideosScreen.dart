@@ -9,7 +9,8 @@ class MathVideosScreen extends StatefulWidget {
   State<MathVideosScreen> createState() => _MathVideosScreenState();
 }
 
-class _MathVideosScreenState extends State<MathVideosScreen> with TickerProviderStateMixin {
+class _MathVideosScreenState extends State<MathVideosScreen>
+    with TickerProviderStateMixin {
   late TabController _tabController;
 
   final List<Map<String, String>> englishVideos = const [
@@ -55,7 +56,8 @@ class _MathVideosScreenState extends State<MathVideosScreen> with TickerProvider
     {
       "title": "Haseeb's Math Adventures",
       "description": "Haseeb's fun journey to learn numbers.",
-      "url": "https://youtu.be/iRIzMDwez7M?list=PLjtwKLjnWi7FfBT2Du6Wwg6-en6A0QMOa",
+      "url":
+          "https://youtu.be/iRIzMDwez7M?list=PLjtwKLjnWi7FfBT2Du6Wwg6-en6A0QMOa",
       "thumbnail": "images/Haseeb.PNG"
     },
     {
@@ -85,7 +87,8 @@ class _MathVideosScreenState extends State<MathVideosScreen> with TickerProvider
     {
       "title": "Learning Times Tables with Zakaria",
       "description": "Complete times table with Zakaria.",
-      "url": "https://youtu.be/aT_SXpWHV84?list=PLEaGEZnOHpUPgAhXALGsesepwdzXEmDvY",
+      "url":
+          "https://youtu.be/aT_SXpWHV84?list=PLEaGEZnOHpUPgAhXALGsesepwdzXEmDvY",
       "thumbnail": "images/Learn_with_Zakria.PNG"
     },
   ];
@@ -116,8 +119,10 @@ class _MathVideosScreenState extends State<MathVideosScreen> with TickerProvider
   Widget _buildVideoTile(Map<String, String> video, BuildContext context) {
     final bool isAsset = video['thumbnail']!.startsWith("images/");
     final imageWidget = isAsset
-        ? Image.asset(video['thumbnail']!, width: 80, height: 80, fit: BoxFit.cover)
-        : Image.network(video['thumbnail']!, width: 80, height: 80, fit: BoxFit.cover);
+        ? Image.asset(video['thumbnail']!,
+            width: 80, height: 80, fit: BoxFit.cover)
+        : Image.network(video['thumbnail']!,
+            width: 80, height: 80, fit: BoxFit.cover);
 
     return GestureDetector(
       onTap: () => _openVideo(context, video['url']!),
@@ -131,24 +136,32 @@ class _MathVideosScreenState extends State<MathVideosScreen> with TickerProvider
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            ClipRRect(borderRadius: BorderRadius.circular(12), child: imageWidget),
+            ClipRRect(
+                borderRadius: BorderRadius.circular(12), child: imageWidget),
             const SizedBox(height: 10),
-            Text(video['title']!, textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            Text(video['title']!,
+                textAlign: TextAlign.center,
+                style:
+                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
             const SizedBox(height: 6),
-            Text(video['description']!, textAlign: TextAlign.center, style: TextStyle(fontSize: 14, color: Colors.grey[700], height: 1.3)),
+            Text(video['description']!,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    fontSize: 14, color: Colors.grey[700], height: 1.3)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildVideoGrid(List<Map<String, String>> videos, BuildContext context) {
+  Widget _buildVideoGrid(
+      List<Map<String, String>> videos, BuildContext context) {
     return GridView.count(
       padding: const EdgeInsets.all(16),
       crossAxisCount: 2,
       crossAxisSpacing: 16,
       mainAxisSpacing: 16,
-      childAspectRatio: 0.8,
+      childAspectRatio: 0.5,
       children: videos.map((video) => _buildVideoTile(video, context)).toList(),
     );
   }

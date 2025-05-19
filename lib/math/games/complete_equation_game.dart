@@ -58,9 +58,15 @@ class _CompleteEquationGameState extends State<CompleteEquationGame> {
       '-': 'minus',
       '=': 'equals',
       '_': 'blank',
-      '1': 'one', '2': 'two', '3': 'three',
-      '4': 'four', '5': 'five', '6': 'six',
-      '7': 'seven', '8': 'eight', '9': 'nine',
+      '1': 'one',
+      '2': 'two',
+      '3': 'three',
+      '4': 'four',
+      '5': 'five',
+      '6': 'six',
+      '7': 'seven',
+      '8': 'eight',
+      '9': 'nine',
       '0': 'zero',
     };
 
@@ -124,18 +130,24 @@ class _CompleteEquationGameState extends State<CompleteEquationGame> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text("🎉 Good Job!", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+        title: const Text("🎉 Good Job!",
+            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text("Your Score: $score / ${_questions.length}", style: const TextStyle(fontSize: 22)),
+            Text("Drag the right number card ",
+                style: const TextStyle(fontSize: 22)),
+            Text("Your Score: $score / ${_questions.length}",
+                style: const TextStyle(fontSize: 22)),
             const SizedBox(height: 10),
-            Text(_getStars(score, _questions.length), style: const TextStyle(fontSize: 40)),
+            Text(_getStars(score, _questions.length),
+                style: const TextStyle(fontSize: 40)),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _resetGame,
               style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-              child: const Text("🔁 Play Again", style: TextStyle(fontSize: 20)),
+              child:
+                  const Text("🔁 Play Again", style: TextStyle(fontSize: 20)),
             ),
           ],
         ),
@@ -167,7 +179,9 @@ class _CompleteEquationGameState extends State<CompleteEquationGame> {
                   color: Colors.orange[100],
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Text("🏆 Score: $score", style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                child: Text("🏆 Score: $score",
+                    style: const TextStyle(
+                        fontSize: 24, fontWeight: FontWeight.bold)),
               ),
               Wrap(
                 alignment: WrapAlignment.center,
@@ -182,12 +196,17 @@ class _CompleteEquationGameState extends State<CompleteEquationGame> {
                         height: 50,
                         margin: const EdgeInsets.symmetric(horizontal: 8),
                         decoration: BoxDecoration(
-                          color: droppedValue != null ? Colors.greenAccent : Colors.white,
-                          border: Border.all(color: Colors.deepOrange, width: 2),
+                          color: droppedValue != null
+                              ? Colors.greenAccent
+                              : Colors.white,
+                          border:
+                              Border.all(color: Colors.deepOrange, width: 2),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         alignment: Alignment.center,
-                        child: Text(droppedValue ?? "_", style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+                        child: Text(droppedValue ?? "_",
+                            style: const TextStyle(
+                                fontSize: 28, fontWeight: FontWeight.bold)),
                       ),
                       onAccept: _checkAnswer,
                     );
@@ -216,7 +235,8 @@ class _CompleteEquationGameState extends State<CompleteEquationGame> {
                   ),
                   padding: const EdgeInsets.all(8),
                   margin: const EdgeInsets.only(bottom: 20),
-                  child: Image.asset("images/new_images/${q['image']}", height: 160),
+                  child: Image.asset("images/new_images/${q['image']}",
+                      height: 160),
                 ),
               Wrap(
                 spacing: 20,
@@ -228,7 +248,8 @@ class _CompleteEquationGameState extends State<CompleteEquationGame> {
                       color: Colors.transparent,
                       child: _buildOption(opt, dragging: true),
                     ),
-                    childWhenDragging: Opacity(opacity: 0.4, child: _buildOption(opt)),
+                    childWhenDragging:
+                        Opacity(opacity: 0.4, child: _buildOption(opt)),
                     child: _buildOption(opt),
                   );
                 }).toList(),
@@ -246,9 +267,11 @@ class _CompleteEquationGameState extends State<CompleteEquationGame> {
       decoration: BoxDecoration(
         color: dragging ? Colors.amber : Colors.orangeAccent,
         borderRadius: BorderRadius.circular(12),
-        boxShadow: dragging ? [] : [BoxShadow(color: Colors.black26, blurRadius: 4)],
+        boxShadow:
+            dragging ? [] : [BoxShadow(color: Colors.black26, blurRadius: 4)],
       ),
-      child: Text(value, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+      child: Text(value,
+          style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
     );
   }
 }

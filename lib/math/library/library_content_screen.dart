@@ -20,7 +20,8 @@ class LibraryContentScreen extends StatefulWidget {
   State<LibraryContentScreen> createState() => _LibraryContentScreenState();
 }
 
-class _LibraryContentScreenState extends State<LibraryContentScreen> with TickerProviderStateMixin {
+class _LibraryContentScreenState extends State<LibraryContentScreen>
+    with TickerProviderStateMixin {
   late TabController _tabController;
   final FlutterTts _flutterTts = FlutterTts();
 
@@ -56,24 +57,24 @@ class _LibraryContentScreenState extends State<LibraryContentScreen> with Ticker
     ],
     [
       {
-          "title": "Making Choices",
-  "text": "We use math to choose what to buy.",
-  "content": "The girl uses shapes to pick a snack.",
-  "emoji": "🛍️",
-  "tip": "Use shapes or prices to help you decide.",
-  "real": "She compares snack boxes by shape.",
+        "title": "Making Choices",
+        "text": "We use math to choose what to buy.",
+        "content": "The girl uses shapes to pick a snack.",
+        "emoji": "🛍️",
+        "tip": "Use shapes or prices to help you decide.",
+        "real": "She compares snack boxes by shape.",
         "image": "child_buying_sncacks.PNG"
       },
-    
-    {
-"title": "Grocery Prices",
-"text": "Use math to add prices.",
-"content": "The cart shows how much each item costs.",
-"emoji": "🛒",
-"tip": "Add the prices to find the total.",
-"real": "Milk is \\\$3, bread is \\\$2, and an apple is \\\$1. Total = \\\$6.",
-      "image": "Grocery_Cart.PNG"
-    },
+      {
+        "title": "Grocery Prices",
+        "text": "Use math to add prices.",
+        "content": "The cart shows how much each item costs.",
+        "emoji": "🛒",
+        "tip": "Add the prices to find the total.",
+        "real":
+            "Milk is \\\$3, bread is \\\$2, and an apple is \\\$1. Total = \\\$6.",
+        "image": "Grocery_Cart.PNG"
+      },
       {
         "title": "Patterns",
         "text": "Find what repeats.",
@@ -85,11 +86,14 @@ class _LibraryContentScreenState extends State<LibraryContentScreen> with Ticker
       },
       {
         "title": "Weekdays Patterns",
-  "text": "Understand repeating patterns like weekdays.",
-  "content": "Patterns help us recognize regular sequences, such as weekdays in a schedule.",
-  "emoji": "📅",
-  "tip": "Practice recognizing and filling in weekday patterns, like M, T, W.",
-  "real": "The pattern shows the sequence of weekdays for a month, with Monday (M), Tuesday (T), and Wednesday (W).",
+        "text": "Understand repeating patterns like weekdays.",
+        "content":
+            "Patterns help us recognize regular sequences, such as weekdays in a schedule.",
+        "emoji": "📅",
+        "tip":
+            "Practice recognizing and filling in weekday patterns, like M, T, W.",
+        "real":
+            "The pattern shows the sequence of weekdays for a month, with Monday (M), Tuesday (T), and Wednesday (W).",
         "image": "Reapating_Symbol.PNG"
       },
     ],
@@ -167,7 +171,7 @@ class _LibraryContentScreenState extends State<LibraryContentScreen> with Ticker
                 crossAxisCount: 2,
                 crossAxisSpacing: 16,
                 mainAxisSpacing: 16,
-                childAspectRatio: 0.8,
+                childAspectRatio: 0.5,
               ),
               itemCount: _concepts[levelIndex].length,
               itemBuilder: (context, index) {
@@ -192,11 +196,13 @@ class _LibraryContentScreenState extends State<LibraryContentScreen> with Ticker
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(concept["emoji"] ?? "", style: const TextStyle(fontSize: 50)),
+                        Text(concept["emoji"] ?? "",
+                            style: const TextStyle(fontSize: 50)),
                         const SizedBox(height: 10),
                         Text(
                           concept["title"] ?? "",
-                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 6),
