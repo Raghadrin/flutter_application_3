@@ -44,6 +44,9 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     final Color buttonColor = isDarkMode
         ? const Color.fromARGB(255, 72, 213, 235)
         : const Color.fromARGB(255, 255, 193, 143);
@@ -67,166 +70,178 @@ class _MainScreenState extends State<MainScreen> {
                   end: Alignment.bottomRight,
                 ),
         ),
-        child: Column(
-          children: [
-            const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Builder(builder: (context) {
+          return Column(
+            children: [
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    GestureDetector(
+                      onTap: openSettingsMenu,
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.settings,
+                            size: 28,
+                            color: isDarkMode
+                                ? Colors.white
+                                : const Color(0xFFEC5417),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            'settings'.tr(),
+                            style: TextStyle(
+                              color: isDarkMode ? Colors.white : Colors.black,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Arial',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ProfileManagementScreen(
+                              isDarkMode: isDarkMode,
+                            ),
+                          ),
+                        );
+                      },
+                      child: Column(
+                        children: [
+                          const CircleAvatar(
+                            radius: 60,
+                            backgroundImage: AssetImage('images/logo.jpg'),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            'profile'.tr(),
+                            style: TextStyle(
+                              color: isDarkMode ? Colors.white : Colors.black,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Arial',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: toggleDarkMode,
+                      child: Column(
+                        children: [
+                          Icon(
+                            isDarkMode
+                                ? Icons.wb_sunny
+                                : Icons.nightlight_round,
+                            size: 28,
+                            color: isDarkMode
+                                ? const Color(0xFFFFDA38)
+                                : const Color(0xFFEC5417),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            isDarkMode ? 'lightMode'.tr() : 'darkMode'.tr(),
+                            style: TextStyle(
+                              color: isDarkMode ? Colors.white : Colors.black,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Arial',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 60),
+              Image.asset('images/fox_main_screen2.png', height: 300),
+              const SizedBox(height: 40),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  GestureDetector(
-                    onTap: openSettingsMenu,
-                    child: Column(
-                      children: [
-                        Icon(
-                          Icons.settings,
-                          size: 28,
-                          color: isDarkMode
-                              ? Colors.white
-                              : const Color(0xFFEC5417),
+                  Flexible(
+                    child: GestureDetector(
+                      onTap: onSubjectsButtonPressed,
+                      child: Container(
+                        margin: EdgeInsets.symmetric(
+                            horizontal: screenWidth * 0.02),
+                        padding: EdgeInsets.all(screenWidth * 0.027),
+                        decoration: BoxDecoration(
+                          color: buttonColor,
+                          borderRadius: BorderRadius.circular(20),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'settings'.tr(),
-                          style: TextStyle(
-                            color: isDarkMode ? Colors.white : Colors.black,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Arial',
-                          ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Image.asset('images/subject.png',
+                                height: screenHeight * 0.18),
+                            SizedBox(height: screenHeight * 0.01),
+                            Text(
+                              'subjects'.tr(),
+                              style: TextStyle(
+                                fontSize: screenHeight * 0.03,
+                                fontWeight: FontWeight.bold,
+                                color: isDarkMode ? Colors.white : Colors.black,
+                                fontFamily: 'Arial',
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ProfileManagementScreen(
-                            isDarkMode: isDarkMode,
+                  Flexible(
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ParentDashboardScreen(),
                           ),
+                        );
+                      },
+                      child: Container(
+                        margin: EdgeInsets.symmetric(
+                            horizontal: screenWidth * 0.02),
+                        padding: EdgeInsets.all(screenWidth * 0.03),
+                        decoration: BoxDecoration(
+                          color: buttonColor,
+                          borderRadius: BorderRadius.circular(20),
                         ),
-                      );
-                    },
-                    child: Column(
-                      children: [
-                        const CircleAvatar(
-                          radius: 60,
-                          backgroundImage: AssetImage('images/logo.jpg'),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Image.asset('images/parents.png',
+                                height: screenHeight * 0.18),
+                            SizedBox(height: screenHeight * 0.01),
+                            Text(
+                              'parent'.tr(),
+                              style: TextStyle(
+                                fontSize: screenHeight * 0.03,
+                                fontWeight: FontWeight.bold,
+                                color: isDarkMode ? Colors.white : Colors.black,
+                                fontFamily: 'Arial',
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 6),
-                        Text(
-                          'profile'.tr(),
-                          style: TextStyle(
-                            color: isDarkMode ? Colors.white : Colors.black,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Arial',
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: toggleDarkMode,
-                    child: Column(
-                      children: [
-                        Icon(
-                          isDarkMode ? Icons.wb_sunny : Icons.nightlight_round,
-                          size: 28,
-                          color: isDarkMode
-                              ? const Color(0xFFFFDA38)
-                              : const Color(0xFFEC5417),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          isDarkMode ? 'lightMode'.tr() : 'darkMode'.tr(),
-                          style: TextStyle(
-                            color: isDarkMode ? Colors.white : Colors.black,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Arial',
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ],
-              ),
-            ),
-            const SizedBox(height: 60),
-            Image.asset('images/fox_main_screen2.png', height: 300),
-            const SizedBox(height: 40),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                GestureDetector(
-                  onTap: onSubjectsButtonPressed,
-                  child: Container(
-                    width: 170,
-                    height: 210,
-                    decoration: BoxDecoration(
-                      color: buttonColor,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Image.asset('images/subject.png', height: 150),
-                        const SizedBox(height: 8),
-                        Text(
-                          'subjects'.tr(),
-                          style: TextStyle(
-                            fontSize: 26,
-                            fontWeight: FontWeight.bold,
-                            color: isDarkMode ? Colors.white : Colors.black,
-                            fontFamily: 'Arial',
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 30),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const ParentDashboardScreen(),
-                      ),
-                    );
-                  },
-                  child: Container(
-                    width: 170,
-                    height: 210,
-                    decoration: BoxDecoration(
-                      color: buttonColor,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Image.asset('images/parents.png', height: 150),
-                        const SizedBox(height: 8),
-                        Text(
-                          'parent'.tr(),
-                          style: TextStyle(
-                            fontSize: 26,
-                            fontWeight: FontWeight.bold,
-                            color: isDarkMode ? Colors.white : Colors.black,
-                            fontFamily: 'Arial',
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const Spacer(),
-          ],
-        ),
+              )
+
+              //const Spacer(),
+            ],
+          );
+        }),
       ),
     );
   }

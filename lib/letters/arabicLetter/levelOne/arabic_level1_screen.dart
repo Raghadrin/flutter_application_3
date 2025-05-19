@@ -128,7 +128,10 @@ class _ArabicLevel1ScreenState extends State<ArabicLevel1Screen> {
             ),
             child: Text(
               feedback,
-              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: feedbackColor),
+              style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: feedbackColor),
               textAlign: TextAlign.center,
             ),
           )
@@ -147,7 +150,8 @@ class _ArabicLevel1ScreenState extends State<ArabicLevel1Screen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
                 decoration: BoxDecoration(
                   color: Colors.orange.shade50,
                   borderRadius: BorderRadius.circular(15),
@@ -173,7 +177,8 @@ class _ArabicLevel1ScreenState extends State<ArabicLevel1Screen> {
                 onPressed: () => speak(currentExercise.target),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orange,
-                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 18),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 30, vertical: 18),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
                   ),
@@ -206,7 +211,9 @@ class _ArabicLevel1ScreenState extends State<ArabicLevel1Screen> {
                       setState(() {
                         feedbackColor = isCorrect ? Colors.green : Colors.red;
                       });
-                      speak(isCorrect ? "صحيح! هذا صوت $letter" : "خطأ، حاول مرة أخرى");
+                      speak(isCorrect
+                          ? "صحيح! هذا صوت $letter"
+                          : "خطأ، حاول مرة أخرى");
                       showDialog(
                         context: context,
                         builder: (_) => AlertDialog(
@@ -218,7 +225,9 @@ class _ArabicLevel1ScreenState extends State<ArabicLevel1Screen> {
                             ),
                           ),
                           content: Text(
-                            isCorrect ? "لقد تعرفت على الصوت بشكل صحيح" : "الصوت الصحيح هو: ${currentExercise.target}",
+                            isCorrect
+                                ? "لقد تعرفت على الصوت بشكل صحيح"
+                                : "الصوت الصحيح هو: ${currentExercise.target}",
                             style: const TextStyle(fontSize: 18),
                           ),
                           actions: [
@@ -254,10 +263,12 @@ class _ArabicLevel1ScreenState extends State<ArabicLevel1Screen> {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.arrow_back),
-                    onPressed: currentExerciseIndex > 0 ? () {
-                      setState(() => currentExerciseIndex--);
-                      currentExercise = exercises[currentExerciseIndex];
-                    } : null,
+                    onPressed: currentExerciseIndex > 0
+                        ? () {
+                            setState(() => currentExerciseIndex--);
+                            currentExercise = exercises[currentExerciseIndex];
+                          }
+                        : null,
                     color: Colors.orange,
                     iconSize: 30,
                   ),
@@ -267,10 +278,12 @@ class _ArabicLevel1ScreenState extends State<ArabicLevel1Screen> {
                   ),
                   IconButton(
                     icon: const Icon(Icons.arrow_forward),
-                    onPressed: currentExerciseIndex < exercises.length - 1 ? () {
-                      setState(() => currentExerciseIndex++);
-                      currentExercise = exercises[currentExerciseIndex];
-                    } : null,
+                    onPressed: currentExerciseIndex < exercises.length - 1
+                        ? () {
+                            setState(() => currentExerciseIndex++);
+                            currentExercise = exercises[currentExerciseIndex];
+                          }
+                        : null,
                     color: Colors.orange,
                     iconSize: 30,
                   ),
@@ -305,19 +318,21 @@ class _ArabicLevel1ScreenState extends State<ArabicLevel1Screen> {
           backgroundColor: const Color.fromARGB(255, 253, 249, 228),
           appBar: AppBar(
             backgroundColor: Colors.orange,
-  toolbarHeight: 56, // تصغير ارتفاع الشريط العلوي
-  title: const Text("🌟 تعلم من الجملة", style: TextStyle(fontSize: 22)),
+            centerTitle: true,
+            toolbarHeight: 56, // تصغير ارتفاع الشريط العلوي
+            title:
+                const Text("🌟 تعلم من الجملة", style: TextStyle(fontSize: 25)),
             bottom: const TabBar(
-    labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-    indicatorWeight: 3,
-    tabs: [
-       Tab(text: 'الحروف'),
+              labelStyle: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              indicatorWeight: 3,
+              tabs: [
+                Tab(text: 'الحروف'),
                 Tab(text: 'الجملة'),
                 Tab(text: 'الصوت والحرف'),
               ],
             ),
           ),
-                   body: TabBarView(
+          body: TabBarView(
             children: [
               // الحروف
               PageView.builder(
@@ -334,7 +349,8 @@ class _ArabicLevel1ScreenState extends State<ArabicLevel1Screen> {
                       children: [
                         Text(
                           word,
-                          style: const TextStyle(fontSize: 35, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                              fontSize: 35, fontWeight: FontWeight.bold),
                           textDirection: TextDirection.rtl,
                         ),
                         const SizedBox(height: 20),
@@ -346,7 +362,9 @@ class _ArabicLevel1ScreenState extends State<ArabicLevel1Screen> {
                           children: letters.asMap().entries.map((entry) {
                             final i = entry.key;
                             final letter = entry.value;
-                            final color = Colors.primaries[i % Colors.primaries.length].shade200;
+                            final color = Colors
+                                .primaries[i % Colors.primaries.length]
+                                .shade200;
                             bool isTapped = false;
 
                             return StatefulBuilder(
@@ -355,20 +373,26 @@ class _ArabicLevel1ScreenState extends State<ArabicLevel1Screen> {
                                   onTap: () async {
                                     setState(() => isTapped = true);
                                     await speak(letter);
-                                    await Future.delayed(const Duration(milliseconds: 500));
+                                    await Future.delayed(
+                                        const Duration(milliseconds: 500));
                                     setState(() => isTapped = false);
                                   },
                                   child: AnimatedContainer(
                                     duration: const Duration(milliseconds: 300),
                                     padding: const EdgeInsets.all(20),
                                     decoration: BoxDecoration(
-                                      color: isTapped ? Colors.green.shade200 : color,
-                                      border: Border.all(color: Colors.orange, width: 1),
+                                      color: isTapped
+                                          ? Colors.green.shade200
+                                          : color,
+                                      border: Border.all(
+                                          color: Colors.orange, width: 1),
                                       borderRadius: BorderRadius.circular(20),
                                     ),
                                     child: Text(
                                       letter,
-                                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                                      style: const TextStyle(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold),
                                       textDirection: TextDirection.rtl,
                                     ),
                                   ),
@@ -383,21 +407,25 @@ class _ArabicLevel1ScreenState extends State<ArabicLevel1Screen> {
                           children: [
                             ElevatedButton.icon(
                               icon: const Icon(Icons.volume_up, size: 28),
-                              label: const Text("نطق الكلمة", style: TextStyle(fontSize: 20)),
+                              label: const Text("نطق الكلمة",
+                                  style: TextStyle(fontSize: 20)),
                               onPressed: () => speak(word),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.orange,
-                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 24, vertical: 14),
                               ),
                             ),
                             const SizedBox(width: 16),
                             ElevatedButton.icon(
                               icon: const Icon(Icons.mic, size: 28),
-                              label: const Text("تقييم", style: TextStyle(fontSize: 20)),
+                              label: const Text("تقييم",
+                                  style: TextStyle(fontSize: 20)),
                               onPressed: () => evaluateWord(word, index),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.orange,
-                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 24, vertical: 14),
                               ),
                             ),
                           ],
@@ -408,30 +436,38 @@ class _ArabicLevel1ScreenState extends State<ArabicLevel1Screen> {
                           children: [
                             ElevatedButton.icon(
                               icon: const Icon(Icons.arrow_back, size: 24),
-                              label: const Text("السابق", style: TextStyle(fontSize: 18)),
+                              label: const Text("السابق",
+                                  style: TextStyle(fontSize: 18)),
                               onPressed: () {
                                 if (index > 0) {
                                   pageController.animateToPage(index - 1,
-                                      duration: const Duration(milliseconds: 400), curve: Curves.ease);
+                                      duration:
+                                          const Duration(milliseconds: 400),
+                                      curve: Curves.ease);
                                 }
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.orange,
-                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 20, vertical: 12),
                               ),
                             ),
                             ElevatedButton.icon(
                               icon: const Icon(Icons.arrow_forward, size: 24),
-                              label: const Text("التالي", style: TextStyle(fontSize: 18)),
+                              label: const Text("التالي",
+                                  style: TextStyle(fontSize: 18)),
                               onPressed: () {
                                 if (index < words.length - 1) {
                                   pageController.animateToPage(index + 1,
-                                      duration: const Duration(milliseconds: 400), curve: Curves.ease);
+                                      duration:
+                                          const Duration(milliseconds: 400),
+                                      curve: Curves.ease);
                                 }
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.orange,
-                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 20, vertical: 12),
                               ),
                             ),
                           ],
@@ -441,7 +477,8 @@ class _ArabicLevel1ScreenState extends State<ArabicLevel1Screen> {
                         const SizedBox(height: 24),
                         Text(
                           "❓ ما هو أول حرف في الكلمة؟",
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontSize: 20, fontWeight: FontWeight.bold),
                           textDirection: TextDirection.rtl,
                         ),
                         const SizedBox(height: 12),
@@ -455,12 +492,16 @@ class _ArabicLevel1ScreenState extends State<ArabicLevel1Screen> {
                             return ElevatedButton(
                               onPressed: () {
                                 final isCorrect = choice == correct;
-                                final msg = isCorrect ? 'إجابة صحيحة!' : 'إجابة خاطئة';
-                                final color = isCorrect ? Colors.green : Colors.red;
+                                final msg =
+                                    isCorrect ? 'إجابة صحيحة!' : 'إجابة خاطئة';
+                                final color =
+                                    isCorrect ? Colors.green : Colors.red;
                                 showDialog(
                                   context: context,
                                   builder: (_) => AlertDialog(
-                                    title: Text(msg, style: TextStyle(color: color, fontSize: 22)),
+                                    title: Text(msg,
+                                        style: TextStyle(
+                                            color: color, fontSize: 22)),
                                     actions: [
                                       TextButton(
                                         onPressed: () => Navigator.pop(context),
@@ -472,7 +513,8 @@ class _ArabicLevel1ScreenState extends State<ArabicLevel1Screen> {
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.orange.shade100,
-                                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 18, vertical: 12),
                               ),
                               child: Text(
                                 choice,
@@ -496,12 +538,16 @@ class _ArabicLevel1ScreenState extends State<ArabicLevel1Screen> {
                   children: [
                     const Text(
                       "📖 لنقرأ الجملة معًا!",
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.orange),
+                      style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.orange),
                       textDirection: TextDirection.rtl,
                     ),
                     const SizedBox(height: 20),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
                       decoration: BoxDecoration(
                         color: Colors.brown.shade50,
                         borderRadius: BorderRadius.circular(18),
@@ -521,23 +567,30 @@ class _ArabicLevel1ScreenState extends State<ArabicLevel1Screen> {
                     const SizedBox(height: 24),
                     ElevatedButton.icon(
                       icon: const Icon(Icons.volume_up, size: 28),
-                      label: const Text("استمع للجملة", style: TextStyle(fontSize: 20)),
+                      label: const Text("استمع للجملة",
+                          style: TextStyle(fontSize: 20)),
                       onPressed: () => speak(widget.sentence),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.orange,
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 14),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16)),
                       ),
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton.icon(
-                      icon: const Icon(Icons.record_voice_over_rounded, size: 28),
-                      label: const Text("سجل الجملة", style: TextStyle(fontSize: 20)),
+                      icon:
+                          const Icon(Icons.record_voice_over_rounded, size: 28),
+                      label: const Text("سجل الجملة",
+                          style: TextStyle(fontSize: 20)),
                       onPressed: () => evaluateWord(widget.sentence, -1),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.deepOrangeAccent,
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 14),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16)),
                       ),
                     ),
                     const SizedBox(height: 20),

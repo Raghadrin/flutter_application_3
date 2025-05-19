@@ -12,7 +12,8 @@ class ArabicLibraryScreen extends StatelessWidget {
       backgroundColor: const Color(0xFFFFF6ED),
       appBar: AppBar(
         backgroundColor: const Color(0xFFFFA726),
-        title: const Text("مكتبة اللغة العربية", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text("مكتبة اللغة العربية",
+            style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
       ),
       body: Padding(
@@ -21,7 +22,7 @@ class ArabicLibraryScreen extends StatelessWidget {
           crossAxisCount: 2,
           mainAxisSpacing: 16,
           crossAxisSpacing: 16,
-          childAspectRatio: 0.85,
+          childAspectRatio: 0.5,
           children: [
             _buildTile(
               context,

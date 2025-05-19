@@ -7,6 +7,8 @@ class SubjectsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -19,7 +21,7 @@ class SubjectsScreen extends StatelessWidget {
         ),
         title: Text(
           tr("Subjects"),
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
             color: Colors.black,
@@ -32,24 +34,25 @@ class SubjectsScreen extends StatelessWidget {
           const SizedBox(height: 30),
           Image.asset(
             "images/subject_fox.jpg",
-            height: 280,
+            height: screenWidth * 0.8,
           ),
           const SizedBox(height: 20),
           Text(
-            tr("Choose Subject"), // Add this to your translation files
-            style: TextStyle(
+            tr("Choose Subject"),
+            style: const TextStyle(
               fontSize: 34,
-              color: const Color.fromARGB(255, 42, 42, 42),
+              color: Color.fromARGB(255, 42, 42, 42),
               fontWeight: FontWeight.w600,
               fontFamily: 'Arial',
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 20),
           _buildSubjectButton(
-              context, tr("Arabic"), "images/arabicsubject.png"),
+              context, tr("Arabic"), "images/arabicsubject.png", screenWidth),
           _buildSubjectButton(
-              context, tr("English"), "images/englishsubject.png"),
-          _buildSubjectButton(context, tr("Math"), "images/mathsubject.png"),
+              context, tr("English"), "images/englishsubject.png", screenWidth),
+          _buildSubjectButton(
+              context, tr("Math"), "images/mathsubject.png", screenWidth),
           const Spacer(),
         ],
       ),
@@ -57,9 +60,12 @@ class SubjectsScreen extends StatelessWidget {
   }
 
   Widget _buildSubjectButton(
-      BuildContext context, String text, String iconPath) {
+      BuildContext context, String text, String iconPath, double screenWidth) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 30.0),
+      padding: EdgeInsets.symmetric(
+        vertical: screenWidth * 0.02,
+        horizontal: screenWidth * 0.1,
+      ),
       child: GestureDetector(
         onTap: () {
           Navigator.push(
@@ -70,24 +76,28 @@ class SubjectsScreen extends StatelessWidget {
           );
         },
         child: Container(
-          height: 80,
+          height: screenWidth * 0.18,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
             gradient: const LinearGradient(
               colors: [Color(0xFFFBD1B2), Color(0xFFFEE5D3)],
             ),
           ),
-          child: ListTile(
-            leading: Image.asset(iconPath, height: 45),
-            title: Text(
-              text,
-              //textAlign: Alignment.center,
-              style: TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.w600,
-                fontFamily: 'Arial',
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(iconPath, height: screenWidth * 0.1),
+              const SizedBox(width: 15),
+              Text(
+                text,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: screenWidth * 0.06,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Arial',
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),

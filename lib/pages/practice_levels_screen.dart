@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter_application_3/letters/arabicLetter/levelOne/arabic_level3_screen.dart';
-import 'package:flutter_application_3/letters/arabicLetter/levelOne/arabic_level2_screen.dart';
-import 'package:flutter_application_3/letters/arabicLetter/levelOne/arabic_level1_screen.dart';
+import 'package:flutter_application_3/letters/arabicLetter/levelOne/sentence_selection_screen.dart';
 import 'package:flutter_application_3/letters/arabicLetter/levelOne/sentence_selection_level2_screen.dart';
 import 'package:flutter_application_3/letters/arabicLetter/levelOne/sentence_selection_level3_screen.dart';
-import 'package:flutter_application_3/letters/arabicLetter/levelOne/sentence_selection_screen.dart';
 import 'package:flutter_application_3/letters/englishLetters/practice/english_level1_screen.dart';
 import 'package:flutter_application_3/letters/englishLetters/practice/english_level2_screen.dart';
 import 'package:flutter_application_3/letters/englishLetters/practice/english_level3_screen.dart';
@@ -19,9 +16,13 @@ class PracticeLevelsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        centerTitle: true,
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
@@ -31,12 +32,12 @@ class PracticeLevelsScreen extends StatelessWidget {
           },
         ),
         title: Align(
-          alignment: Alignment.centerLeft,
+          //alignment: Alignment.centerLeft,
           child: Text(
             subject,
-            style: const TextStyle(
+            style: TextStyle(
               color: Colors.black,
-              fontSize: 28,
+              fontSize: screenWidth * 0.075, // Dynamic font size
               fontWeight: FontWeight.bold,
               fontFamily: 'Arial',
             ),
@@ -46,60 +47,59 @@ class PracticeLevelsScreen extends StatelessWidget {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const SizedBox(height: 40),
-          Image.asset("images/subject_fox.jpg", height: 280),
-          const SizedBox(height: 30),
+          SizedBox(height: screenHeight * 0.05),
+          Image.asset("images/subject_fox.jpg", height: screenHeight * 0.35),
+          SizedBox(height: screenHeight * 0.04),
           Text(
             tr("start learning"),
-            style: const TextStyle(
-              color: Color.fromARGB(255, 48, 47, 47),
-              fontSize: 24,
+            style: TextStyle(
+              color: const Color.fromARGB(255, 48, 47, 47),
+              fontSize: screenWidth * 0.06,
               fontFamily: 'Arial',
             ),
           ),
-          const SizedBox(height: 15),
-          _buildLevelButton(context, tr("Level 1")),
-          _buildLevelButton(context, tr("Level 2")),
-          _buildLevelButton(context, tr("Level 3")),
+          SizedBox(height: screenHeight * 0.02),
+          _buildLevelButton(context, tr("Level 1"), screenWidth),
+          _buildLevelButton(context, tr("Level 2"), screenWidth),
+          _buildLevelButton(context, tr("Level 3"), screenWidth),
           const Spacer(),
         ],
       ),
     );
   }
 
-  Widget _buildLevelButton(BuildContext context, String level) {
+  Widget _buildLevelButton(
+      BuildContext context, String level, double screenWidth) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 50.0),
+      padding: EdgeInsets.symmetric(
+        vertical: screenWidth * 0.01,
+        horizontal: screenWidth * 0.1,
+      ),
       child: GestureDetector(
         onTap: () {
           final isArabic = subject == tr('Arabic');
           final isEnglish = subject == tr('English');
           final isMath = subject == tr('Math');
 
-         if (level == tr("Level 1")) {
- if (isArabic) {
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => SentenceSelectionScreen(), // ✅ استخدم شاشة الاختيار
-    ),
-  );
-}
-else if (isEnglish) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => EnglishLevel1Screen()),
-    );
-  } else if (isMath) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => MathLevel1Screen()),
-    );
-  }
-}
-
-
-          if (level == tr("Level 2")) {
+          if (level == tr("Level 1")) {
+            if (isArabic) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => SentenceSelectionScreen()),
+              );
+            } else if (isEnglish) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => EnglishLevel1Screen()),
+              );
+            } else if (isMath) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => MathLevel1Screen()),
+              );
+            }
+          } else if (level == tr("Level 2")) {
             if (isArabic) {
               Navigator.push(
                 context,
@@ -117,10 +117,14 @@ else if (isEnglish) {
                 MaterialPageRoute(builder: (context) => MathLevel2Screen()),
               );
             }
-          }
-
-          if (level == tr("Level 3")) {
-            if (isEnglish) {
+          } else if (level == tr("Level 3")) {
+            if (isArabic) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => SentenceSelectionLevel3Screen()),
+              );
+            } else if (isEnglish) {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => EnglishLevel3Screen()),
@@ -130,17 +134,11 @@ else if (isEnglish) {
                 context,
                 MaterialPageRoute(builder: (context) => MathLevel3Screen()),
               );
-            } else if (isArabic) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => SentenceSelectionLevel3Screen()),
-              );
             }
           }
         },
         child: Container(
-          height: 80,
+          height: screenWidth * 0.18,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             color: const Color(0xFFFED2B5),
@@ -148,8 +146,8 @@ else if (isEnglish) {
           child: Center(
             child: Text(
               level,
-              style: const TextStyle(
-                fontSize: 22,
+              style: TextStyle(
+                fontSize: screenWidth * 0.06,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'Arial',
               ),

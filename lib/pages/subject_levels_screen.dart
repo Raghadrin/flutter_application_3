@@ -15,6 +15,8 @@ class SubjectLevelsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -39,7 +41,7 @@ class SubjectLevelsScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const SizedBox(height: 40),
-          Image.asset("images/subject_fox.jpg", height: 280),
+          Image.asset("images/subject_fox.jpg", height: screenWidth * 0.8),
           const SizedBox(height: 30),
           _buildLevelButton(context, tr('Practice')),
           _buildLevelButton(context, tr('Quiz')),
@@ -51,8 +53,12 @@ class SubjectLevelsScreen extends StatelessWidget {
   }
 
   Widget _buildLevelButton(BuildContext context, String text) {
+    final screenWidth = MediaQuery.of(context).size.width;
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 50.0),
+      padding: EdgeInsets.symmetric(
+        vertical: screenWidth * 0.02,
+        horizontal: screenWidth * 0.1,
+      ),
       child: GestureDetector(
         onTap: () {
           if (text == tr('Practice')) {
@@ -73,12 +79,12 @@ class SubjectLevelsScreen extends StatelessWidget {
                 context,
                 MaterialPageRoute(builder: (context) => QuizForAll()),
               );
-            }
-              else if (subject == tr('English')) {
-               Navigator.push(
-                 context,
-                 MaterialPageRoute(builder: (context) => QuizEScreen(subject: '',)),
-               );
+            } else if (subject == tr('English')) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => QuizEScreen(subject: '')),
+              );
             }
           } else if (text == tr('Library')) {
             if (subject == tr('Arabic')) {
@@ -89,19 +95,18 @@ class SubjectLevelsScreen extends StatelessWidget {
             } else if (subject == tr('Math')) {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) =>LibraryScreen()),
+                MaterialPageRoute(builder: (context) => LibraryScreen()),
               );
-            }
-              else if (subject == tr('English')) {
-               Navigator.push(
-                 context,
-                 MaterialPageRoute(builder: (context) =>EnglishLibraryScreen()),
-               );
+            } else if (subject == tr('English')) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => EnglishLibraryScreen()),
+              );
             }
           }
         },
         child: Container(
-          height: 85,
+          height: screenWidth * 0.18,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(18),
             color: const Color(0xFFFED2B5),
@@ -109,8 +114,9 @@ class SubjectLevelsScreen extends StatelessWidget {
           child: Center(
             child: Text(
               text,
-              style: const TextStyle(
-                fontSize: 24,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: screenWidth * 0.06,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'Arial',
               ),

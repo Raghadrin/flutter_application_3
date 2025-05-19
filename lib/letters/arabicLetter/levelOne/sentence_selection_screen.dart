@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'arabic_level1_screen.dart';
 
@@ -16,7 +15,7 @@ class SentenceSelectionScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFFFF8E1),
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 153, 203, 5),
+        backgroundColor: Colors.orange,
         elevation: 0,
         centerTitle: true,
         title: const Text(
@@ -45,7 +44,7 @@ class SentenceSelectionScreen extends StatelessWidget {
                   crossAxisCount: 2,
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
-                  childAspectRatio: 0.85,
+                  childAspectRatio: 0.5,
                 ),
                 itemBuilder: (context, index) {
                   final sentence = sentences[index];
@@ -54,7 +53,8 @@ class SentenceSelectionScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) => ArabicLevel1Screen(sentence: sentence["text"]!),
+                          builder: (_) =>
+                              ArabicLevel1Screen(sentence: sentence["text"]!),
                         ),
                       );
                     },
@@ -74,7 +74,8 @@ class SentenceSelectionScreen extends StatelessWidget {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text(sentence["emoji"]!, style: const TextStyle(fontSize: 40)),
+                          Text(sentence["emoji"]!,
+                              style: const TextStyle(fontSize: 40)),
                           const SizedBox(height: 8),
                           Text(
                             sentence["title"]!,
