@@ -1,354 +1,439 @@
-/// Localization applied for English and Arabic
 import 'dart:async';
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:reorderables/reorderables.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
-import 'package:confetti/confetti.dart';
-import 'package:easy_localization/easy_localization.dart';
 
-class QuizEScreen extends StatefulWidget {
-  final String subject;
-
-  const QuizEScreen({required this.subject, Key? key}) : super(key: key);
+class EnglishComprehensiveQuizScreen extends StatefulWidget {
+  const EnglishComprehensiveQuizScreen({super.key});
 
   @override
-  _QuizEScreenState createState() => _QuizEScreenState();
+  State<EnglishComprehensiveQuizScreen> createState() => _EnglishComprehensiveQuizScreenState();
 }
 
-class _QuizEScreenState extends State<QuizEScreen> {
-  final List<Map<String, String>> quizData = [
-    {
-      "paragraph": "We visited the museum and saw old paintings and sculptures.",
-      "target": "museum",
-      "emoji": "🏛️"
-    },
-    {
-      "paragraph": "My brother baked a chocolate cake all by himself.",
-      "target": "cake",
-      "emoji": "🎂"
-    },
-    {
-      "paragraph": "She read her favorite story under a tree in the garden.",
-      "target": "story",
-      "emoji": "📖"
-    },
+class _EnglishComprehensiveQuizScreenState extends State<EnglishComprehensiveQuizScreen> {
+  late FlutterTts flutterTts;
+  late stt.SpeechToText speech;
+  Timer? countdownTimer;
+  int remainingSeconds = 180;
+  List<String> userOrder = [];
+
+  final List<Map<String, dynamic>> questions = [
+    {'type': 'speak', 'prompt': 'Say the word: strategy', 'answer': 'strategy'},
+    {'type': 'reorder', 'prompt': 'Reorder the sentence: [the, sun, rises, in, the, east]', 'answer': 'the sun rises in the east'},
+    {'type': 'choice', 'prompt': 'Why do students visit the museum?', 'options': ['To learn history', 'To buy gifts', 'To relax'], 'answer': 'To learn history'},
+    {'type': 'yesno', 'prompt': 'Does the sentence "The student went to school early" contain a verb?', 'answer': 'Yes'},
+    {'type': 'speak', 'prompt': 'Read the sentence: The sun shines in the morning.', 'answer': 'The sun shines in the morning'},
+    {'type': 'choice', 'prompt': 'What is the synonym of "loyalty"?', 'options': ['Faithfulness', 'Forgetfulness', 'Deception'], 'answer': 'Faithfulness'},
+    {'type': 'reorder', 'prompt': 'Reorder the sentence: [we, should, protect, the, environment]', 'answer': 'we should protect the environment'},
+    {'type': 'choice', 'prompt': 'Which sentence is grammatically correct?', 'options': ['She play in the park', 'He ate the apple', 'They was going home'], 'answer': 'He ate the apple'},
   ];
 
   int currentIndex = 0;
-  double score = 0;
+  int score = 0;
   bool isListening = false;
-  String spokenText = '';
-  double wordScore = 0;
-  double sentenceScore = 0;
-  bool showNext = false;
-  String? motivationalMessage;
-  final ConfettiController confettiController = ConfettiController(duration: Duration(seconds: 2));
-
-  final flutterTts = FlutterTts();
-  final stt.SpeechToText speech = stt.SpeechToText();
-  final Duration maxTime = Duration(minutes: 2);
-  Duration timeLeft = Duration(minutes: 2);
-  Timer? timer;
-
-  final List<String> messages = [
-    "excellent_feedback",
-    "well_done_feedback",
-    "great_pronunciation",
-    "try_again_feedback"
-  ];
+  String recognizedText = '';
+  String? selectedOption;
+  String? selectedYesNo;
+  List<Map<String, dynamic>> answerLog = [];
 
   @override
+  bool showStartScreen = true;
+
   void initState() {
     super.initState();
-    startTimer();
+    flutterTts = FlutterTts();
     flutterTts.setLanguage("en-US");
-    flutterTts.setSpeechRate(0.5);
-  }
-
-  void startTimer() {
-    timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (timeLeft.inSeconds == 0) {
-        timer.cancel();
-        _showFinalScore();
-      } else {
-        setState(() {
-          timeLeft -= const Duration(seconds: 1);
-        });
-      }
-    });
-  }
-
-  String formatTime(Duration duration) {
-    String twoDigits(int n) => n.toString().padLeft(2, '0');
-    return "${twoDigits(duration.inMinutes)}:${twoDigits(duration.inSeconds.remainder(60))}";
-  }
-
-  Future<void> evaluate(String word, String sentence) async {
-    bool available = await speech.initialize();
-    if (!available) return;
-
-    setState(() {
-      spokenText = '';
-      wordScore = 0;
-      sentenceScore = 0;
-      motivationalMessage = null;
-      isListening = true;
-      showNext = false;
-    });
-
-    speech.listen(
-      onResult: (result) {
-        spokenText = result.recognizedWords;
-
-        if (word.isNotEmpty) {
-          wordScore = calculateScore(word, spokenText);
-        }
-        if (sentence.isNotEmpty) {
-          sentenceScore = calculateScore(sentence, spokenText);
-        }
-
-        if ((wordScore >= 80 || sentenceScore >= 80)) {
-          score += 1;
-          motivationalMessage = tr(messages[Random().nextInt(messages.length)]);
-          showNext = true;
-          if (score == quizData.length) confettiController.play();
-        } else {
-          motivationalMessage = tr("try_again_feedback");
-        }
-
-        setState(() => isListening = false);
-        speech.stop();
-      },
-      localeId: "en_US",
-      listenMode: stt.ListenMode.dictation,
-      listenFor: const Duration(seconds: 10),
-      pauseFor: const Duration(seconds: 3),
-      partialResults: false,
-    );
-  }
-
-  double calculateScore(String original, String spoken) {
-    original = original.toLowerCase().trim().replaceAll(RegExp(r'[^\w\s]'), '');
-    spoken = spoken.toLowerCase().trim().replaceAll(RegExp(r'[^\w\s]'), '');
-    int distance = levenshtein(original, spoken);
-    int maxLength = max(original.length, spoken.length);
-    return ((1 - distance / maxLength) * 100).clamp(0, 100);
-  }
-
-  int levenshtein(String s, String t) {
-    if (s == t) return 0;
-    if (s.isEmpty) return t.length;
-    if (t.isEmpty) return s.length;
-
-    List<List<int>> matrix = List.generate(s.length + 1, (_) => List<int>.filled(t.length + 1, 0));
-    for (int i = 0; i <= s.length; i++) matrix[i][0] = i;
-    for (int j = 0; j <= t.length; j++) matrix[0][j] = j;
-
-    for (int i = 1; i <= s.length; i++) {
-      for (int j = 1; j <= t.length; j++) {
-        int cost = s[i - 1] == t[j - 1] ? 0 : 1;
-        matrix[i][j] = [
-          matrix[i - 1][j] + 1,
-          matrix[i][j - 1] + 1,
-          matrix[i - 1][j - 1] + cost
-        ].reduce(min);
-      }
-    }
-
-    return matrix[s.length][t.length];
-  }
-
-  void _showFinalScore() {
-    String emoji = score == quizData.length ? "🏆" : "✅";
-    String message = score == quizData.length
-        ? tr("excellent_feedback")
-        : "${tr("well_done_feedback")} ${score.toInt()} / ${quizData.length}";
-
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text("$emoji ${tr("final_score_title")}"),
-        content: Text(message),
-        actions: [
-          TextButton(
-            child: Text(tr("return")),
-            onPressed: () => Navigator.popUntil(context, (r) => r.isFirst),
-          ),
-        ],
-      ),
-    );
+    flutterTts.setSpeechRate(0.4);
+    speech = stt.SpeechToText();
+    startTimer();
+    if (questions.first['type'] == 'reorder') prepareReorder();
   }
 
   @override
   void dispose() {
-    timer?.cancel();
-    speech.stop();
-    confettiController.dispose();
+    countdownTimer?.cancel();
+    flutterTts.stop();
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final data = quizData[currentIndex];
-    final paragraph = data["paragraph"]!;
-    final target = data["target"]!;
-    final emoji = data["emoji"]!;
-    final parts = paragraph.split(target);
+  void startTimer() {
+    countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) return;
+      if (remainingSeconds > 0) {
+        setState(() => remainingSeconds--);
+      } else {
+        timer.cancel();
+        showResult();
+      }
+    });
+  }
 
-    return Scaffold(
-      backgroundColor: Colors.orange.shade50,
-      appBar: AppBar(
-        title: Text("${tr("quiz_title")} - ${widget.subject}"),
-        backgroundColor: Colors.orange,
-        centerTitle: true,
+  void prepareReorder() {
+    userOrder = questions[currentIndex]['answer'].toString().split(' ');
+    userOrder.shuffle();
+  }
+
+  void onReorder(int oldIndex, int newIndex) {
+    setState(() {
+      if (newIndex > oldIndex) newIndex -= 1;
+      final item = userOrder.removeAt(oldIndex);
+      userOrder.insert(newIndex, item);
+    });
+  }
+
+  Future<void> speak(String text) async {
+    await flutterTts.stop();
+    await flutterTts.speak(text);
+  }
+
+  Future<void> startListening() async {
+    bool available = await speech.initialize();
+    if (!available) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Speech recognition not available')));
+      return;
+    }
+    setState(() {
+      isListening = true;
+      recognizedText = '';
+    });
+    speech.listen(
+      localeId: 'en_US',
+      listenMode: stt.ListenMode.dictation,
+      partialResults: false,
+      onResult: (val) => setState(() => recognizedText = val.recognizedWords),
+    );
+  }
+
+  Future<void> stopListening() async {
+    await speech.stop();
+    setState(() => isListening = false);
+    validateAnswer();
+  }
+
+  
+  void validateAnswer() {
+    final question = questions[currentIndex];
+    final correct = question['answer'].toString().trim();
+    bool isCorrect = false;
+    String userAnswer = '';
+
+    if (question['type'] == 'speak') {
+      userAnswer = recognizedText.trim();
+      isCorrect = normalize(userAnswer).contains(normalize(correct));
+    } else if (question['type'] == 'choice') {
+      userAnswer = selectedOption ?? '';
+      isCorrect = selectedOption == correct;
+    } else if (question['type'] == 'yesno') {
+      userAnswer = selectedYesNo ?? '';
+      isCorrect = selectedYesNo == correct;
+    } else if (question['type'] == 'reorder') {
+      userAnswer = userOrder.join(' ');
+      isCorrect = normalize(userAnswer) == normalize(correct);
+    }
+
+    answerLog.add({
+      'prompt': question['prompt'],
+      'yourAnswer': userAnswer,
+      'correctAnswer': correct,
+      'correct': isCorrect
+    });
+
+    if (isCorrect) {
+      score++;
+      ();
+      speak('Great job!');
+      speak('Correct answer!');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.close, color: Color(0xFFF44336), size: 28),
+              SizedBox(width: 10),
+              Text('Wrong!', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFFF44336)))
+            ],
+          ),
+          backgroundColor: Color(0xFFFFEBEE),
+          duration: Duration(seconds: 1),
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.all(20),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+        ),
+      );
+      speak('Wrong answer');
+    }
+
+    Future.delayed(const Duration(seconds: 2), nextQuestion);
+  }
+
+  void nextQuestion() {
+    if (currentIndex < questions.length - 1) {
+      setState(() {
+        currentIndex++;
+        recognizedText = '';
+        selectedOption = null;
+        selectedYesNo = null;
+        if (questions[currentIndex]['type'] == 'reorder') prepareReorder();
+      });
+    } else {
+      countdownTimer?.cancel();
+      showResult();
+    }
+  }
+
+  void restartQuiz() {
+    setState(() {
+      currentIndex = 0;
+      score = 0;
+      recognizedText = '';
+      selectedOption = null;
+      selectedYesNo = null;
+      userOrder.clear();
+      answerLog.clear();
+      remainingSeconds = 180;
+    });
+    startTimer();
+    if (questions.first['type'] == 'reorder') prepareReorder();
+  }
+
+  String normalize(String input) {
+    return input
+      .toLowerCase()
+      .replaceAll(RegExp(r'[.,!?]'), '')
+      .trim();
+  }
+
+  void showResult() {
+    double percentage = (score / questions.length) * 100;
+    int stars = percentage >= 80 ? 3 : percentage >= 50 ? 2 : 1;
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+        title: const Center(
+          child: Text(
+            '🎯 Final Score',
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          ),
+        ),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('You got $score out of ${questions.length}', style: const TextStyle(fontSize: 18)),
+              Text('Percentage: ${percentage.toStringAsFixed(1)}%', style: const TextStyle(fontSize: 18, color: Colors.teal)),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  stars,
+                  (index) => const Icon(Icons.star, color: Colors.orange, size: 30),
+                ),
+              )
+            ],
+          ),
+        ),
         actions: [
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text("⏱ ${formatTime(timeLeft)}"),
-            ),
-          )
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close')),
+          TextButton(onPressed: () { Navigator.pop(context); restartQuiz(); }, child: const Text('Retry')),
         ],
       ),
-      body: Stack(
-        alignment: Alignment.center,
-        children: [
-          ConfettiWidget(
-            confettiController: confettiController,
-            blastDirectionality: BlastDirectionality.explosive,
-            numberOfParticles: 25,
-            blastDirection: pi / 2,
-            gravity: 0.3,
-            shouldLoop: false,
-            colors: const [Colors.orange, Colors.amber, Colors.deepOrangeAccent],
-          ),
-          Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text("${tr("score")}: ${score.toInt()} / ${quizData.length}",
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 10),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.orange.withOpacity(0.15),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Text(emoji, style: const TextStyle(fontSize: 40)),
-                  ),
-                  const SizedBox(height: 14),
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: RichText(
-                      textAlign: TextAlign.center,
-                      text: TextSpan(
-                        style: const TextStyle(fontSize: 18, color: Colors.black),
-                        children: [
-                          TextSpan(text: parts[0]),
-                          TextSpan(
-                            text: target,
-                            style: const TextStyle(
-                                backgroundColor: Colors.yellow, fontWeight: FontWeight.bold),
-                          ),
-                          TextSpan(text: parts.length > 1 ? parts[1] : ''),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () => flutterTts.speak(paragraph),
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.orange.shade100),
-                    child: Text(tr("listen_sentence")),
-                  ),
-                  const SizedBox(height: 10),
-                  ElevatedButton(
-                    onPressed: () => flutterTts.speak(target),
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.orange.shade200),
-                    child: Text(tr("listen_word")),
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () => evaluate(target, ""),
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.orange.shade100),
-                        child: Text(tr("record_word")),
-                      ),
-                      const SizedBox(width: 12),
-                      ElevatedButton(
-                        onPressed: () => evaluate("", paragraph),
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.orange.shade200),
-                        child: Text(tr("record_sentence_btn")),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  if (spokenText.isNotEmpty)
-                    Text("${tr("you_said")} \"$spokenText\"", textAlign: TextAlign.center),
-                  if (wordScore > 0)
-                    Text("${tr("score")}: ${wordScore.toStringAsFixed(1)}%",
-                        style: TextStyle(
-                            color: wordScore >= 80 ? Colors.green : Colors.red,
-                            fontWeight: FontWeight.bold)),
-                  if (sentenceScore > 0)
-                    Text("${tr("score")}: ${sentenceScore.toStringAsFixed(1)}%",
-                        style: TextStyle(
-                            color: sentenceScore >= 80 ? Colors.green : Colors.red,
-                            fontWeight: FontWeight.bold)),
-                  if (motivationalMessage != null)
-                    Padding(
-                      padding: const EdgeInsets.all(12.0),
-                      child: Text(
-                        motivationalMessage!,
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: motivationalMessage == tr("try_again_feedback")
-                                ? Colors.red
-                                : Colors.green),
-                      ),
-                    ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: (wordScore >= 80 || sentenceScore >= 80)
-                        ? () {
-                            if (currentIndex == quizData.length - 1) {
-                              _showFinalScore();
-                            } else {
-                              setState(() {
-                                currentIndex++;
-                                spokenText = '';
-                                wordScore = 0;
-                                sentenceScore = 0;
-                                motivationalMessage = null;
-                                showNext = false;
-                              });
-                            }
-                          }
-                        : null,
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor: (wordScore >= 80 || sentenceScore >= 80)
-                            ? Colors.deepOrangeAccent.shade100
-                            : Colors.grey.shade400),
-                    child: Text(currentIndex == quizData.length - 1
-                        ? tr("finish_quiz")
-                        : tr("next_question")),
-                  )
-                ],
+    );
+  }
+  @override
+  Widget build(BuildContext context) {
+    if (showStartScreen) {
+      return Scaffold(
+        backgroundColor: const Color(0xFFF5FAFF),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Text(
+                '🎓 Ready to start the quiz?',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
               ),
-            ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() => showStartScreen = false);
+                  startTimer();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blueAccent,
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                ),
+                child: const Text('Start Quiz', style: TextStyle(fontSize: 20)),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+    final question = questions[currentIndex];
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5FAFF),
+      appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 243, 88, 5),
+        title: const Text('Quiz', style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold)),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Center(child: Text('⏱ $remainingSeconds s', style: const TextStyle(fontSize: 16))),
           ),
         ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(4),
+          child: LinearProgressIndicator(
+            value: remainingSeconds / 180,
+            backgroundColor: Color.fromARGB(255, 243, 88, 5),
+            valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+            minHeight: 4,
+          ),
+        ),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Question ${currentIndex + 1} of ${questions.length}',
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 170, 5, 49)),
+              ),
+              const SizedBox(height: 12),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.2), blurRadius: 4)],
+                ),
+                child: Text(
+                  question['prompt'],
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(height: 24),
+              if (question['type'] == 'speak') ...[
+                Center(
+                  child: ElevatedButton.icon(
+                    onPressed: isListening ? null : startListening,
+                    icon: const Icon(Icons.mic, size: 24),
+                    label: const Text('Start Recording', style: TextStyle(fontSize: 22)),
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Center(
+                  child: ElevatedButton.icon(
+                    onPressed: isListening ? stopListening : null,
+                    icon: const Icon(Icons.stop_circle, size: 24),
+                    label: const Text('Stop', style: TextStyle(fontSize: 22)),
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.blueAccent),
+                  ),
+                  child: Text(
+                    recognizedText.isEmpty ? 'Recognized text will appear here' : recognizedText,
+                    style: TextStyle(fontSize: 22, color: recognizedText.isEmpty ? const Color.fromARGB(255, 207, 32, 32) : Colors.black87),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ] else if (question['type'] == 'choice') ...[
+                ...question['options'].map<Widget>((opt) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: RadioListTile<String>(
+                    title: Text(opt, style: const TextStyle(fontSize: 22)),
+                    value: opt,
+                    groupValue: selectedOption,
+                    onChanged: (val) => setState(() => selectedOption = val),
+                  ),
+                )),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: selectedOption != null ? validateAnswer : null,
+                    child: const Text('Check Answer', style: TextStyle(fontSize: 22)),
+
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+                  ),
+                )
+              ] else if (question['type'] == 'yesno') ...[
+                RadioListTile<String>(
+                  title: const Text('Yes', style: TextStyle(fontSize: 22)),
+                  value: 'Yes',
+                  groupValue: selectedYesNo,
+                  onChanged: (val) => setState(() => selectedYesNo = val),
+                ),
+                RadioListTile<String>(
+                  title: const Text('No', style: TextStyle(fontSize: 22)),
+                  value: 'No',
+                  groupValue: selectedYesNo,
+                  onChanged: (val) => setState(() => selectedYesNo = val),
+                ),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: selectedYesNo != null ? validateAnswer : null,
+                    child: const Text('Check Answer', style: TextStyle(fontSize: 22)),
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+                    
+                  ),
+                )
+              ] else if (question['type'] == 'reorder') ...[
+                ReorderableWrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  needsLongPressDraggable: false,
+                  onReorder: onReorder,
+                  children: userOrder
+                      .map((word) => Chip(
+                            key: ValueKey(word),
+                            label: Text(word, style: const TextStyle(fontSize: 22)),
+                            backgroundColor: Colors.lightBlue.shade100,
+                          ))
+                      .toList(),
+                ),
+                const SizedBox(height: 16),
+                Center(
+                  child: ElevatedButton(
+                    onPressed: validateAnswer,
+                    child: const Text('Check Order', style: TextStyle(fontSize: 22)),
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+                  ),
+                )
+              ],
+              const SizedBox(height: 24),
+              Center(
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    countdownTimer?.cancel();
+                    showResult();
+                  },
+                  icon: const Icon(Icons.exit_to_app, size: 24),
+                  label: const Text('Finish Quiz Now', style: TextStyle(fontSize:22 )),
+                  style: ElevatedButton.styleFrom(backgroundColor: Color.fromARGB(255, 243, 88, 5)),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

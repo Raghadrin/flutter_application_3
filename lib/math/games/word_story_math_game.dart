@@ -140,7 +140,7 @@ class _WordStoryMathGameState extends State<WordStoryMathGame>
     for (int i = 0; i < words.length; i++) {
       setState(() => currentSpokenWord = i);
       await _speak(words[i]);
-      await Future.delayed(const Duration(milliseconds: 400));
+      await Future.delayed(const Duration(milliseconds: 1000));
     }
     setState(() => currentSpokenWord = -1);
   }

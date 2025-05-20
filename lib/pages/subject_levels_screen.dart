@@ -83,7 +83,7 @@ class SubjectLevelsScreen extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => QuizEScreen(subject: '')),
+                    builder: (context) => EnglishComprehensiveQuizScreen()),
               );
             }
           } else if (text == tr('Library')) {
