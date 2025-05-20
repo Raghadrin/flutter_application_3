@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_3/letters/arabicLetter/levelOne/arabic_level1_screen.dart';
 import 'package:flutter_application_3/letters/arabicLetter/levelOne/sentence_selection_screen.dart';
 import 'package:flutter_application_3/letters/englishLetters/practice/english_level1_screen.dart';
+import 'package:flutter_application_3/letters/englishLetters/practice/sentence_eng_selection_screen.dart';
 import 'package:flutter_application_3/math/math/math_level1_screen.dart';
 
 class LevelsScreen extends StatelessWidget {
@@ -56,7 +57,7 @@ class LevelsScreen extends StatelessWidget {
   List<Map<String, dynamic>> _getLevelsForSubject(String subject) {
     if (subject == "English") {
       return [
-        {"title": "Letters", "screen": EnglishLevel1Screen()},
+        {"title": "Letters", "screen": EnglishSentenceSelectionScreen()},
         ];
     } else if (subject == "Arabic") {
       return [
