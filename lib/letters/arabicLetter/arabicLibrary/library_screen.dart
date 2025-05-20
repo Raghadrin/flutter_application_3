@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_3/letters/arabicLetter/arabicLibrary/n.dart';
 import 'full_library_screen.dart';
 import 'arabic_videos_screen.dart';
 import 'FeelingsScreen.dart';
@@ -65,13 +66,13 @@ class ArabicLibraryScreen extends StatelessWidget {
             
             _buildTile(
               context,
-              title: "تحديات والغاز",
-              description: "العب وتحدى نفسك",
-              imagePath: "images/feelings_icon.png",
+              title: "صندوق الضاد",
+              description: "كلمات جديدة",
+              imagePath: "images/4.png",
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => const ArabicMotivationHomeScreen(),
+                  builder: (_) => const SunduqAlDadGame(),
                 ),
               ),
             ),
