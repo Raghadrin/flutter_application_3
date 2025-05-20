@@ -78,7 +78,7 @@ class ArabicVideosTabbedScreen extends StatelessWidget {
           bottom: TabBar(
             isScrollable: true,
             labelStyle:
-                const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             indicatorColor: Colors.white,
             tabs: categorizedVideos.keys
                 .map((category) => Tab(text: category))
@@ -128,7 +128,7 @@ class ArabicVideosTabbedScreen extends StatelessWidget {
                             child: Image.network(
                               video['thumbnail']!,
                               width: 80,
-                              height: 70,
+                              height: 80,
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -137,9 +137,9 @@ class ArabicVideosTabbedScreen extends StatelessWidget {
                             video['title']!.tr(),
                             textAlign: TextAlign.center,
                             style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 14),
+                                fontWeight: FontWeight.bold, fontSize: 16),
                           ),
-                          const SizedBox(height: 6),
+                          const SizedBox(height:6),
                           Text(
                             video['description']!.tr(),
                             textAlign: TextAlign.center,

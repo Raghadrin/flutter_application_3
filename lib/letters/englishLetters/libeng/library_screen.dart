@@ -58,7 +58,7 @@ class EnglishLibraryScreen extends StatelessWidget {
               context,
               title: "Challenges & Riddles",
               description: "Play and challenge your mind.",
-              imagePath: "images/feelings_icon.png",
+              imagePath: "images/3.png",
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -68,7 +68,7 @@ class EnglishLibraryScreen extends StatelessWidget {
             ),
             _buildTile(
               context,
-              title: "Emotions & Feelings",
+              title: "Whoe's There?",
               description: "Explore feelings with fun games.",
               imagePath: "images/feelings_icon.png",
               onTap: () => Navigator.push(
