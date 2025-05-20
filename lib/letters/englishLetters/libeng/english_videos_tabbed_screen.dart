@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'youtube_player_screen.dart';
+import 'package:flutter_application_3/math/library/youtube_player_screen.dart';
+
 
 class EnglishVideosTabbedScreen extends StatelessWidget {
   const EnglishVideosTabbedScreen({super.key});

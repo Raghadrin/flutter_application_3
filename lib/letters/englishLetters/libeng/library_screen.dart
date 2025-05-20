@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_3/letters/englishLetters/libeng/english_videos_tabbed_screen.dart';
+import 'c.dart';
 import 'full_library_screen.dart';
-import 'arabic_videos_screen.dart';
+
 import 'FeelingsScreen.dart';
 
-class ArabicLibraryScreen extends StatelessWidget {
-  const ArabicLibraryScreen({super.key});
+class EnglishLibraryScreen extends StatelessWidget {
+  const EnglishLibraryScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -12,8 +14,10 @@ class ArabicLibraryScreen extends StatelessWidget {
       backgroundColor: const Color(0xFFFFF6ED),
       appBar: AppBar(
         backgroundColor: const Color(0xFFFFA726),
-        title: const Text("مكتبة اللغة العربية",
-            style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          "English Library",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
       ),
       body: Padding(
@@ -26,52 +30,51 @@ class ArabicLibraryScreen extends StatelessWidget {
           children: [
             _buildTile(
               context,
-              title: "تمارين لغوية",
-              description: "تمرن على القضايا اللغوية.",
+              title: "Language Exercises",
+              description: "Practice grammar and vocabulary.",
               imagePath: "images/one.png",
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => const FullLibraryScreen(
-                    title: "تمارين لغوية",
+                  builder: (_) => const EnglishLibrary1Screen(
+                  
                   ),
                 ),
               ),
             ),
             _buildTile(
               context,
-              title: "فيديوهات تعليمية",
-              description: "شاهد فيديوهات تشرح العربية.",
+              title: "Educational Videos",
+              description: "Watch videos to improve your English.",
               imagePath: "images/two.png",
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => const ArabicVideosTabbedScreen(),
+                  builder: (_) => const EnglishVideosTabbedScreen(),
                 ),
               ),
             ),
             _buildTile(
               context,
-              title: "تحديات والغاز",
-              description: "العب وتحدى نفسك",
+              title: "Challenges & Riddles",
+              description: "Play and challenge your mind.",
               imagePath: "images/feelings_icon.png",
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => const ArabicMotivationHomeScreen(),
+                  builder: (_) => const EnglishMotivationHomeScreen(),
                 ),
               ),
             ),
-            
             _buildTile(
               context,
-              title: "تحديات والغاز",
-              description: "العب وتحدى نفسك",
+              title: "Emotions & Feelings",
+              description: "Explore feelings with fun games.",
               imagePath: "images/feelings_icon.png",
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => const ArabicMotivationHomeScreen(),
+                  builder: (_) => const HelloWordScreen(),
                 ),
               ),
             ),

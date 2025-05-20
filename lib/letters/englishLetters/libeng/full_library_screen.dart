@@ -6,8 +6,8 @@ import 'record_sentence_game.dart';
 import 'karaoke_reading_game.dart';
 import 'english_videos_tabbed_screen.dart'; // Make sure this screen exists
 
-class EnglishLibraryScreen extends StatelessWidget {
-  const EnglishLibraryScreen({super.key});
+class EnglishLibrary1Screen extends StatelessWidget {
+  const EnglishLibrary1Screen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -50,10 +50,6 @@ class EnglishLibraryScreen extends StatelessWidget {
             EnglishLibraryTile(
               title: "5. 🎙 Karaoke Reading",
               screen: const KaraokeReadingGame(),
-            ),
-            EnglishLibraryTile(
-              title: "6. 📺 English Teaching Videos",
-              screen: const EnglishVideosTabbedScreen(),
             ),
           ],
         ),
