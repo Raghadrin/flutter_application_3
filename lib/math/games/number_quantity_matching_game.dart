@@ -3,15 +3,19 @@ import 'package:flutter_application_3/math/theme.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:confetti/confetti.dart';
 import 'package:lottie/lottie.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class NumberQuantityMatchingGame extends StatefulWidget {
   const NumberQuantityMatchingGame({super.key});
 
   @override
-  State<NumberQuantityMatchingGame> createState() => _NumberQuantityMatchingGameState();
+  State<NumberQuantityMatchingGame> createState() =>
+      _NumberQuantityMatchingGameState();
 }
 
-class _NumberQuantityMatchingGameState extends State<NumberQuantityMatchingGame> {
+class _NumberQuantityMatchingGameState
+    extends State<NumberQuantityMatchingGame> {
   final FlutterTts tts = FlutterTts();
   late ConfettiController _confettiController;
   int currentIndex = 0;
@@ -43,7 +47,8 @@ class _NumberQuantityMatchingGameState extends State<NumberQuantityMatchingGame>
   @override
   void initState() {
     super.initState();
-    _confettiController = ConfettiController(duration: const Duration(seconds: 3));
+    _confettiController =
+        ConfettiController(duration: const Duration(seconds: 3));
     _speakQuestion();
   }
 
@@ -51,6 +56,50 @@ class _NumberQuantityMatchingGameState extends State<NumberQuantityMatchingGame>
   void dispose() {
     _confettiController.dispose();
     super.dispose();
+  }
+
+  Future<void> _saveScore(int score) async {
+    try {
+      // Fetch parentId and childId, adapt this to your actual method:
+      String? parentId = ""; // fetch parentId from your auth or Firestore
+      String? childId = ""; // fetch childId from your app logic
+
+      // Example: fetch from Firestore assuming current user is parent
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        print("User not logged in");
+        return;
+      }
+      parentId = user.uid;
+
+      // For childId, assuming you select or fetch it earlier, just set here for testing
+      childId =
+          "exampleChildId"; // replace with your actual logic to get childId
+
+      if (parentId.isEmpty || childId == null) {
+        print("Cannot save score: parentId or childId missing");
+        return;
+      }
+
+      // Save to Firestore: example path 'parents/{parentId}/children/{childId}/scores'
+      await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(parentId)
+          .collection('children')
+          .doc(childId)
+          .collection('math')
+          .doc('math1')
+          .collection('game2') // or game2
+          .add({
+        'score': score,
+        'total': _items.length,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      print("Score saved successfully");
+    } catch (e) {
+      print("Error saving score: $e");
+    }
   }
 
   Future<void> _speak(String text) async {
@@ -88,7 +137,8 @@ class _NumberQuantityMatchingGameState extends State<NumberQuantityMatchingGame>
       });
       _speakQuestion();
     } else {
-      _speak("Well done! You got $score out of ${_items.length}. Would you like to try again or go back?");
+      _speak(
+          "Well done! You got $score out of ${_items.length}. Would you like to try again or go back?");
       _confettiController.play();
       _showFinalDialog();
     }
@@ -105,7 +155,8 @@ class _NumberQuantityMatchingGameState extends State<NumberQuantityMatchingGame>
     _speakQuestion();
   }
 
-  void _showFinalDialog() {
+  Future<void> _showFinalDialog() async {
+    await _saveScore(score);
     showDialog(
       context: context,
       builder: (_) => Stack(
@@ -113,14 +164,18 @@ class _NumberQuantityMatchingGameState extends State<NumberQuantityMatchingGame>
         children: [
           AlertDialog(
             backgroundColor: Colors.white,
-            title: const Text("🎉 Good Job!", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+            title: const Text("🎉 Good Job!",
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text("You finished all the questions!", textAlign: TextAlign.center),
+                const Text("You finished all the questions!",
+                    textAlign: TextAlign.center),
                 const SizedBox(height: 12),
-                Text("Your Score: $score / ${_items.length}", style: const TextStyle(fontSize: 22)),
-                Text(_getStars(score, _items.length), style: const TextStyle(fontSize: 36)),
+                Text("Your Score: $score / ${_items.length}",
+                    style: const TextStyle(fontSize: 22)),
+                Text(_getStars(score, _items.length),
+                    style: const TextStyle(fontSize: 36)),
               ],
             ),
             actions: [
@@ -192,7 +247,8 @@ class _NumberQuantityMatchingGameState extends State<NumberQuantityMatchingGame>
                 ),
                 child: Text(
                   item["question"],
-                  style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 26, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -221,8 +277,10 @@ class _NumberQuantityMatchingGameState extends State<NumberQuantityMatchingGame>
                           : isWrong
                               ? Colors.red
                               : Colors.orangeAccent,
-                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 32, vertical: 16),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
                     child: Text(opt, style: const TextStyle(fontSize: 28)),
                   );

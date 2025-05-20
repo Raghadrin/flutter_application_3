@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class HardEquationGame extends StatefulWidget {
   const HardEquationGame({super.key});
@@ -46,6 +48,58 @@ class _HardEquationGameState extends State<HardEquationGame> {
     await tts.setLanguage("en-US");
     await tts.setSpeechRate(0.45);
     await tts.speak(text);
+  }
+
+  Future<void> _saveScore(int score) async {
+    try {
+      // Fetch parentId and childId, adapt this to your actual method:
+      String? parentId = ""; // fetch parentId from your auth or Firestore
+      String? childId = ""; // fetch childId from your app logic
+
+      // Example: fetch from Firestore assuming current user is parent
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        print("User not logged in");
+        return;
+      }
+      parentId = user.uid;
+
+      final childrenSnapshot = await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(parentId)
+          .collection('children')
+          .get();
+      if (childrenSnapshot.docs.isNotEmpty) {
+        childId = childrenSnapshot.docs.first.id;
+      } else {
+        print("No children found for this parent.");
+        return null;
+      }
+
+      if (parentId.isEmpty || childId == null) {
+        print("Cannot save score: parentId or childId missing");
+        return;
+      }
+
+      // Save to Firestore: example path 'parents/{parentId}/children/{childId}/scores'
+      await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(parentId)
+          .collection('children')
+          .doc(childId)
+          .collection('math')
+          .doc('math2')
+          .collection('game3')
+          .add({
+        'score': score,
+        //'total': _items.length,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      print("Score saved successfully");
+    } catch (e) {
+      print("Error saving score: $e");
+    }
   }
 
   void _speakCurrent() {
@@ -96,7 +150,8 @@ class _HardEquationGameState extends State<HardEquationGame> {
     return "⭐";
   }
 
-  void _showFinalDialog() {
+  Future<void> _showFinalDialog() async {
+    await _saveScore(score);
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -104,16 +159,20 @@ class _HardEquationGameState extends State<HardEquationGame> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text("You solved all hard equations!", style: const TextStyle(fontSize: 20)),
+            Text("You solved all hard equations!",
+                style: const TextStyle(fontSize: 20)),
             const SizedBox(height: 10),
-            Text("Score: $score / ${_questions.length}", style: const TextStyle(fontSize: 20)),
+            Text("Score: $score / ${_questions.length}",
+                style: const TextStyle(fontSize: 20)),
             const SizedBox(height: 10),
-            Text(_getStars(score, _questions.length), style: const TextStyle(fontSize: 36)),
+            Text(_getStars(score, _questions.length),
+                style: const TextStyle(fontSize: 36)),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _resetGame,
               style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-              child: const Text("🔁 Play Again", style: TextStyle(fontSize: 20)),
+              child:
+                  const Text("🔁 Play Again", style: TextStyle(fontSize: 20)),
             )
           ],
         ),
@@ -147,7 +206,9 @@ class _HardEquationGameState extends State<HardEquationGame> {
                   color: Colors.orange[100],
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Text("🏆 Score: $score", style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                child: Text("🏆 Score: $score",
+                    style: const TextStyle(
+                        fontSize: 24, fontWeight: FontWeight.bold)),
               ),
               // Question box
               Container(
@@ -162,7 +223,8 @@ class _HardEquationGameState extends State<HardEquationGame> {
                 child: Text(
                   "What is the result of this equation?",
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 24, fontWeight: FontWeight.bold),
                 ),
               ),
               // Transparent equation
@@ -176,7 +238,10 @@ class _HardEquationGameState extends State<HardEquationGame> {
                 child: Text(
                   q['question'],
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.deepOrange),
+                  style: const TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.deepOrange),
                 ),
               ),
               // Image visual
@@ -189,7 +254,8 @@ class _HardEquationGameState extends State<HardEquationGame> {
                   ),
                   padding: const EdgeInsets.all(8),
                   margin: const EdgeInsets.only(bottom: 20),
-                  child: Image.asset("images/new_images/${q['image']}", height: 160),
+                  child: Image.asset("images/new_images/${q['image']}",
+                      height: 160),
                 ),
               // Options
               Wrap(
@@ -205,8 +271,10 @@ class _HardEquationGameState extends State<HardEquationGame> {
                     onPressed: showNext ? null : () => _check(opt),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: bgColor,
-                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 32, vertical: 18),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
                     child: Text(opt, style: const TextStyle(fontSize: 24)),
                   );
@@ -214,11 +282,13 @@ class _HardEquationGameState extends State<HardEquationGame> {
               ),
               const SizedBox(height: 20),
               if (isCorrect)
-                const Text("✅ Correct!", style: TextStyle(fontSize: 22, color: Colors.green)),
+                const Text("✅ Correct!",
+                    style: TextStyle(fontSize: 22, color: Colors.green)),
               if (showNext)
                 ElevatedButton(
                   onPressed: _next,
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.amber),
+                  style:
+                      ElevatedButton.styleFrom(backgroundColor: Colors.amber),
                   child: const Text("Next", style: TextStyle(fontSize: 22)),
                 ),
             ],

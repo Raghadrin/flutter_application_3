@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:lottie/lottie.dart';
@@ -42,6 +44,58 @@ class _CompareQuantitiesGameState extends State<CompareQuantitiesGame> {
   void initState() {
     super.initState();
     _speakCurrent();
+  }
+
+  Future<void> _saveScore(int score) async {
+    try {
+      // Fetch parentId and childId, adapt this to your actual method:
+      String? parentId = ""; // fetch parentId from your auth or Firestore
+      String? childId = ""; // fetch childId from your app logic
+
+      // Example: fetch from Firestore assuming current user is parent
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        print("User not logged in");
+        return;
+      }
+      parentId = user.uid;
+
+      final childrenSnapshot = await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(parentId)
+          .collection('children')
+          .get();
+      if (childrenSnapshot.docs.isNotEmpty) {
+        childId = childrenSnapshot.docs.first.id;
+      } else {
+        print("No children found for this parent.");
+        return null;
+      }
+
+      if (parentId.isEmpty || childId == null) {
+        print("Cannot save score: parentId or childId missing");
+        return;
+      }
+
+      // Save to Firestore: example path 'parents/{parentId}/children/{childId}/scores'
+      await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(parentId)
+          .collection('children')
+          .doc(childId)
+          .collection('math')
+          .doc('math2')
+          .collection('game1')
+          .add({
+        'score': score,
+        //'total': _items.length,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      print("Score saved successfully");
+    } catch (e) {
+      print("Error saving score: $e");
+    }
   }
 
   Future<void> _speak(String text) async {
@@ -98,7 +152,8 @@ class _CompareQuantitiesGameState extends State<CompareQuantitiesGame> {
     return "⭐";
   }
 
-  void _showFinalDialog() {
+  Future<void> _showFinalDialog() async {
+    await _saveScore(score);
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -106,17 +161,21 @@ class _CompareQuantitiesGameState extends State<CompareQuantitiesGame> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text("Your Score: $score / ${_questions.length}", style: const TextStyle(fontSize: 22)),
+            Text("Your Score: $score / ${_questions.length}",
+                style: const TextStyle(fontSize: 22)),
             const SizedBox(height: 10),
-            Text(_getStars(score, _questions.length), style: const TextStyle(fontSize: 40)),
+            Text(_getStars(score, _questions.length),
+                style: const TextStyle(fontSize: 40)),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _resetGame,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               ),
-              child: const Text("🔁 Play Again", style: TextStyle(fontSize: 20)),
+              child:
+                  const Text("🔁 Play Again", style: TextStyle(fontSize: 20)),
             ),
           ],
         ),
@@ -126,13 +185,14 @@ class _CompareQuantitiesGameState extends State<CompareQuantitiesGame> {
 
   Widget _buildMedia(String path) {
     if (path.endsWith('.json')) {
-      return Lottie.asset(path, height: 120);
+      return Lottie.asset(path, height: 120, width: 120, fit: BoxFit.contain);
     } else {
-      return Image.asset(path, height: 120);
+      return Image.asset(path, height: 120, width: 120, fit: BoxFit.contain);
     }
   }
 
-  Widget _buildImage(String path, {required String label, required VoidCallback onTap}) {
+  Widget _buildImage(String path,
+      {required String label, required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -147,7 +207,9 @@ class _CompareQuantitiesGameState extends State<CompareQuantitiesGame> {
             child: _buildMedia(path),
           ),
           const SizedBox(height: 8),
-          Text(label, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          Text(label,
+              style:
+                  const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
         ],
       ),
     );
@@ -160,7 +222,8 @@ class _CompareQuantitiesGameState extends State<CompareQuantitiesGame> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Compare Quantities"),
+        title: const Text("Compare Quantities",
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.orange,
         centerTitle: true,
       ),
@@ -178,7 +241,9 @@ class _CompareQuantitiesGameState extends State<CompareQuantitiesGame> {
                   color: Colors.orange[100],
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Text("🏆 Score: $score", style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                child: Text("🏆 Score: $score",
+                    style: const TextStyle(
+                        fontSize: 24, fontWeight: FontWeight.bold)),
               ),
               Container(
                 width: screenWidth * 0.85,
@@ -192,7 +257,8 @@ class _CompareQuantitiesGameState extends State<CompareQuantitiesGame> {
                 child: Text(
                   q['question'],
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 24, fontWeight: FontWeight.bold),
                 ),
               ),
 
@@ -200,12 +266,18 @@ class _CompareQuantitiesGameState extends State<CompareQuantitiesGame> {
               if (q['options'] != null)
                 Column(
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _buildImage(q['imageA'], label: "A", onTap: () {}),
-                        _buildImage(q['imageB'], label: "B", onTap: () {}),
-                      ],
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _buildImage(q['imageA'],
+                              label: "A", onTap: () => _check("A")),
+                          const SizedBox(width: 16),
+                          _buildImage(q['imageB'],
+                              label: "B", onTap: () => _check("B")),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 24),
                     Wrap(
@@ -218,10 +290,13 @@ class _CompareQuantitiesGameState extends State<CompareQuantitiesGame> {
                                 ? Colors.lightGreen.shade100
                                 : Colors.pink.shade100,
                             foregroundColor: Colors.black,
-                            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 32, vertical: 16),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12)),
                           ),
-                          child: Text(opt, style: const TextStyle(fontSize: 22)),
+                          child:
+                              Text(opt, style: const TextStyle(fontSize: 22)),
                         );
                       }).toList(),
                     ),
@@ -231,14 +306,17 @@ class _CompareQuantitiesGameState extends State<CompareQuantitiesGame> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    _buildImage(q['imageA'], label: "A", onTap: () => _check("A")),
-                    _buildImage(q['imageB'], label: "B", onTap: () => _check("B")),
+                    _buildImage(q['imageA'],
+                        label: "A", onTap: () => _check("A")),
+                    _buildImage(q['imageB'],
+                        label: "B", onTap: () => _check("B")),
                   ],
                 ),
 
               const SizedBox(height: 30),
               if (isCorrect)
-                const Text("✅ Correct!", style: TextStyle(fontSize: 24, color: Colors.green)),
+                const Text("✅ Correct!",
+                    style: TextStyle(fontSize: 24, color: Colors.green)),
               if (showNext)
                 Padding(
                   padding: const EdgeInsets.only(top: 16),
@@ -246,8 +324,10 @@ class _CompareQuantitiesGameState extends State<CompareQuantitiesGame> {
                     onPressed: _next,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.amber,
-                      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 30, vertical: 14),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
                     child: const Text("Next", style: TextStyle(fontSize: 22)),
                   ),

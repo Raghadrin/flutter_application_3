@@ -22,7 +22,8 @@ class MathLevel2Screen extends StatelessWidget {
   void _speakIntro() async {
     await tts.setLanguage("en-US");
     await tts.setSpeechRate(0.4);
-    await tts.speak("Welcome to Math Level 2. Let's compare, calculate, and solve word problems together!");
+    await tts.speak(
+        "Welcome to Math Level 2. Let's compare, calculate, and solve word problems together!");
   }
 
   @override
@@ -32,13 +33,14 @@ class MathLevel2Screen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFFFF6ED),
       appBar: AppBar(
+        centerTitle: true,
         backgroundColor: const Color(0xFFFFA726),
         elevation: 0,
-        leading: BackButton(color: Colors.white),
+        leading: BackButton(color: const Color.fromARGB(255, 0, 0, 0)),
         title: const Text(
           "Math - Level 2",
           style: TextStyle(
-            color: Colors.white,
+            color: Color.fromARGB(255, 0, 0, 0),
             fontSize: 24,
             fontWeight: FontWeight.bold,
             fontFamily: 'Arial',
@@ -50,7 +52,7 @@ class MathLevel2Screen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         mainAxisSpacing: 16,
         crossAxisSpacing: 16,
-        childAspectRatio: 0.9,
+        childAspectRatio: 0.7,
         children: [
           _buildGameTile(
             context,
@@ -58,7 +60,10 @@ class MathLevel2Screen extends StatelessWidget {
             jsonPath: "images/new_images/toys.json",
             onTap: () {
               _speak("Let's compare quantities.");
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const CompareQuantitiesGame()));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const CompareQuantitiesGame()));
             },
           ),
           _buildGameTile(
@@ -67,7 +72,10 @@ class MathLevel2Screen extends StatelessWidget {
             jsonPath: "images/new_images/operation.json",
             onTap: () {
               _speak("Choose the correct operation.");
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const OperationSortingGame()));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const OperationSortingGame()));
             },
           ),
           _buildGameTile(
@@ -76,7 +84,10 @@ class MathLevel2Screen extends StatelessWidget {
             jsonPath: "images/new_images/think.json",
             onTap: () {
               _speak("Solve the story problem.");
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const TwoStepWordProblemGame()));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const TwoStepWordProblemGame()));
             },
           ),
           _buildGameTile(
@@ -85,7 +96,8 @@ class MathLevel2Screen extends StatelessWidget {
             jsonPath: "images/new_images/equation.json",
             onTap: () {
               _speak("Try solving hard equations.");
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const HardEquationGame()));
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const HardEquationGame()));
             },
           ),
           _buildGameTile(
@@ -94,7 +106,8 @@ class MathLevel2Screen extends StatelessWidget {
             jsonPath: "images/new_images/Quiz.json",
             onTap: () {
               _speak("Let’s begin the quiz for level 2.");
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const Level2QuizScreen()));
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const Level2QuizScreen()));
             },
           ),
         ],
@@ -102,7 +115,8 @@ class MathLevel2Screen extends StatelessWidget {
     );
   }
 
-  Widget _buildGameTile(BuildContext context, {
+  Widget _buildGameTile(
+    BuildContext context, {
     required String title,
     required String jsonPath,
     required VoidCallback onTap,

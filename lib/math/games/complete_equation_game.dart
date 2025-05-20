@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_3/math/theme.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class CompleteEquationGame extends StatefulWidget {
   const CompleteEquationGame({super.key});
@@ -42,6 +44,58 @@ class _CompleteEquationGameState extends State<CompleteEquationGame> {
   void initState() {
     super.initState();
     _speakCurrentQuestionKaraoke();
+  }
+
+  Future<void> _saveScore(int score) async {
+    try {
+      // Fetch parentId and childId, adapt this to your actual method:
+      String? parentId = ""; // fetch parentId from your auth or Firestore
+      String? childId = ""; // fetch childId from your app logic
+
+      // Example: fetch from Firestore assuming current user is parent
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        print("User not logged in");
+        return;
+      }
+      parentId = user.uid;
+
+      final childrenSnapshot = await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(parentId)
+          .collection('children')
+          .get();
+      if (childrenSnapshot.docs.isNotEmpty) {
+        childId = childrenSnapshot.docs.first.id;
+      } else {
+        print("No children found for this parent.");
+        return null;
+      }
+
+      if (parentId.isEmpty || childId == null) {
+        print("Cannot save score: parentId or childId missing");
+        return;
+      }
+
+      // Save to Firestore: example path 'parents/{parentId}/children/{childId}/scores'
+      await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(parentId)
+          .collection('children')
+          .doc(childId)
+          .collection('math')
+          .doc('math1')
+          .collection('game3')
+          .add({
+        'score': score,
+        //'total': _items.length,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      print("Score saved successfully");
+    } catch (e) {
+      print("Error saving score: $e");
+    }
   }
 
   Future<void> _speak(String text) async {
@@ -126,7 +180,8 @@ class _CompleteEquationGameState extends State<CompleteEquationGame> {
     return "⭐";
   }
 
-  void _showFinalDialog() {
+  Future<void> _showFinalDialog() async {
+    await _saveScore(score);
     showDialog(
       context: context,
       builder: (_) => AlertDialog(

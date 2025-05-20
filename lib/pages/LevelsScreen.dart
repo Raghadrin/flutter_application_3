@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_application_3/letters/arabicLetter/levelOne/arabic_level1_screen.dart';
 import 'package:flutter_application_3/letters/arabicLetter/levelOne/sentence_selection_screen.dart';
 import 'package:flutter_application_3/letters/englishLetters/practice/english_level1_screen.dart';
 import 'package:flutter_application_3/math/math/math_level1_screen.dart';
@@ -57,15 +56,15 @@ class LevelsScreen extends StatelessWidget {
     if (subject == "English") {
       return [
         {"title": "Letters", "screen": EnglishLevel1Screen()},
-        ];
+      ];
     } else if (subject == "Arabic") {
       return [
         {"title": "Letters", "screen": SentenceSelectionScreen()},
-        ];
+      ];
     } else if (subject == "Mathematics") {
       return [
-        {"title": "Games", "screen":MathLevel1Screen()},
-       ];
+        {"title": "Games", "screen": MathLevel1Screen()},
+      ];
     }
     return [];
   }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class OperationSortingGame extends StatefulWidget {
   const OperationSortingGame({super.key});
@@ -37,6 +39,58 @@ class _OperationSortingGameState extends State<OperationSortingGame> {
   void initState() {
     super.initState();
     _speakCurrent();
+  }
+
+  Future<void> _saveScore(int score) async {
+    try {
+      // Fetch parentId and childId, adapt this to your actual method:
+      String? parentId = ""; // fetch parentId from your auth or Firestore
+      String? childId = ""; // fetch childId from your app logic
+
+      // Example: fetch from Firestore assuming current user is parent
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        print("User not logged in");
+        return;
+      }
+      parentId = user.uid;
+
+      final childrenSnapshot = await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(parentId)
+          .collection('children')
+          .get();
+      if (childrenSnapshot.docs.isNotEmpty) {
+        childId = childrenSnapshot.docs.first.id;
+      } else {
+        print("No children found for this parent.");
+        return null;
+      }
+
+      if (parentId.isEmpty || childId == null) {
+        print("Cannot save score: parentId or childId missing");
+        return;
+      }
+
+      // Save to Firestore: example path 'parents/{parentId}/children/{childId}/scores'
+      await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(parentId)
+          .collection('children')
+          .doc(childId)
+          .collection('math')
+          .doc('math2')
+          .collection('game2')
+          .add({
+        'score': score,
+        //'total': _items.length,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      print("Score saved successfully");
+    } catch (e) {
+      print("Error saving score: $e");
+    }
   }
 
   Future<void> _speak(String text) async {
@@ -93,26 +147,32 @@ class _OperationSortingGameState extends State<OperationSortingGame> {
     _speakCurrent();
   }
 
-  void _showFinalDialog() {
+  Future<void> _showFinalDialog() async {
+    await _saveScore(score);
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: Colors.white,
-        title: const Text("🎉 Well done!", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+        title: const Text("🎉 Well done!",
+            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text("Your Score: $score / ${_questions.length}", style: const TextStyle(fontSize: 22)),
+            Text("Your Score: $score / ${_questions.length}",
+                style: const TextStyle(fontSize: 22)),
             const SizedBox(height: 10),
-            Text(_getStars(score, _questions.length), style: const TextStyle(fontSize: 40)),
+            Text(_getStars(score, _questions.length),
+                style: const TextStyle(fontSize: 40)),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _resetGame,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
               ),
-              child: const Text("🔁 Play Again", style: TextStyle(fontSize: 22)),
+              child:
+                  const Text("🔁 Play Again", style: TextStyle(fontSize: 22)),
             ),
           ],
         ),
@@ -165,17 +225,22 @@ class _OperationSortingGameState extends State<OperationSortingGame> {
                 alignment: WrapAlignment.center,
                 children: q["options"].map<Widget>((symbol) {
                   final correct = symbol == q["answer"];
-                  final bgColor = isCorrect && correct ? Colors.green : Colors.deepOrange.shade100;
+                  final bgColor = isCorrect && correct
+                      ? Colors.green
+                      : Colors.deepOrange.shade100;
                   return ElevatedButton(
                     onPressed: showNext ? null : () => _check(symbol),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: bgColor,
-                      padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 20),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 36, vertical: 20),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14)),
                     ),
                     child: Text(
                       symbol,
-                      style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 32, fontWeight: FontWeight.bold),
                     ),
                   );
                 }).toList(),
@@ -185,7 +250,11 @@ class _OperationSortingGameState extends State<OperationSortingGame> {
 
               // Feedback
               if (isCorrect)
-                const Text("✅ Correct!", style: TextStyle(fontSize: 26, color: Colors.green, fontWeight: FontWeight.w600)),
+                const Text("✅ Correct!",
+                    style: TextStyle(
+                        fontSize: 26,
+                        color: Colors.green,
+                        fontWeight: FontWeight.w600)),
 
               const SizedBox(height: 10),
 
@@ -194,7 +263,8 @@ class _OperationSortingGameState extends State<OperationSortingGame> {
                   onPressed: _next,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.amber,
-                    padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 28, vertical: 14),
                   ),
                   child: const Text("Next", style: TextStyle(fontSize: 24)),
                 ),

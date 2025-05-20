@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class Level2QuizScreen extends StatefulWidget {
   const Level2QuizScreen({super.key});
@@ -42,7 +44,8 @@ class _Level2QuizScreenState extends State<Level2QuizScreen> {
     },
     {
       'type': 'word',
-      'question': 'Liam had 4 candies, then got 3 more and gave 2 away. How many now?',
+      'question':
+          'Liam had 4 candies, then got 3 more and gave 2 away. How many now?',
       'options': ['5', '4', '6'],
       'answer': '5'
     },
@@ -59,6 +62,58 @@ class _Level2QuizScreenState extends State<Level2QuizScreen> {
     super.initState();
     _speak(questions[currentIndex]['question']);
     startTimer();
+  }
+
+  Future<void> _saveScore(int score) async {
+    try {
+      // Fetch parentId and childId, adapt this to your actual method:
+      String? parentId = ""; // fetch parentId from your auth or Firestore
+      String? childId = ""; // fetch childId from your app logic
+
+      // Example: fetch from Firestore assuming current user is parent
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        print("User not logged in");
+        return;
+      }
+      parentId = user.uid;
+
+      final childrenSnapshot = await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(parentId)
+          .collection('children')
+          .get();
+      if (childrenSnapshot.docs.isNotEmpty) {
+        childId = childrenSnapshot.docs.first.id;
+      } else {
+        print("No children found for this parent.");
+        return null;
+      }
+
+      if (parentId.isEmpty || childId == null) {
+        print("Cannot save score: parentId or childId missing");
+        return;
+      }
+
+      // Save to Firestore: example path 'parents/{parentId}/children/{childId}/scores'
+      await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(parentId)
+          .collection('children')
+          .doc(childId)
+          .collection('math')
+          .doc('math2')
+          .collection('quiz2')
+          .add({
+        'score': score,
+        //'total': _items.length,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      print("Score saved successfully");
+    } catch (e) {
+      print("Error saving score: $e");
+    }
   }
 
   void startTimer() {
@@ -136,7 +191,8 @@ class _Level2QuizScreenState extends State<Level2QuizScreen> {
     return "⭐";
   }
 
-  void _showFinalDialog() {
+  Future<void> _showFinalDialog() async {
+    await _saveScore(score);
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -144,14 +200,17 @@ class _Level2QuizScreenState extends State<Level2QuizScreen> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text("Your Score: $score / ${questions.length}", style: const TextStyle(fontSize: 22)),
+            Text("Your Score: $score / ${questions.length}",
+                style: const TextStyle(fontSize: 22)),
             const SizedBox(height: 10),
-            Text(_getStars(score, questions.length), style: const TextStyle(fontSize: 40)),
+            Text(_getStars(score, questions.length),
+                style: const TextStyle(fontSize: 40)),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _resetQuiz,
               style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-              child: const Text("🔁 Play Again", style: TextStyle(fontSize: 20)),
+              child:
+                  const Text("🔁 Play Again", style: TextStyle(fontSize: 20)),
             ),
           ],
         ),
@@ -159,7 +218,8 @@ class _Level2QuizScreenState extends State<Level2QuizScreen> {
     );
   }
 
-  Widget _buildImage(String path, {required String label, required VoidCallback onTap}) {
+  Widget _buildImage(String path,
+      {required String label, required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -174,7 +234,9 @@ class _Level2QuizScreenState extends State<Level2QuizScreen> {
             child: Image.asset(path, height: 100),
           ),
           const SizedBox(height: 8),
-          Text(label, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          Text(label,
+              style:
+                  const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         ],
       ),
     );
@@ -234,20 +296,24 @@ class _Level2QuizScreenState extends State<Level2QuizScreen> {
                 child: Text(
                   q['question'],
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                      fontSize: 28, fontWeight: FontWeight.w600),
                 ),
               ),
-
               if (q['type'] == 'compare')
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    _buildImage(q['imageLeft'], label: "Left", onTap: () => _checkAnswer("Left")),
-                    const SizedBox(width: 20),
-                    _buildImage(q['imageRight'], label: "Right", onTap: () => _checkAnswer("Right")),
+                    Expanded(
+                      child: _buildImage(q['imageLeft'],
+                          label: "Left", onTap: () => _checkAnswer("Left")),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _buildImage(q['imageRight'],
+                          label: "Right", onTap: () => _checkAnswer("Right")),
+                    ),
                   ],
                 ),
-
               if (q['type'] != 'compare')
                 Wrap(
                   spacing: 16,
@@ -258,15 +324,18 @@ class _Level2QuizScreenState extends State<Level2QuizScreen> {
                     return ElevatedButton(
                       onPressed: showNext ? null : () => _checkAnswer(option),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: isCorrectOption ? Colors.green : Colors.orangeAccent,
-                        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        backgroundColor: isCorrectOption
+                            ? Colors.green
+                            : Colors.orangeAccent,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 32, vertical: 20),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
                       ),
                       child: Text(option, style: const TextStyle(fontSize: 26)),
                     );
                   }).toList(),
                 ),
-
               const SizedBox(height: 30),
               if (showWarning)
                 Text("⚠️ Hurry up! Less than 30 seconds left!",
@@ -274,7 +343,8 @@ class _Level2QuizScreenState extends State<Level2QuizScreen> {
               if (showNext)
                 ElevatedButton(
                   onPressed: _nextQuestion,
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.amber),
+                  style:
+                      ElevatedButton.styleFrom(backgroundColor: Colors.amber),
                   child: const Text("Next", style: TextStyle(fontSize: 22)),
                 )
             ],
