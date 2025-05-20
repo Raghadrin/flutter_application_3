@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:lottie/lottie.dart';
@@ -21,7 +20,8 @@ class _MathLevel3ScreenState extends State<MathLevel3Screen> {
   @override
   void initState() {
     super.initState();
-    _speak("Welcome to Math Level 3. Let's solve multi-step equations, reverse operations, and word story problems together.");
+    _speak(
+        "Welcome to Math Level 3. Let's solve multi-step equations, reverse operations, and word story problems together.");
   }
 
   Future<void> _speak(String text) async {
@@ -40,13 +40,14 @@ class _MathLevel3ScreenState extends State<MathLevel3Screen> {
     return Scaffold(
       backgroundColor: const Color(0xFFFFF6ED),
       appBar: AppBar(
+        centerTitle: true,
         backgroundColor: const Color(0xFFFFA726),
         elevation: 0,
-        leading: BackButton(color: Colors.white),
+        leading: BackButton(color: const Color.fromARGB(255, 0, 0, 0)),
         title: const Text(
           "Math - Level 3",
           style: TextStyle(
-            color: Colors.white,
+            color: Color.fromARGB(255, 0, 0, 0),
             fontSize: 24,
             fontWeight: FontWeight.bold,
             fontFamily: 'Arial',
@@ -58,15 +59,18 @@ class _MathLevel3ScreenState extends State<MathLevel3Screen> {
         padding: const EdgeInsets.all(16),
         mainAxisSpacing: 16,
         crossAxisSpacing: 16,
-        childAspectRatio: 0.9,
+        childAspectRatio: 0.6,
         children: [
-          _buildGameTile("Multi-Step Equations", "images/new_images/Multi-Step.json", () {
+          _buildGameTile(
+              "Multi-Step Equations", "images/new_images/Multi-Step.json", () {
             _onTileTap("Multi-Step Equations", const MultiStepEquationGame());
           }),
-          _buildGameTile("Reverse Equation", "images/new_images/equation.json", () {
+          _buildGameTile("Reverse Equation", "images/new_images/equation.json",
+              () {
             _onTileTap("Reverse Equation", const ReverseEquationGame());
           }),
-          _buildGameTile("Word Story Problem", "images/new_images/think.json", () {
+          _buildGameTile("Word Story Problem", "images/new_images/think.json",
+              () {
             _onTileTap("Word Story Problem", const WordStoryMathGame());
           }),
           _buildGameTile("Level 3 Quiz", "images/new_images/Quiz.json", () {

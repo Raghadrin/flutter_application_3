@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class MultiStepEquationGame extends StatefulWidget {
   const MultiStepEquationGame({super.key});
@@ -8,7 +10,8 @@ class MultiStepEquationGame extends StatefulWidget {
   State<MultiStepEquationGame> createState() => _MultiStepEquationGameState();
 }
 
-class _MultiStepEquationGameState extends State<MultiStepEquationGame> with SingleTickerProviderStateMixin {
+class _MultiStepEquationGameState extends State<MultiStepEquationGame>
+    with SingleTickerProviderStateMixin {
   final FlutterTts tts = FlutterTts();
   int currentIndex = 0;
   int score = 0;
@@ -42,8 +45,11 @@ class _MultiStepEquationGameState extends State<MultiStepEquationGame> with Sing
   @override
   void initState() {
     super.initState();
-    _shakeController = AnimationController(vsync: this, duration: const Duration(milliseconds: 500));
-    _shakeAnimation = Tween<double>(begin: 0, end: 10).chain(CurveTween(curve: Curves.elasticIn)).animate(_shakeController);
+    _shakeController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 500));
+    _shakeAnimation = Tween<double>(begin: 0, end: 10)
+        .chain(CurveTween(curve: Curves.elasticIn))
+        .animate(_shakeController);
     _speakCurrent();
   }
 
@@ -51,6 +57,58 @@ class _MultiStepEquationGameState extends State<MultiStepEquationGame> with Sing
     await tts.setLanguage("en-US");
     await tts.setSpeechRate(0.45);
     await tts.speak(text);
+  }
+
+  Future<void> _saveScore(int score) async {
+    try {
+      // Fetch parentId and childId, adapt this to your actual method:
+      String? parentId = ""; // fetch parentId from your auth or Firestore
+      String? childId = ""; // fetch childId from your app logic
+
+      // Example: fetch from Firestore assuming current user is parent
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        print("User not logged in");
+        return;
+      }
+      parentId = user.uid;
+
+      final childrenSnapshot = await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(parentId)
+          .collection('children')
+          .get();
+      if (childrenSnapshot.docs.isNotEmpty) {
+        childId = childrenSnapshot.docs.first.id;
+      } else {
+        print("No children found for this parent.");
+        return null;
+      }
+
+      if (parentId.isEmpty || childId == null) {
+        print("Cannot save score: parentId or childId missing");
+        return;
+      }
+
+      // Save to Firestore: example path 'parents/{parentId}/children/{childId}/scores'
+      await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(parentId)
+          .collection('children')
+          .doc(childId)
+          .collection('math')
+          .doc('math3')
+          .collection('game1')
+          .add({
+        'score': score,
+        //'total': _items.length,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      print("Score saved successfully");
+    } catch (e) {
+      print("Error saving score: $e");
+    }
   }
 
   void _speakCurrent() {
@@ -79,7 +137,7 @@ class _MultiStepEquationGameState extends State<MultiStepEquationGame> with Sing
     }
   }
 
-  void _next() {
+  Future<void> _next() async {
     if (currentIndex < _questions.length - 1) {
       setState(() {
         currentIndex++;
@@ -89,7 +147,9 @@ class _MultiStepEquationGameState extends State<MultiStepEquationGame> with Sing
       _speakCurrent();
     } else {
       setState(() => finished = true);
-      _speak("Great work! Your score is $score out of ${_questions.length}. Would you like to try again?");
+      _speak(
+          "Great work! Your score is $score out of ${_questions.length}. Would you like to try again?");
+      await _saveScore(score);
     }
   }
 
@@ -123,7 +183,9 @@ class _MultiStepEquationGameState extends State<MultiStepEquationGame> with Sing
     final q = _questions[currentIndex];
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Multi-Step Equation Game"), backgroundColor: Colors.orange),
+      appBar: AppBar(
+          title: const Text("Multi-Step Equation Game"),
+          backgroundColor: Colors.orange),
       backgroundColor: const Color(0xFFFFF6ED),
       body: Center(
         child: finished
@@ -134,24 +196,35 @@ class _MultiStepEquationGameState extends State<MultiStepEquationGame> with Sing
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(20),
-                    boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 8, offset: Offset(0, 4))],
+                    boxShadow: [
+                      BoxShadow(
+                          color: Colors.black26,
+                          blurRadius: 8,
+                          offset: Offset(0, 4))
+                    ],
                   ),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Text("🎉 Well done!", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+                      const Text("🎉 Well done!",
+                          style: TextStyle(
+                              fontSize: 28, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 10),
-                      Text("Your Score: $score / ${_questions.length}", style: const TextStyle(fontSize: 22)),
+                      Text("Your Score: $score / ${_questions.length}",
+                          style: const TextStyle(fontSize: 22)),
                       const SizedBox(height: 10),
-                      Text(_getStars(score, _questions.length), style: const TextStyle(fontSize: 36)),
+                      Text(_getStars(score, _questions.length),
+                          style: const TextStyle(fontSize: 36)),
                       const SizedBox(height: 20),
                       ElevatedButton(
                         onPressed: _resetGame,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.orange,
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 20, vertical: 12),
                         ),
-                        child: const Text("🔁 Play Again", style: TextStyle(fontSize: 20)),
+                        child: const Text("🔁 Play Again",
+                            style: TextStyle(fontSize: 20)),
                       ),
                     ],
                   ),
@@ -170,9 +243,13 @@ class _MultiStepEquationGameState extends State<MultiStepEquationGame> with Sing
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(16),
-                        boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 4)],
+                        boxShadow: [
+                          BoxShadow(color: Colors.black26, blurRadius: 4)
+                        ],
                       ),
-                      child: Text("🏆 Score: $score", style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                      child: Text("🏆 Score: $score",
+                          style: const TextStyle(
+                              fontSize: 24, fontWeight: FontWeight.bold)),
                     ),
 
                     // Question
@@ -187,7 +264,10 @@ class _MultiStepEquationGameState extends State<MultiStepEquationGame> with Sing
                       child: Text(
                         q['question'],
                         textAlign: TextAlign.center,
-                        style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.deepOrange),
+                        style: const TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.deepOrange),
                       ),
                     ),
 
@@ -196,12 +276,14 @@ class _MultiStepEquationGameState extends State<MultiStepEquationGame> with Sing
                       Container(
                         decoration: BoxDecoration(
                           color: Colors.deepOrange.withOpacity(0.1),
-                          border: Border.all(color: Colors.deepOrange, width: 3),
+                          border:
+                              Border.all(color: Colors.deepOrange, width: 3),
                           borderRadius: BorderRadius.circular(16),
                         ),
                         padding: const EdgeInsets.all(8),
                         margin: const EdgeInsets.only(bottom: 20),
-                        child: Image.asset("images/new_images/${q['image']}", height: 160),
+                        child: Image.asset("images/new_images/${q['image']}",
+                            height: 160),
                       ),
 
                     // Drop Target
@@ -214,13 +296,17 @@ class _MultiStepEquationGameState extends State<MultiStepEquationGame> with Sing
                         );
                       },
                       child: DragTarget<String>(
-                        builder: (context, candidateData, rejectedData) => Container(
+                        builder: (context, candidateData, rejectedData) =>
+                            Container(
                           height: 60,
                           width: 240,
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
                             color: Colors.white,
-                            border: Border.all(color: wrongDrop ? Colors.red : Colors.deepOrange, width: 3),
+                            border: Border.all(
+                                color:
+                                    wrongDrop ? Colors.red : Colors.deepOrange,
+                                width: 3),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
@@ -229,7 +315,8 @@ class _MultiStepEquationGameState extends State<MultiStepEquationGame> with Sing
                             style: const TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
-                              color: Colors.deepOrange, // ✅ Enhanced hint visibility
+                              color: Colors
+                                  .deepOrange, // ✅ Enhanced hint visibility
                             ),
                           ),
                         ),
@@ -249,7 +336,8 @@ class _MultiStepEquationGameState extends State<MultiStepEquationGame> with Sing
                             color: Colors.transparent,
                             child: _buildOption(opt),
                           ),
-                          childWhenDragging: Opacity(opacity: 0.4, child: _buildOption(opt)),
+                          childWhenDragging:
+                              Opacity(opacity: 0.4, child: _buildOption(opt)),
                           child: _buildOption(opt),
                         );
                       }).toList(),
@@ -265,11 +353,13 @@ class _MultiStepEquationGameState extends State<MultiStepEquationGame> with Sing
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: BoxDecoration(
-        border: Border.all(color: wrongDrop ? Colors.red : Colors.deepOrange, width: 3),
+        border: Border.all(
+            color: wrongDrop ? Colors.red : Colors.deepOrange, width: 3),
         color: Colors.orangeAccent.shade100,
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Text(text, style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+      child: Text(text,
+          style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
     );
   }
 }

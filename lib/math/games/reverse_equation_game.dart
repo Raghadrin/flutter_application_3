@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ReverseEquationGame extends StatefulWidget {
   const ReverseEquationGame({super.key});
@@ -45,6 +47,56 @@ class _ReverseEquationGameState extends State<ReverseEquationGame> {
     _speakCurrent();
   }
 
+  Future<void> _saveScore(int score) async {
+    try {
+      // Fetch parentId and childId, adapt this to your actual method:
+      String? parentId = ""; // fetch parentId from your auth or Firestore
+      String? childId = ""; // fetch childId from your app logic
+
+      // Example: fetch from Firestore assuming current user is parent
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        print("User not logged in");
+        return;
+      }
+      parentId = user.uid;
+
+      final childrenSnapshot = await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(parentId)
+          .collection('children')
+          .get();
+      if (childrenSnapshot.docs.isNotEmpty) {
+        childId = childrenSnapshot.docs.first.id;
+      } else {
+        print("No children found for this parent.");
+        return null;
+      }
+
+      if (parentId.isEmpty || childId == null) {
+        print("Cannot save score: parentId or childId missing");
+        return;
+      }
+      await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(parentId)
+          .collection('children')
+          .doc(childId)
+          .collection('math')
+          .doc('math3')
+          .collection('game2')
+          .add({
+        'score': score,
+        //'total': _items.length,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      print("Score saved successfully");
+    } catch (e) {
+      print("Error saving score: $e");
+    }
+  }
+
   Future<void> _speak(String text) async {
     await tts.setLanguage("en-US");
     await tts.setSpeechRate(0.45);
@@ -52,7 +104,9 @@ class _ReverseEquationGameState extends State<ReverseEquationGame> {
   }
 
   void _speakCurrent() {
-    _speak(_questions[currentIndex]['equation'] + ". " + _questions[currentIndex]['question']);
+    _speak(_questions[currentIndex]['equation'] +
+        ". " +
+        _questions[currentIndex]['question']);
   }
 
   void _check(String value) {
@@ -74,7 +128,8 @@ class _ReverseEquationGameState extends State<ReverseEquationGame> {
       });
       _speakCurrent();
     } else {
-      _speak("Excellent! You finished the reverse equations. Your score is $score out of ${_questions.length}");
+      _speak(
+          "Excellent! You finished the reverse equations. Your score is $score out of ${_questions.length}");
       _showFinalDialog();
     }
   }
@@ -90,26 +145,32 @@ class _ReverseEquationGameState extends State<ReverseEquationGame> {
     _speakCurrent();
   }
 
-  void _showFinalDialog() {
+  Future<void> _showFinalDialog() async {
+    await _saveScore(score);
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: Colors.white,
-        title: const Text("🎉 Well done!", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+        title: const Text("🎉 Well done!",
+            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text("Your Score: $score / ${_questions.length}", style: const TextStyle(fontSize: 22)),
+            Text("Your Score: $score / ${_questions.length}",
+                style: const TextStyle(fontSize: 22)),
             const SizedBox(height: 10),
-            Text(_getStars(score, _questions.length), style: const TextStyle(fontSize: 40)),
+            Text(_getStars(score, _questions.length),
+                style: const TextStyle(fontSize: 40)),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: _resetGame,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               ),
-              child: const Text("🔁 Play Again", style: TextStyle(fontSize: 20)),
+              child:
+                  const Text("🔁 Play Again", style: TextStyle(fontSize: 20)),
             ),
           ],
         ),
@@ -127,17 +188,23 @@ class _ReverseEquationGameState extends State<ReverseEquationGame> {
 
   Color _colorToken(String token) {
     if (token == "x") return Colors.blue;
-    if (["+", "-", "=", "×", "*", "/"].contains(token)) return Colors.deepOrange;
+    if (["+", "-", "=", "×", "*", "/"].contains(token))
+      return Colors.deepOrange;
     return Colors.black;
   }
 
   @override
   Widget build(BuildContext context) {
     final q = _questions[currentIndex];
-    final tokens = RegExp(r'x|\d+|[+=×*/-]').allMatches(q['equation']).map((e) => e.group(0)!).toList();
+    final tokens = RegExp(r'x|\d+|[+=×*/-]')
+        .allMatches(q['equation'])
+        .map((e) => e.group(0)!)
+        .toList();
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Reverse Equation Game"), backgroundColor: Colors.orange),
+      appBar: AppBar(
+          title: const Text("Reverse Equation Game"),
+          backgroundColor: Colors.orange),
       backgroundColor: const Color(0xFFFFF6ED),
       body: Center(
         child: SingleChildScrollView(
@@ -153,7 +220,9 @@ class _ReverseEquationGameState extends State<ReverseEquationGame> {
                   color: Colors.orange[100],
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Text("🏆 Score: $score", style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                child: Text("🏆 Score: $score",
+                    style: const TextStyle(
+                        fontSize: 24, fontWeight: FontWeight.bold)),
               ),
 
               // Equation display
@@ -171,7 +240,8 @@ class _ReverseEquationGameState extends State<ReverseEquationGame> {
                   runSpacing: 12,
                   children: tokens.map((token) {
                     return Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(8),
@@ -193,7 +263,8 @@ class _ReverseEquationGameState extends State<ReverseEquationGame> {
               // Question
               Text(
                 q['question'],
-                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w500),
+                style:
+                    const TextStyle(fontSize: 22, fontWeight: FontWeight.w500),
               ),
 
               const SizedBox(height: 20),
@@ -207,7 +278,8 @@ class _ReverseEquationGameState extends State<ReverseEquationGame> {
                   ),
                   padding: const EdgeInsets.all(8),
                   margin: const EdgeInsets.only(bottom: 20, top: 12),
-                  child: Image.asset("images/new_images/${q['image']}", height: 160),
+                  child: Image.asset("images/new_images/${q['image']}",
+                      height: 160),
                 ),
 
               // Options
@@ -217,13 +289,17 @@ class _ReverseEquationGameState extends State<ReverseEquationGame> {
                 alignment: WrapAlignment.center,
                 children: q["options"].map<Widget>((opt) {
                   final correct = opt == q["answer"];
-                  final bgColor = isCorrect && correct ? Colors.green : Colors.orangeAccent.shade100;
+                  final bgColor = isCorrect && correct
+                      ? Colors.green
+                      : Colors.orangeAccent.shade100;
                   return ElevatedButton(
                     onPressed: showNext ? null : () => _check(opt),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: bgColor,
-                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 32, vertical: 18),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
                     child: Text(opt, style: const TextStyle(fontSize: 24)),
                   );
@@ -232,12 +308,15 @@ class _ReverseEquationGameState extends State<ReverseEquationGame> {
 
               const SizedBox(height: 20),
 
-              if (isCorrect) const Text("✅ Correct!", style: TextStyle(fontSize: 22, color: Colors.green)),
+              if (isCorrect)
+                const Text("✅ Correct!",
+                    style: TextStyle(fontSize: 22, color: Colors.green)),
 
               if (showNext)
                 ElevatedButton(
                   onPressed: _next,
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.amber),
+                  style:
+                      ElevatedButton.styleFrom(backgroundColor: Colors.amber),
                   child: const Text("Next", style: TextStyle(fontSize: 22)),
                 ),
             ],
