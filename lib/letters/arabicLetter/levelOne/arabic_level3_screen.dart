@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ArabicLevel3Screen extends StatefulWidget {
   final String title;
@@ -35,7 +37,12 @@ class _ArabicLevel3ScreenState extends State<ArabicLevel3Screen> {
   Color feedbackColor = Colors.transparent;
 
   final List<String> dummyOptions = [
-    "البحر", "الأصدقاء", "الطعام", "الملعب", "الشجرة", "النوم"
+    "البحر",
+    "الأصدقاء",
+    "الطعام",
+    "الملعب",
+    "الشجرة",
+    "النوم"
   ];
 
   @override
@@ -49,6 +56,107 @@ class _ArabicLevel3ScreenState extends State<ArabicLevel3Screen> {
     Future.delayed(const Duration(milliseconds: 500), () {
       speak("مرحبًا بك! لنبدأ القصة معًا");
     });
+  }
+
+  Future<void> _saveScore(double score) async {
+    try {
+      // Fetch parentId and childId, adapt this to your actual method:
+      String? parentId = ""; // fetch parentId from your auth or Firestore
+      String? childId = ""; // fetch childId from your app logic
+
+      // Example: fetch from Firestore assuming current user is parent
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        print("User not logged in");
+        return;
+      }
+      parentId = user.uid;
+
+      final childrenSnapshot = await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(parentId)
+          .collection('children')
+          .get();
+      if (childrenSnapshot.docs.isNotEmpty) {
+        childId = childrenSnapshot.docs.first.id;
+      } else {
+        print("No children found for this parent.");
+        return null;
+      }
+
+      if (parentId.isEmpty || childId == null) {
+        print("Cannot save score: parentId or childId missing");
+        return;
+      }
+
+      await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(parentId)
+          .collection('children')
+          .doc(childId)
+          .collection('arabic')
+          .doc('arabic3')
+          .collection('attempts') // optional: track multiple attempts
+          .add({
+        'score': score,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      print("Score saved successfully");
+    } catch (e) {
+      print("Error saving score: $e");
+    }
+  }
+
+  Future<void> _saveStoryScore(int scor) async {
+    try {
+      // Fetch parentId and childId, adapt this to your actual method:
+      String? parentId = ""; // fetch parentId from your auth or Firestore
+      String? childId = ""; // fetch childId from your app logic
+
+      // Example: fetch from Firestore assuming current user is parent
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        print("User not logged in");
+        return;
+      }
+      parentId = user.uid;
+
+      final childrenSnapshot = await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(parentId)
+          .collection('children')
+          .get();
+      if (childrenSnapshot.docs.isNotEmpty) {
+        childId = childrenSnapshot.docs.first.id;
+      } else {
+        print("No children found for this parent.");
+        return null;
+      }
+
+      if (parentId.isEmpty || childId == null) {
+        print("Cannot save score: parentId or childId missing");
+        return;
+      }
+
+      await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(parentId)
+          .collection('children')
+          .doc(childId)
+          .collection('arabic')
+          .doc('arabic3')
+          .collection('story')
+          .doc('level3') // optional: track multiple attempts
+          .set({
+        'score': scor,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      print("Score saved successfully");
+    } catch (e) {
+      print("Error saving score: $e");
+    }
   }
 
   Future<void> speak(String text) async {
@@ -89,7 +197,7 @@ class _ArabicLevel3ScreenState extends State<ArabicLevel3Screen> {
       listenFor: const Duration(seconds: 90),
       pauseFor: const Duration(seconds: 30),
       partialResults: false,
-      onResult: (val) {
+      onResult: (val) async {
         final expected = normalize(widget.storyText);
         final spoken = normalize(val.recognizedWords);
 
@@ -111,8 +219,10 @@ class _ArabicLevel3ScreenState extends State<ArabicLevel3Screen> {
 
         String feedback;
         Color color;
+        await _saveScore(finalScore);
         if (finalScore >= 80) {
-          feedback = "✅ ممتاز جدًا!\nتطابق بنسبة: ${finalScore.toStringAsFixed(1)}٪";
+          feedback =
+              "✅ ممتاز جدًا!\nتطابق بنسبة: ${finalScore.toStringAsFixed(1)}٪";
           color = Colors.green;
         } else if (finalScore >= 70) {
           feedback = "✨ جيد، تابع المحاولة\n${finalScore.toStringAsFixed(1)}٪";
@@ -134,209 +244,237 @@ class _ArabicLevel3ScreenState extends State<ArabicLevel3Screen> {
   List<String> generateOptions(String correct) {
     final options = <String>{correct};
     while (options.length < 4) {
-      options.add(dummyOptions[(options.length * 2 + correct.length) % dummyOptions.length]);
+      options.add(dummyOptions[
+          (options.length * 2 + correct.length) % dummyOptions.length]);
     }
     return options.toList()..shuffle();
   }
 
   Widget buildQuestionTab() {
-  if (showSummary) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text("🌟 ملخص التقييم", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(4, (i) {
-              return Icon(i < correctCount ? Icons.star : Icons.star_border, color: Colors.orange, size: 28);
-            }),
-          ),
-          const SizedBox(height: 30),
-          ElevatedButton.icon(
-            icon: const Icon(Icons.refresh, size: 22),
-            label: const Text("إعادة المحاولة", style: TextStyle(fontSize: 18)),
-            onPressed: () {
-              setState(() {
-                currentQuestion = 0;
-                correctCount = 0;
-                selectedAnswer = '';
-                showFeedback = false;
-                showSummary = false;
-              });
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange,
-              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    _saveStoryScore(correctCount);
+    if (showSummary) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text("🌟 ملخص التقييم",
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(4, (i) {
+                return Icon(i < correctCount ? Icons.star : Icons.star_border,
+                    color: Colors.orange, size: 28);
+              }),
             ),
-          ),
-          const SizedBox(height: 16),
-          ElevatedButton.icon(
-            icon: const Icon(Icons.home, size: 20),
-            label: const Text("العودة إلى القصص", style: TextStyle(fontSize: 18)),
-            onPressed: () => Navigator.pop(context),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange,
-              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  final question = widget.questions[currentQuestion];
-  final correct = widget.correctAnswers[currentQuestion];
-  final options = generateOptions(correct);
-
-  return Padding(
-    padding: const EdgeInsets.all(16),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Text("🧠 $question", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 20),
-        ...options.map((answer) {
-          final isSelected = selectedAnswer == answer;
-          final isAnswerCorrect = answer == correct;
-
-          return GestureDetector(
-            onTap: () async {
-              await flutterTts.stop();
-              setState(() {
-                selectedAnswer = answer;
-                isCorrect = isAnswerCorrect;
-                showFeedback = true;
-                if (isAnswerCorrect) correctCount++;
-              });
-
-              await speak(isAnswerCorrect ? "أحسنت!" : "حاول مرة أخرى");
-
-              if (isAnswerCorrect) {
-                Future.delayed(const Duration(seconds: 2), () {
-                  if (currentQuestion < widget.questions.length - 1) {
-                    setState(() {
-                      currentQuestion++;
-                      selectedAnswer = '';
-                      showFeedback = false;
-                    });
-                  } else {
-                    setState(() => showSummary = true);
-                    speak("أحسنت، لقد أنهيت القصة بنجاح!");
-                  }
+            const SizedBox(height: 30),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.refresh, size: 22),
+              label:
+                  const Text("إعادة المحاولة", style: TextStyle(fontSize: 18)),
+              onPressed: () {
+                setState(() {
+                  currentQuestion = 0;
+                  correctCount = 0;
+                  selectedAnswer = '';
+                  showFeedback = false;
+                  showSummary = false;
                 });
-              }
-            },
-            child: Container(
-              margin: const EdgeInsets.symmetric(vertical: 10),
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: isSelected ? Colors.orange.shade100 : Colors.white,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: Colors.orange, width: 1.5),
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
               ),
-              child: Text(answer, style: const TextStyle(fontSize: 18)),
             ),
-          );
-        }).toList(),
-        const SizedBox(height: 16),
-        if (showFeedback)
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: feedbackColor.withOpacity(0.1),
-              border: Border.all(color: feedbackColor),
-              borderRadius: BorderRadius.circular(14),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.home, size: 20),
+              label: const Text("العودة إلى القصص",
+                  style: TextStyle(fontSize: 18)),
+              onPressed: () => Navigator.pop(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
+              ),
             ),
-            child: Text(
-              isCorrect ? "✅ إجابة صحيحة" : "❌ إجابة خاطئة",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: feedbackColor),
-              textAlign: TextAlign.center,
-            ),
-          ),
-      ],
-    ),
-  );
-}
+          ],
+        ),
+      );
+    }
 
-  Widget buildStoryTab() {
-  return Center(
-    child: Container(
+    final question = widget.questions[currentQuestion];
+    final correct = widget.correctAnswers[currentQuestion];
+    final options = generateOptions(correct);
+
+    return Padding(
       padding: const EdgeInsets.all(16),
-      margin: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFFF8E1),
-        border: Border.all(color: Colors.orange.shade200, width: 1.5),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
-      ),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
-            "📖 لنقرأ القصة معًا!",
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.orange),
-          ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: Colors.brown.shade50,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: Colors.brown.shade200),
-            ),
-            child: Text(
-              widget.storyText,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.brown),
-            ),
-          ),
+          Text("🧠 $question",
+              style:
+                  const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
           const SizedBox(height: 20),
-          ElevatedButton.icon(
-            icon: const Icon(Icons.volume_up, size: 22),
-            label: const Text("استمع للجملة", style: TextStyle(fontSize: 18)),
-            onPressed: () => speak(widget.storyText),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            ),
-          ),
-          const SizedBox(height: 12),
-          ElevatedButton.icon(
-            icon: const Icon(Icons.mic, size: 20),
-            label: const Text("قيّم نطقك", style: TextStyle(fontSize: 18)),
-            onPressed: evaluateStorySpeech,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            ),
-          ),
+          ...options.map((answer) {
+            final isSelected = selectedAnswer == answer;
+            final isAnswerCorrect = answer == correct;
+
+            return GestureDetector(
+              onTap: () async {
+                await flutterTts.stop();
+                setState(() {
+                  selectedAnswer = answer;
+                  isCorrect = isAnswerCorrect;
+                  showFeedback = true;
+                  if (isAnswerCorrect) correctCount++;
+                });
+
+                await speak(isAnswerCorrect ? "أحسنت!" : "حاول مرة أخرى");
+
+                if (isAnswerCorrect) {
+                  Future.delayed(const Duration(seconds: 2), () {
+                    if (currentQuestion < widget.questions.length - 1) {
+                      setState(() {
+                        currentQuestion++;
+                        selectedAnswer = '';
+                        showFeedback = false;
+                      });
+                    } else {
+                      setState(() => showSummary = true);
+                      speak("أحسنت، لقد أنهيت القصة بنجاح!");
+                    }
+                  });
+                }
+              },
+              child: Container(
+                margin: const EdgeInsets.symmetric(vertical: 10),
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: isSelected ? Colors.orange.shade100 : Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: Colors.orange, width: 1.5),
+                ),
+                child: Text(answer, style: const TextStyle(fontSize: 18)),
+              ),
+            );
+          }).toList(),
           const SizedBox(height: 16),
-          if (voiceFeedback.isNotEmpty)
+          if (showFeedback)
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: feedbackColor, width: 1.5),
                 color: feedbackColor.withOpacity(0.1),
+                border: Border.all(color: feedbackColor),
+                borderRadius: BorderRadius.circular(14),
               ),
               child: Text(
-                voiceFeedback,
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: feedbackColor),
+                isCorrect ? "✅ إجابة صحيحة" : "❌ إجابة خاطئة",
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: feedbackColor),
                 textAlign: TextAlign.center,
               ),
             ),
         ],
       ),
-    ),
-  );
-}
+    );
+  }
 
+  Widget buildStoryTab() {
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        margin: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFFF8E1),
+          border: Border.all(color: Colors.orange.shade200, width: 1.5),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              "📖 لنقرأ القصة معًا!",
+              style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.orange),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Colors.brown.shade50,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Colors.brown.shade200),
+              ),
+              child: Text(
+                widget.storyText,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.brown),
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.volume_up, size: 22),
+              label: const Text("استمع للجملة", style: TextStyle(fontSize: 18)),
+              onPressed: () => speak(widget.storyText),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
+              ),
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.mic, size: 20),
+              label: const Text("قيّم نطقك", style: TextStyle(fontSize: 18)),
+              onPressed: evaluateStorySpeech,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
+              ),
+            ),
+            const SizedBox(height: 16),
+            if (voiceFeedback.isNotEmpty)
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: feedbackColor, width: 1.5),
+                  color: feedbackColor.withOpacity(0.1),
+                ),
+                child: Text(
+                  voiceFeedback,
+                  style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: feedbackColor),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -346,24 +484,24 @@ class _ArabicLevel3ScreenState extends State<ArabicLevel3Screen> {
         length: 2,
         child: Scaffold(
           backgroundColor: const Color(0xFFFDF7E4),
-         appBar: AppBar(
-  backgroundColor: Colors.orange,
-  toolbarHeight: 56, // تصغير ارتفاع الشريط العلوي
-  title: Text(
-    widget.title,
-    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-    overflow: TextOverflow.ellipsis, // لتفادي خروج العنوان من الشاشة
-  ),
-  bottom: const TabBar(
-    labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-    indicatorWeight: 3,
-    tabs: [
-      Tab(text: "الجملة"),
-      Tab(text: "الأسئلة"),
-    ],
-  ),
-),
- body: TabBarView(
+          appBar: AppBar(
+            backgroundColor: Colors.orange,
+            toolbarHeight: 56, // تصغير ارتفاع الشريط العلوي
+            title: Text(
+              widget.title,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              overflow: TextOverflow.ellipsis, // لتفادي خروج العنوان من الشاشة
+            ),
+            bottom: const TabBar(
+              labelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              indicatorWeight: 3,
+              tabs: [
+                Tab(text: "الجملة"),
+                Tab(text: "الأسئلة"),
+              ],
+            ),
+          ),
+          body: TabBarView(
             children: [
               buildStoryTab(),
               buildQuestionTab(),

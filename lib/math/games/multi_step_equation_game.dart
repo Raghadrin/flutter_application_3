@@ -90,7 +90,6 @@ class _MultiStepEquationGameState extends State<MultiStepEquationGame>
         return;
       }
 
-      // Save to Firestore: example path 'parents/{parentId}/children/{childId}/scores'
       await FirebaseFirestore.instance
           .collection('parents')
           .doc(parentId)
