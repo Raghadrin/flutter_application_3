@@ -41,7 +41,7 @@ class SubjectLevelsScreen extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const SizedBox(height: 40),
-          Image.asset("images/subject_fox.jpg", height: screenWidth * 0.8),
+          Image.asset("images/subject_fox.jpg", height: screenWidth * 0.6),
           const SizedBox(height: 30),
           _buildLevelButton(context, tr('Practice')),
           _buildLevelButton(context, tr('Quiz')),

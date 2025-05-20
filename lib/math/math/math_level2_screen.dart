@@ -15,7 +15,7 @@ class MathLevel2Screen extends StatelessWidget {
 
   void _speak(String text) async {
     await tts.setLanguage("en-US");
-    await tts.setSpeechRate(0.4);
+    await tts.setSpeechRate(0.2);
     await tts.speak(text);
   }
 

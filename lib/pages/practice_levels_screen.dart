@@ -6,6 +6,9 @@ import 'package:flutter_application_3/letters/arabicLetter/levelOne/sentence_sel
 import 'package:flutter_application_3/letters/englishLetters/practice/english_level1_screen.dart';
 import 'package:flutter_application_3/letters/englishLetters/practice/english_level2_screen.dart';
 import 'package:flutter_application_3/letters/englishLetters/practice/english_level3_screen.dart';
+import 'package:flutter_application_3/letters/englishLetters/practice/sentence_eng_selection_level2_screen.dart';
+import 'package:flutter_application_3/letters/englishLetters/practice/sentence_eng_selection_level3_screen.dart';
+import 'package:flutter_application_3/letters/englishLetters/practice/sentence_eng_selection_screen.dart';
 import 'package:flutter_application_3/math/math/math_level1_screen.dart';
 import 'package:flutter_application_3/math/math/math_level2_screen.dart';
 import 'package:flutter_application_3/math/math/math_level3_screen.dart';
@@ -91,7 +94,7 @@ class PracticeLevelsScreen extends StatelessWidget {
             } else if (isEnglish) {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => EnglishLevel1Screen()),
+                MaterialPageRoute(builder: (context) => EnglishSentenceSelectionScreen()),
               );
             } else if (isMath) {
               Navigator.push(
@@ -109,7 +112,7 @@ class PracticeLevelsScreen extends StatelessWidget {
             } else if (isEnglish) {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => EnglishLevel2Screen()),
+                MaterialPageRoute(builder: (context) => EnglishSentenceSelectionLevel2Screen()),
               );
             } else if (isMath) {
               Navigator.push(
@@ -127,7 +130,7 @@ class PracticeLevelsScreen extends StatelessWidget {
             } else if (isEnglish) {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => EnglishLevel3Screen()),
+                MaterialPageRoute(builder: (context) => EnglishSentenceSelectionLevel3Screen()),
               );
             } else if (isMath) {
               Navigator.push(

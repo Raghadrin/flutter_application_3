@@ -103,7 +103,7 @@ class _TwoStepWordProblemGameState extends State<TwoStepWordProblemGame> {
 
   Future<void> _speak(String text) async {
     await tts.setLanguage("en-US");
-    await tts.setSpeechRate(0.45);
+    await tts.setSpeechRate(0.2);
     await tts.speak(text);
   }
 
@@ -112,7 +112,7 @@ class _TwoStepWordProblemGameState extends State<TwoStepWordProblemGame> {
     for (int i = 0; i < words.length; i++) {
       setState(() => currentSpokenWord = i);
       await _speak(words[i]);
-      await Future.delayed(const Duration(milliseconds: 500));
+      await Future.delayed(const Duration(milliseconds: 1000));
     }
     setState(() => currentSpokenWord = -1);
   }
