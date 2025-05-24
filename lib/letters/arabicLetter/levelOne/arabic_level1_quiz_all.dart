@@ -1,53 +1,53 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+import 'dart:async';
+import 'dart:math';
 
-class ArabicQuizWithSentenceEvaluation extends StatefulWidget {
-  const ArabicQuizWithSentenceEvaluation({super.key});
+class ArabicLevel1QuizScreen extends StatefulWidget {
+  const ArabicLevel1QuizScreen({super.key});
 
   @override
-  State<ArabicQuizWithSentenceEvaluation> createState() =>
-      _ArabicQuizWithSentenceEvaluationState();
+  State<ArabicLevel1QuizScreen> createState() => _ArabicLevel1QuizScreenState();
 }
 
-class _ArabicQuizWithSentenceEvaluationState
-    extends State<ArabicQuizWithSentenceEvaluation> {
+class _ArabicLevel1QuizScreenState extends State<ArabicLevel1QuizScreen> {
   final FlutterTts flutterTts = FlutterTts();
   final stt.SpeechToText speech = stt.SpeechToText();
 
-  int currentQuestionIndex = 0;
-  bool answered = false;
+  int currentIndex = 0;
+  int score = 0;
+  String recognizedText = '';
   String feedback = '';
   Color feedbackColor = Colors.transparent;
-  String recognizedText = '';
-  String sentenceEvaluation = '';
-  int totalCorrect = 0;
+  Timer? _timer;
+  int timeLeft = 30;
+  bool isSpeaking = false;
+  bool answerSubmitted = false;
 
-  final List<Map<String, dynamic>> quizData = [
+  final List<Map<String, dynamic>> questions = [
+    {"type": "speech", "text": "القطة نائمة على السرير"},
+    {"type": "speech", "text": "أكل سامي تفاحة حمراء"},
+    {"type": "speech", "text": "قرأت مريم كتابًا مفيدًا"},
     {
-      "sentence": "الولد يرسم صورة جميلة",
-      "question": "ما هي أول كلمة في الجملة؟",
-      "options": ["الولد", "يرسم", "صورة"],
-      "answer": "الولد"
+      "type": "choice",
+      "question": "ما أول حرف في كلمة \"تفاحة\"؟",
+      "options": ["ت", "ب", "ن"],
+      "answer": "ت"
     },
     {
-      "sentence": "السماء زرقاء وصافية اليوم",
-      "question": "ما هي الكلمة التي تدل على اللون؟",
-      "options": ["زرقاء", "اليوم", "وصافية"],
-      "answer": "زرقاء"
+      "type": "choice",
+      "question": "أي كلمة تدل على مكان؟",
+      "options": ["مدرسة", "يأكل", "سعيد"],
+      "answer": "مدرسة"
     },
     {
-      "sentence": "أحضرت فاطمة حقيبتها إلى المدرسة",
-      "question": "من أحضر الحقيبة؟",
-      "options": ["فاطمة", "حقيبة", "مدرسة"],
-      "answer": "فاطمة"
+      "type": "missing_word",
+      "sentence": "ذهب الولد إلى ____",
+      "options": ["البيت", "يأكل", "يلعب"],
+      "answer": "البيت"
     },
-    {
-      "sentence": "جلس القط على الكرسي",
-      "question": "أين جلس القط؟",
-      "options": ["على الكرسي", "في الغرفة", "تحت الطاولة"],
-      "answer": "على الكرسي"
-    }
+   
   ];
 
   @override
@@ -55,269 +55,381 @@ class _ArabicQuizWithSentenceEvaluationState
     super.initState();
     flutterTts.setLanguage("ar-SA");
     flutterTts.setSpeechRate(0.4);
+    _speak("استمع وأجب عن الأسئلة");
+    startTimer();
   }
 
-  Future<void> speak(String text) async {
+  void startTimer() {
+    _timer?.cancel();
+    timeLeft = 30;
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (timeLeft > 0) {
+        setState(() => timeLeft--);
+      } else {
+        _nextQuestion();
+      }
+    });
+  }
+
+  Future<void> _speak(String text) async {
+    setState(() => isSpeaking = true);
     await flutterTts.stop();
     await flutterTts.speak(text);
+    await Future.delayed(Duration(seconds: text.length ~/ 5));
+    setState(() => isSpeaking = false);
   }
 
-  void checkAnswer(String selected, String correct) {
-    final isCorrect = normalize(selected) == normalize(correct);
-    if (isCorrect) totalCorrect++;
-    setState(() {
-      answered = true;
-      feedback = isCorrect ? "أحسنت! ✅" : "إجابة خاطئة ❌";
-      feedbackColor = isCorrect ? Colors.green : Colors.red;
-    });
-    speak(feedback);
-  }
+  Future<void> _evaluateSpeech(String expected) async {
+    if (isSpeaking || answerSubmitted) return;
+    
+    bool available = await speech.initialize();
+    if (!available) return;
 
- 
-String normalize(String text) {
-  return text
-      .trim()
-      .replaceAll('أ', 'ا')
-      .replaceAll('إ', 'ا')
-      .replaceAll('آ', 'ا')
-      .replaceAll('ة', 'ه')
-      .replaceAll(RegExp(r'[^\u0600-\u06FF\s]'), ''); // إزالة الرموز
-}
-
-
-  Future<void> evaluateSpokenSentence(String expectedSentence) async {
-  bool available = await speech.initialize();
-  if (!available) {
-    setState(() {
-      sentenceEvaluation = "❌ الميكروفون غير متاح";
-      feedbackColor = Colors.red;
-    });
-    return;
-  }
-
-  setState(() {
     recognizedText = '';
-    sentenceEvaluation = "🎙 جاري الاستماع لمدة 5 ثوانٍ...";
-    feedbackColor = Colors.orange;
-  });
+    speech.listen(
+      localeId: 'ar_SA',
+      partialResults: false,
+      onResult: (val) async {
+        recognizedText = val.recognizedWords;
+        final spoken = normalizeArabic(recognizedText.trim());
+        final correct = normalizeArabic(expected.trim());
 
-  await speech.listen(
-    localeId: 'ar_SA',
-    partialResults: false,
-    onResult: (val) {
-      recognizedText = val.recognizedWords;
-      print("👂 تم التعرف على: $recognizedText");
-    },
-  );
+        final percentage = calculateSimilarityPercentage(correct, spoken);
+        final color = percentage >= 80 ? Colors.green : Colors.red;
 
-  // ⏳ انتظر 5 ثوانٍ
-  await Future.delayed(const Duration(seconds: 10));
-  await speech.stop();
+        setState(() {
+          feedback = "$percentage%";
+          feedbackColor = color;
+          answerSubmitted = true;
+        });
 
-  final expected = normalize(expectedSentence);
-  final spoken = normalize(recognizedText);
+        await Future.delayed(const Duration(milliseconds: 300));
+        await _speak("أحرزت $percentage بالمئة");
 
-  int score = calculateAccuracy(spoken, expected);
-
-  setState(() {
-    sentenceEvaluation = "📊 دقتك: $score%\n🗣 ما قلته: $recognizedText";
-    feedbackColor = score >= 80 ? Colors.green : Colors.red;
-  });
-
-  if (score >= 80) {
-    speak("قراءة ممتازة!");
-  } else {
-    speak("حاول مرة أخرى");
+        if (percentage >= 80) {
+          score++;
+        }
+      },
+    );
   }
-}
 
- int calculateAccuracy(String spoken, String expected) {
-  spoken = spoken.trim();
-  expected = expected.trim();
+  void _evaluateChoice(String selected, String correct) async {
+    if (answerSubmitted) return;
+    
+    final isCorrect = selected == correct;
+    final color = isCorrect ? Colors.green : Colors.red;
 
-  int m = spoken.length;
-  int n = expected.length;
+    setState(() {
+      feedback = isCorrect ? "إجابة صحيحة!" : "إجابة خاطئة";
+      feedbackColor = color;
+      answerSubmitted = true;
+    });
 
-  if (m == 0 || n == 0) return 0;
+    await _speak(feedback);
+    if (isCorrect) {
+      score++;
+    }
+  }
 
-  List<List<int>> dp = List.generate(m + 1, (_) => List.filled(n + 1, 0));
+  void _nextQuestion() {
+    _timer?.cancel();
+    setState(() {
+      currentIndex++;
+      feedback = '';
+      feedbackColor = Colors.transparent;
+      answerSubmitted = false;
+    });
+    
+    if (currentIndex < questions.length) {
+      startTimer();
+    } else {
+      _showResult();
+    }
+  }
 
-  for (int i = 0; i <= m; i++) {
-    for (int j = 0; j <= n; j++) {
-      if (i == 0) {
-        dp[i][j] = j;
-      } else if (j == 0) {
-        dp[i][j] = i;
-      } else if (spoken[i - 1] == expected[j - 1]) {
-        dp[i][j] = dp[i - 1][j - 1];
-      } else {
-        dp[i][j] = 1 + [
-          dp[i - 1][j],     // حذف
-          dp[i][j - 1],     // إدراج
-          dp[i - 1][j - 1]  // استبدال
+  void _skipQuestion() {
+    _nextQuestion();
+  }
+
+  void _showResult() {
+    String message;
+    if (score == questions.length) {
+      message = "ممتاز! 🌟";
+    } else if (score >= questions.length * 0.7) {
+      message = "جيد جدًا! 👍";
+    } else if (score >= questions.length * 0.4) {
+      message = "جيد، يمكنك التحسن 💪";
+    } else {
+      message = "لا بأس، حاول مجددًا!";
+    }
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("🌟 النتيجة النهائية", textAlign: TextAlign.center),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              "أحرزت $score من ${questions.length}",
+              style: const TextStyle(fontSize: 22),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 10),
+            Text(
+              message,
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              setState(() {
+                currentIndex = 0;
+                score = 0;
+                feedback = '';
+                feedbackColor = Colors.transparent;
+                answerSubmitted = false;
+              });
+              _speak("لنبدأ من جديد");
+              startTimer();
+            },
+            child: const Text("إعادة المحاولة", style: TextStyle(fontSize: 20)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("العودة", style: TextStyle(fontSize: 20)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String normalizeArabic(String input) {
+    return input
+        .replaceAll('ة', 'ه')
+        .replaceAll(RegExp(r'[ًٌٍ]'), '')
+        .replaceAll('ئ', 'ي')
+        .replaceAll('أ', 'ا')
+        .replaceAll('إ', 'ا')
+        .replaceAll('آ', 'ا');
+  }
+
+  int calculateSimilarityPercentage(String expected, String spoken) {
+    final int distance = levenshtein(expected, spoken);
+    final int maxLength = expected.length > 0 ? expected.length : 1;
+    return (((1 - (distance / maxLength)) * 100).round()).clamp(0, 100);
+  }
+
+  int levenshtein(String s, String t) {
+    if (s == t) return 0;
+    if (s.isEmpty) return t.length;
+    if (t.isEmpty) return s.length;
+
+    List<List<int>> matrix = List.generate(
+      s.length + 1,
+      (_) => List.filled(t.length + 1, 0),
+    );
+
+    for (int i = 0; i <= s.length; i++) matrix[i][0] = i;
+    for (int j = 0; j <= t.length; j++) matrix[0][j] = j;
+
+    for (int i = 1; i <= s.length; i++) {
+      for (int j = 1; j <= t.length; j++) {
+        int cost = s[i - 1] == t[j - 1] ? 0 : 1;
+        matrix[i][j] = [
+          matrix[i - 1][j] + 1,
+          matrix[i][j - 1] + 1,
+          matrix[i - 1][j - 1] + cost
         ].reduce((a, b) => a < b ? a : b);
       }
     }
+
+    return matrix[s.length][t.length];
   }
 
-  int distance = dp[m][n];
-  double similarity = (1 - distance / n);
-  return (similarity * 100).clamp(0, 100).toInt();
-}
+  Widget _buildMissingWordQuestion(Map<String, dynamic> question) {
+    return Column(
+      children: [
+        Text(
+          "املأ الفراغ بالكلمة الصحيحة:",
+          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 20),
+        Text(
+          question['sentence'],
+          style: const TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            color: Colors.brown,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 30),
+        ...List.generate(question['options'].length, (i) {
+          final option = question['options'][i];
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: ElevatedButton(
+              onPressed: () => _evaluateChoice(option, question['answer']),
+              child: Text(option, style: const TextStyle(fontSize: 24)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.purple.shade100,
+                minimumSize: const Size.fromHeight(60),
+              ),
+            ),
+          );
+        }),
+      ],
+    );
+  }
+
+  
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    flutterTts.stop();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (currentQuestionIndex >= quizData.length) {
-      return Scaffold(
-        backgroundColor: Colors.orange.shade50,
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text("🎉 تم الانتهاء من الكويز!",
-                  style: TextStyle(fontSize: 28, color: Colors.orange)),
-              const SizedBox(height: 20),
-              Text("نتيجتك: $totalCorrect من ${quizData.length}",
-                  style: const TextStyle(fontSize: 24, color: Colors.brown)),
-              const SizedBox(height: 30),
-              ElevatedButton.icon(
-                icon: const Icon(Icons.refresh),
-                label: const Text("إعادة المحاولة",
-                    style: TextStyle(fontSize: 20)),
-                onPressed: () {
-                  setState(() {
-                    currentQuestionIndex = 0;
-                    answered = false;
-                    feedback = '';
-                    totalCorrect = 0;
-                    sentenceEvaluation = '';
-                  });
-                },
-                style:
-                    ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-              )
-            ],
-          ),
-        ),
-      );
-    }
-
-    final current = quizData[currentQuestionIndex];
-    final sentence = current["sentence"];
-    final question = current["question"];
-    final options = current["options"] as List<String>;
-    final correctAnswer = current["answer"];
+    final current = questions[currentIndex];
 
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: Colors.orange.shade50,
+        backgroundColor: const Color(0xFFFFF8E1),
         appBar: AppBar(
-          backgroundColor: Colors.orange,
-          title: const Text("كويز الجمل", style: TextStyle(fontSize: 24)),
+          title: const Text("📝 كويز المستوى 1", style: TextStyle(fontSize: 26)),
           centerTitle: true,
+          backgroundColor: Colors.orange,
         ),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text("📘 $sentence",
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                        fontSize: 26, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 16),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.volume_up),
-                  label: const Text("تشغيل الجملة"),
-                  onPressed: () => speak(sentence),
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 24, vertical: 14)),
+                Text(
+                  "السؤال ${currentIndex + 1} من ${questions.length}",
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 24),
-                Text(question,
-                    textAlign: TextAlign.center,
+                const SizedBox(height: 10),
+                Text(
+                  "⏰ الوقت المتبقي: $timeLeft ثانية",
+                  style: TextStyle(color: timeLeft < 10 ? Colors.red : Colors.grey[700], fontSize: 18),
+                ),
+                const SizedBox(height: 20),
+                if (current['type'] == 'speech') ...[
+                  Text(
+                    current['text'],
                     style: const TextStyle(
-                        fontSize: 22, fontWeight: FontWeight.w600)),
-                const SizedBox(height: 16),
-                Wrap(
-                  spacing: 12,
-                  alignment: WrapAlignment.center,
-                  children: options.map((option) {
-                    return ElevatedButton(
-                      onPressed: () => checkAnswer(option, correctAnswer),
-                      child:
-                          Text(option, style: const TextStyle(fontSize: 22)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange.shade100,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 24, vertical: 14),
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.brown,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.volume_up, size: 28),
+                    label: const Text("استمع للجملة", style: TextStyle(fontSize: 22)),
+                    onPressed: () => _speak(current['text']),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
+                      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 16),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.mic, size: 28),
+                    label: const Text("أجب بصوتك", style: TextStyle(fontSize: 22)),
+                    onPressed: () => _evaluateSpeech(current['text']),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepOrangeAccent,
+                      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 16),
+                    ),
+                  ),
+                ] else if (current['type'] == 'choice') ...[
+                  Text(
+                    current['question'],
+                    style: const TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.brown,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  ...List.generate(current['options'].length, (i) {
+                    final option = current['options'][i];
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: ElevatedButton(
+                        onPressed: () => _evaluateChoice(option, current['answer']),
+                        child: Text(option, style: const TextStyle(fontSize: 24)),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orange.shade100,
+                          minimumSize: const Size.fromHeight(60),
+                        ),
                       ),
                     );
-                  }).toList(),
-                ),
+                  }),
+                ] else if (current['type'] == 'missing_word') ...[
+                  _buildMissingWordQuestion(current),
+                 ],
                 const SizedBox(height: 20),
                 if (feedback.isNotEmpty)
                   AnimatedContainer(
                     duration: const Duration(milliseconds: 300),
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      border: Border.all(color: feedbackColor, width: 2),
                       color: feedbackColor.withOpacity(0.1),
-                      border: Border.all(color: feedbackColor),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(feedback,
-                        style: TextStyle(fontSize: 22, color: feedbackColor)),
-                  ),
-                const SizedBox(height: 20),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.mic),
-                  label: const Text("سجّل الجملة",
-                      style: TextStyle(fontSize: 20)),
-                  onPressed: () => evaluateSpokenSentence(sentence),
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepOrange,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 24, vertical: 14)),
-                ),
-                const SizedBox(height: 12),
-                if (sentenceEvaluation.isNotEmpty)
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    margin: const EdgeInsets.symmetric(horizontal: 8),
-                    decoration: BoxDecoration(
-                      color: feedbackColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      sentenceEvaluation,
+                      feedback,
+                      style: TextStyle(
+                        color: feedbackColor,
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold),
                       textAlign: TextAlign.center,
-                      style:
-                          TextStyle(fontSize: 20, color: feedbackColor),
                     ),
                   ),
-                const SizedBox(height: 24),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.arrow_forward),
-                  label: const Text("السؤال التالي",
-                      style: TextStyle(fontSize: 20)),
-                  onPressed: () {
-                    setState(() {
-                      currentQuestionIndex++;
-                      answered = false;
-                      feedback = '';
-                      sentenceEvaluation = '';
-                      recognizedText = '';
-                    });
-                  },
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 24, vertical: 14)),
-                ),
+                const Spacer(),
+                if (answerSubmitted || feedback.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 15),
+                    child: ElevatedButton(
+                      onPressed: _nextQuestion,
+                      child: const Text("التالي", style: TextStyle(fontSize: 22)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 16),
+                      ),
+                    ),
+                  ),
+                if (!answerSubmitted && feedback.isEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 30),
+                    child: ElevatedButton(
+                      onPressed: _skipQuestion,
+                      child: const Text("تخطي السؤال", style: TextStyle(fontSize: 22)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey,
+                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),

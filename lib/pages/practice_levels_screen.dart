@@ -86,7 +86,7 @@ class PracticeLevelsScreen extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => SentenceSelectionScreen()),
+                    builder: (context) => ArabicLevel1HomeScreen()),
               );
             } else if (isEnglish) {
               Navigator.push(
@@ -105,7 +105,7 @@ class PracticeLevelsScreen extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => SentenceSelectionLevel2Screen()),
+                    builder: (context) => ArabicLevel2HomeScreen()),
               );
             } else if (isEnglish) {
               Navigator.push(
@@ -125,7 +125,7 @@ class PracticeLevelsScreen extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => SentenceSelectionLevel3Screen()),
+                    builder: (context) => ArabicLevel3HomeScreen()),
               );
             } else if (isEnglish) {
               Navigator.push(

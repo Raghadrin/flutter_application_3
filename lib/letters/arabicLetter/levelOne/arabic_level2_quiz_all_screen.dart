@@ -6,346 +6,291 @@ class ArabicLevel2QuizAllScreen extends StatefulWidget {
   const ArabicLevel2QuizAllScreen({super.key});
 
   @override
-  State<ArabicLevel2QuizAllScreen> createState() =>
-      _ArabicLevel2QuizAllScreenState();
+  State<ArabicLevel2QuizAllScreen> createState() => _ArabicLevel2QuizAllScreenState();
 }
 
 class _ArabicLevel2QuizAllScreenState extends State<ArabicLevel2QuizAllScreen> {
   final FlutterTts flutterTts = FlutterTts();
   final stt.SpeechToText speech = stt.SpeechToText();
 
-  int currentStep = 0;
+  int currentIndex = 0;
   int score = 0;
+  bool showResult = false;
   String feedback = '';
   Color feedbackColor = Colors.transparent;
   String recognizedText = '';
-  String sentenceEvaluation = '';
 
-  final List<Map<String, String>> sightWords = [
-    {"correct": "قطار", "wrong": "قطر"},
-    {"correct": "تفاحة", "wrong": "تفاحه"},
-    {"correct": "مدرسة", "wrong": "مدرصة"},
+  final List<Map<String, dynamic>> questions = [
+    {
+      "type": "speech",
+      "text": "السيارة الحمراء توقفت عند الإشارة الحمراء احترامًا للقانون",
+    },
+    {
+      "type": "choice",
+      "sound": "نشاط",
+      "question": "📢 ما الكلمة الصحيحة التي سمعتها؟",
+      "options": ["نشاط", "نشاطا", "نشط"],
+      "answer": "نشاط"
+    },
+    {
+      "type": "letters",
+      "word": "مطار",
+      "question": "✍️ رتب الحروف لتكون الكلمة:"
+    },
+    {
+      "type": "first_letter",
+      "word": "مدرسة",
+      "question": "❓ ما هو أول حرف في الكلمة مدرسة ؟",
+      "options": ["م", "د", "ب"],
+      "answer": "م"
+    },
   ];
-
-  final List<String> assemblyWords = ["مطار", "كتاب", "حقيبة"];
-
-  final List<String> sentenceQuiz = [
-    "السيارة الحمراء توقفت عند الإشارة الحمراء احترامًا للقانون",
-    "الولد المجتهد يذهب إلى المدرسة كل صباح بنشاط",
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    flutterTts.setLanguage("ar-SA");
-  }
 
   Future<void> speak(String text) async {
-    await flutterTts.stop();
+    await flutterTts.setLanguage("ar-SA");
+    await flutterTts.setSpeechRate(0.4);
     await flutterTts.speak(text);
   }
 
-  String normalize(String text) {
-    return text
-        .replaceAll('أ', 'ا')
-        .replaceAll('إ', 'ا')
-        .replaceAll('آ', 'ا')
-        .replaceAll('ة', 'ه')
-        .trim();
-  }
-
-  int calculateAccuracy(String a, String b) {
-    final m = a.length, n = b.length;
-    if (m == 0 || n == 0) return 0;
-    final dp = List.generate(m + 1, (_) => List.filled(n + 1, 0));
-
-    for (int i = 0; i <= m; i++) {
-      for (int j = 0; j <= n; j++) {
-        if (i == 0)
-          dp[i][j] = j;
-        else if (j == 0)
-          dp[i][j] = i;
-        else if (a[i - 1] == b[j - 1])
-          dp[i][j] = dp[i - 1][j - 1];
-        else
-          dp[i][j] = 1 +
-              [dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]]
-                  .reduce((x, y) => x < y ? x : y);
-      }
-    }
-
-    final distance = dp[m][n];
-    return ((1 - distance / n) * 100).clamp(0, 100).toInt();
-  }
-
-  Future<void> evaluateSentence(String expected) async {
+  Future<void> evaluateSpeech(String expected) async {
     bool available = await speech.initialize();
     if (!available) return;
 
-    setState(() {
-      sentenceEvaluation = "🎤 جاري التسجيل...";
-      feedbackColor = Colors.orange;
-    });
-
-    await speech.listen(
+    speech.listen(
       localeId: 'ar_SA',
       partialResults: false,
       onResult: (val) {
         recognizedText = val.recognizedWords;
+        bool isCorrect = recognizedText.trim() == expected.trim();
+        setState(() {
+          feedback = isCorrect ? "✅ أحسنت!" : "❌ حاول مرة أخرى";
+          feedbackColor = isCorrect ? Colors.green : Colors.red;
+          if (isCorrect) score++;
+        });
       },
     );
+  }
 
-    for (int i = 5; i > 0; i--) {
-      await Future.delayed(const Duration(seconds: 1));
-      setState(() {
-        sentenceEvaluation = "⏳ التسجيل ينتهي خلال: $i ثوانٍ";
-      });
-    }
-
-    await speech.stop();
-
-    final spoken = normalize(recognizedText);
-    final expectedNorm = normalize(expected);
-    final accuracy = calculateAccuracy(spoken, expectedNorm);
-
+  void evaluateChoice(String selected, String correct) {
+    final isCorrect = selected == correct;
     setState(() {
-      sentenceEvaluation = "📊 دقتك: $accuracy%\n🗣 ما قلته: $recognizedText";
-      feedbackColor = accuracy >= 80 ? Colors.green : Colors.red;
+      feedback = isCorrect ? "✅ إجابة صحيحة" : "❌ إجابة خاطئة";
+      feedbackColor = isCorrect ? Colors.green : Colors.red;
+      if (isCorrect) score++;
     });
-
-    if (accuracy >= 80) {
-      score++;
-      speak("أحسنت!");
-    } else {
-      speak("حاول مرة أخرى");
-    }
   }
 
-  Widget buildSightQuestion() {
-    final data = sightWords[currentStep];
-    final options = [data["correct"]!, data["wrong"]!]..shuffle();
-
-    return Column(
-      children: [
-        const Text("🎧 استمع للكلمة واختر الصحيحة",
-            style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 20),
-        ElevatedButton.icon(
-          icon: const Icon(Icons.volume_up),
-          label: const Text("تشغيل", style: TextStyle(fontSize: 20)),
-          onPressed: () => speak(data["correct"]!),
-          style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange, padding: const EdgeInsets.all(16)),
-        ),
-        const SizedBox(height: 24),
-        ...options.map((word) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 6),
-            child: ElevatedButton(
-              onPressed: () {
-                final correct = word == data["correct"];
-                setState(() {
-                  feedback = correct ? "✅ صحيح!" : "❌ خطأ";
-                  feedbackColor = correct ? Colors.green : Colors.red;
-                });
-                if (correct) score++;
-                speak(feedback);
-              },
-              child: Text(word, style: const TextStyle(fontSize: 26)),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange.shade100,
-                minimumSize: const Size(double.infinity, 60),
-              ),
-            ),
-          );
-        }),
-      ],
-    );
-  }
-
-  Widget buildAssemblyQuestion() {
-    final word = assemblyWords[currentStep - sightWords.length];
-    List<String> letters = word.split('')..shuffle();
+  Widget buildLettersGame(String word) {
+    List<String> letters = word.split('');
+    letters.shuffle();
     List<String> selected = [];
 
-    return StatefulBuilder(builder: (context, setStateLocal) {
+    return StatefulBuilder(builder: (context, setLocalState) {
       return Column(
         children: [
-          const Text("🧩 رتب الحروف لتكوين الكلمة",
-              style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 16),
-          ElevatedButton.icon(
-            icon: const Icon(Icons.volume_up),
-            label: const Text("تشغيل الكلمة", style: TextStyle(fontSize: 20)),
-            onPressed: () => speak(word),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-          ),
-          const SizedBox(height: 16),
           Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: letters.map((l) {
+            spacing: 10,
+            runSpacing: 10,
+            alignment: WrapAlignment.center,
+            children: letters.map((char) {
               return ElevatedButton(
                 onPressed: () {
-                  setStateLocal(() {
-                    selected.add(l);
-                    letters.remove(l);
+                  setLocalState(() {
+                    selected.add(char);
+                    letters.remove(char);
                   });
                 },
-                child: Text(l, style: const TextStyle(fontSize: 28)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orange.shade100,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 ),
+                child: Text(char, style: const TextStyle(fontSize: 28)),
               );
             }).toList(),
           ),
           const SizedBox(height: 20),
           Wrap(
-            spacing: 8,
-            children: selected
-                .map((c) => Chip(label: Text(c, style: const TextStyle(fontSize: 26))))
-                .toList(),
+            spacing: 10,
+            alignment: WrapAlignment.center,
+            children: selected.map((c) => Chip(label: Text(c, style: const TextStyle(fontSize: 24)))).toList(),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
           ElevatedButton(
-            child: const Text("تحقق", style: TextStyle(fontSize: 20)),
             onPressed: () {
-              final isCorrect = selected.join() == word;
+              final attempt = selected.join();
+              final isCorrect = attempt == word;
               setState(() {
-                feedback = isCorrect ? "✅ ممتاز" : "❌ حاول مرة أخرى";
+                feedback = isCorrect ? "✅ ممتاز!" : "❌ خطأ";
                 feedbackColor = isCorrect ? Colors.green : Colors.red;
+                if (isCorrect) score++;
               });
-              if (isCorrect) score++;
-              speak(feedback);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.green,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             ),
-          )
+            child: const Text("تحقق", style: TextStyle(fontSize: 24)),
+          ),
         ],
       );
     });
   }
 
-  Widget buildSentenceQuestion(int index) {
-    final sentence = sentenceQuiz[index];
-    return Column(
-      children: [
-        const Text("🗣 قم بقراءة الجملة التالية",
-            style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 16),
-        Text(
-          sentence,
-          style: const TextStyle(fontSize: 28, color: Colors.brown),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 24),
-        ElevatedButton.icon(
-          icon: const Icon(Icons.volume_up),
-          label: const Text("تشغيل الجملة", style: TextStyle(fontSize: 20)),
-          onPressed: () => speak(sentence),
-          style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-        ),
-        const SizedBox(height: 20),
-        ElevatedButton.icon(
-          icon: const Icon(Icons.mic),
-          label: const Text("ابدأ التسجيل", style: TextStyle(fontSize: 20)),
-          onPressed: () => evaluateSentence(sentence),
-          style: ElevatedButton.styleFrom(backgroundColor: Colors.deepOrange),
-        ),
-        const SizedBox(height: 16),
-        if (sentenceEvaluation.isNotEmpty)
-          Text(sentenceEvaluation,
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 20, color: feedbackColor)),
-      ],
-    );
+  Widget buildCurrentQuestion() {
+    final q = questions[currentIndex];
+
+    switch (q["type"]) {
+      case "speech":
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(q["text"], textAlign: TextAlign.center, style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 30),
+            ElevatedButton(
+              onPressed: () => speak(q["text"]),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              ),
+              child: const Text("🔊 استمع للجملة", style: TextStyle(fontSize: 24)),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => evaluateSpeech(q["text"]),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepOrange,
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              ),
+              child: const Text("🎙️ سجّل نطقك", style: TextStyle(fontSize: 24)),
+            ),
+          ],
+        );
+      case "choice":
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(q["question"], style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              onPressed: () => speak(q["sound"]),
+              icon: const Icon(Icons.volume_up),
+              label: const Text("🔊 استمع للكلمة", style: TextStyle(fontSize: 22)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange.shade200,
+                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ...q["options"].map<Widget>((option) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: ElevatedButton(
+                  onPressed: () => evaluateChoice(option, q["answer"]),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange.shade100,
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    minimumSize: const Size(double.infinity, 60),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: const BorderSide(color: Colors.orange),
+                    ),
+                  ),
+                  child: Text(option, style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+                ),
+              );
+            }).toList()
+          ],
+        );
+      case "letters":
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(q["question"], style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 20),
+            buildLettersGame(q["word"]),
+          ],
+        );
+      case "first_letter":
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(q["question"], style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 20),
+            ...q["options"].map<Widget>((letter) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 6),
+                child: ElevatedButton(
+                  onPressed: () => evaluateChoice(letter, q["answer"]),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange.shade100,
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    minimumSize: const Size(double.infinity, 60),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: const BorderSide(color: Colors.orange),
+                    ),
+                  ),
+                  child: Text(letter, style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
+                ),
+              );
+            }).toList()
+          ],
+        );
+      default:
+        return const Text("Unknown question type");
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final totalSteps = sightWords.length + assemblyWords.length + sentenceQuiz.length;
-
-    if (currentStep >= totalSteps) {
-      return Scaffold(
-        backgroundColor: const Color(0xFFFFF8E1),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Text("🎉 انتهيت من الكويز!",
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 20),
-              Text("نتيجتك: $score من $totalSteps",
-                  style: const TextStyle(fontSize: 24, color: Colors.brown)),
-              const SizedBox(height: 30),
-              ElevatedButton.icon(
-                icon: const Icon(Icons.replay),
-                label: const Text("إعادة", style: TextStyle(fontSize: 20)),
-                onPressed: () {
-                  setState(() {
-                    currentStep = 0;
-                    score = 0;
-                    feedback = '';
-                    sentenceEvaluation = '';
-                  });
-                },
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    Widget content;
-    if (currentStep < sightWords.length) {
-      content = buildSightQuestion();
-    } else if (currentStep < sightWords.length + assemblyWords.length) {
-      content = buildAssemblyQuestion();
-    } else {
-      final index = currentStep - sightWords.length - assemblyWords.length;
-      content = buildSentenceQuestion(index);
-    }
-
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF8E1),
+      backgroundColor: const Color(0xFFFFF3E0),
       appBar: AppBar(
+        title: const Text("اختبار المستوى الثاني", style: TextStyle(fontSize: 26)),
         backgroundColor: Colors.orange,
-        title: const Text("الكويز الشامل - المستوى 2"),
         centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            content,
-            const SizedBox(height: 20),
-            if (feedback.isNotEmpty)
-              Text(feedback,
-                  style: TextStyle(fontSize: 24, color: feedbackColor)),
-            const Spacer(),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.arrow_forward),
-              label: const Text("التالي", style: TextStyle(fontSize: 22)),
-              onPressed: () {
-                setState(() {
-                  currentStep++;
-                  feedback = '';
-                  sentenceEvaluation = '';
-                  recognizedText = '';
-                });
-              },
-              style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 24, vertical: 14)),
-            ),
-          ],
+        child: Center(
+          child: showResult
+              ? Text("🎉 نتيجتك: $score من ${questions.length}",
+                  style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.green))
+              : Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Expanded(child: buildCurrentQuestion()),
+                    const SizedBox(height: 24),
+                    Text(feedback, style: TextStyle(fontSize: 26, color: feedbackColor, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      icon: const Icon(Icons.arrow_forward),
+                      onPressed: () {
+                        if (currentIndex < questions.length - 1) {
+                          setState(() {
+                            currentIndex++;
+                            feedback = '';
+                            feedbackColor = Colors.transparent;
+                          });
+                        } else {
+                          setState(() => showResult = true);
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blueAccent,
+                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                      ),
+                      label: const Text("التالي", style: TextStyle(fontSize: 24)),
+                    ),
+                  ],
+                ),
         ),
       ),
     );

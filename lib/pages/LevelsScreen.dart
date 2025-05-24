@@ -60,7 +60,7 @@ class LevelsScreen extends StatelessWidget {
       ];
     } else if (subject == "Arabic") {
       return [
-        {"title": "Letters", "screen": SentenceSelectionScreen()},
+        {"title": "Letters", "screen": ArabicLevel1HomeScreen()},
       ];
     } else if (subject == "Mathematics") {
       return [

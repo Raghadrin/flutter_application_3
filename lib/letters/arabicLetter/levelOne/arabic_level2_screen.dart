@@ -395,8 +395,8 @@ Widget buildDoubleDeficitGameList() {
       tabs: [
               Tab(text: 'الحروف'),
               Tab(text: 'الجملة'),
-              Tab(text: 'السمع والتركيب'),
-              Tab(text: 'تمييز الكلمة'),
+              Tab(text: 'التركيب'),
+              Tab(text: 'تمييز '),
             ],
           
 

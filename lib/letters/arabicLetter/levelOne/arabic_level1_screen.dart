@@ -56,36 +56,72 @@ class _ArabicLevel1ScreenState extends State<ArabicLevel1Screen> {
   }
 
   Future<void> evaluateWord(String expectedWord, int wordIndex) async {
-    bool available = await speech.initialize();
-    if (!available) return;
-    setState(() {
-      recognizedText = '';
-      feedbackColor = Colors.transparent;
-    });
+  bool available = await speech.initialize();
+  if (!available) return;
 
-    speech.listen(
-      localeId: 'ar_SA',
-      partialResults: false,
-      onResult: (val) async {
-        recognizedText = val.recognizedWords;
+  setState(() {
+    recognizedText = '';
+    feedbackColor = Colors.transparent;
+  });
 
-        final spoken = normalizeArabic(recognizedText.trim());
-        final expected = normalizeArabic(expectedWord.trim());
+  speech.listen(
+    localeId: 'ar_SA',
+    partialResults: false,
+    onResult: (val) async {
+      recognizedText = val.recognizedWords;
+      final spoken = normalizeArabic(recognizedText.trim());
+      final expected = normalizeArabic(expectedWord.trim());
 
-        final isCorrect = spoken == expected;
-        final result = isCorrect ? '100%' : '0%';
-        final color = isCorrect ? Colors.green : Colors.red;
+      final percentage = calculateSimilarityPercentage(expected, spoken);
+      final color = percentage >= 80 ? Colors.green : Colors.red;
 
-        setState(() {
-          feedbackColor = color;
-          feedbackPerWord[wordIndex] = result;
-        });
+      setState(() {
+        feedbackColor = color;
+        feedbackPerWord[wordIndex] = "$percentage%";
+      });
 
-        await Future.delayed(const Duration(milliseconds: 500));
-        await speak(isCorrect ? "أحسنت!" : "حاول مرة تانية");
-      },
-    );
+      await Future.delayed(const Duration(milliseconds: 300));
+      await speak("أحرزت $percentage بالمئة");
+    },
+  );
+}
+
+int calculateSimilarityPercentage(String expected, String spoken) {
+  final int distance = levenshtein(expected, spoken);
+  final int maxLength = expected.length > 0 ? expected.length : 1;
+  return (((1 - (distance / maxLength)) * 100).round()).clamp(0, 100);
+}
+
+int levenshtein(String s, String t) {
+  if (s == t) return 0;
+  if (s.isEmpty) return t.length;
+  if (t.isEmpty) return s.length;
+
+  List<List<int>> matrix = List.generate(
+    s.length + 1,
+    (_) => List.filled(t.length + 1, 0),
+  );
+
+  for (int i = 0; i <= s.length; i++) {
+    matrix[i][0] = i;
   }
+  for (int j = 0; j <= t.length; j++) {
+    matrix[0][j] = j;
+  }
+
+  for (int i = 1; i <= s.length; i++) {
+    for (int j = 1; j <= t.length; j++) {
+      int cost = s[i - 1] == t[j - 1] ? 0 : 1;
+      matrix[i][j] = [
+        matrix[i - 1][j] + 1,
+        matrix[i][j - 1] + 1,
+        matrix[i - 1][j - 1] + cost
+      ].reduce((a, b) => a < b ? a : b);
+    }
+  }
+
+  return matrix[s.length][t.length];
+}
 
   String normalizeArabic(String input) {
     return input
@@ -328,7 +364,7 @@ class _ArabicLevel1ScreenState extends State<ArabicLevel1Screen> {
               tabs: [
                 Tab(text: 'الحروف'),
                 Tab(text: 'الجملة'),
-                Tab(text: 'الصوت والحرف'),
+                Tab(text: 'صوت الحرف'),
               ],
             ),
           ),
