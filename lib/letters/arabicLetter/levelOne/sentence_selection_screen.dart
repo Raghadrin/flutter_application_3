@@ -84,7 +84,7 @@ class ArabicLevel1HomeScreen extends StatelessWidget {
               _speak("لنبدأ الاختبار.");
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const ArabicLevel1QuizScreen()),
+                MaterialPageRoute(builder: (_) => const ArabicLetterQuizScreen()),
               );
             },
           ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:lottie/lottie.dart';
 
 class HelloWordScreen extends StatefulWidget {
   const HelloWordScreen({super.key});
@@ -17,28 +18,34 @@ class _HelloWordScreenState extends State<HelloWordScreen> {
   bool callStarted = false;
   String word = '';
   String message = '';
+  String animationPath = '';
   int key = 0;
 
   final List<Map<String, String>> wordCalls = [
     {
       "word": "Brave",
-      "message": "You face your fears like a true hero! That’s amazing bravery!"
+      "message": "You face your fears like a true hero! That’s amazing bravery!",
+      "animation": "images/Brave.json"
     },
     {
       "word": "Happy",
-      "message": "Your smile is sunshine. You make others feel good just by being you!"
+      "message": "Your smile is sunshine. You make others feel good just by being you!",
+      "animation": "images/Happy.json"
     },
     {
       "word": "Creative",
-      "message": "Your ideas are magical — the world needs your imagination!"
+      "message": "Your ideas are magical — the world needs your imagination!",
+      "animation": "images/Creative.json"
     },
     {
       "word": "Kind",
-      "message": "Kindness is your superpower. You make the world warmer!"
+      "message": "Kindness is your superpower. You make the world warmer!",
+      "animation": "images/Kind.json"
     },
     {
       "word": "Confident",
-      "message": "You believe in yourself, and that’s what makes you unstoppable!"
+      "message": "You believe in yourself, and that’s what makes you unstoppable!",
+      "animation": "images/Confident.json"
     },
   ];
 
@@ -47,13 +54,13 @@ class _HelloWordScreenState extends State<HelloWordScreen> {
     setState(() {
       word = selected["word"]!;
       message = selected["message"]!;
+      animationPath = selected["animation"]!;
       isConnecting = true;
     });
 
     await _player.play(AssetSource('audio/ring.mp3'));
+    await Future.delayed(const Duration(seconds: 9));
 
-    // بعد 3 ثواني (انتهاء الرنة)، نبدأ المكالمة
-    await Future.delayed(const Duration(seconds:9));
     setState(() {
       isConnecting = false;
       callStarted = true;
@@ -117,6 +124,8 @@ class _HelloWordScreenState extends State<HelloWordScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          Lottie.asset(animationPath, width: 180, height: 180),
+          const SizedBox(height: 20),
           AnimatedContainer(
             duration: const Duration(seconds: 1),
             curve: Curves.easeInOut,
