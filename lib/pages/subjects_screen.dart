@@ -31,10 +31,10 @@ class SubjectsScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
-          const SizedBox(height: 30),
+          const SizedBox(height: 40),
           Image.asset(
             "images/subject_fox.jpg",
-            height: screenWidth * 0.6,
+            height: screenWidth * 0.7,
           ),
           const SizedBox(height: 20),
           Text(
@@ -46,14 +46,14 @@ class SubjectsScreen extends StatelessWidget {
               fontFamily: 'Arial',
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 30),
           _buildSubjectButton(
               context, tr("Arabic"), "images/arabicsubject.png", screenWidth),
           _buildSubjectButton(
               context, tr("English"), "images/englishsubject.png", screenWidth),
           _buildSubjectButton(
               context, tr("Math"), "images/mathsubject.png", screenWidth),
-          const Spacer(),
+          //const Spacer(),
         ],
       ),
     );
@@ -63,7 +63,7 @@ class SubjectsScreen extends StatelessWidget {
       BuildContext context, String text, String iconPath, double screenWidth) {
     return Padding(
       padding: EdgeInsets.symmetric(
-        vertical: screenWidth * 0.02,
+        vertical: screenWidth * 0.01,
         horizontal: screenWidth * 0.1,
       ),
       child: GestureDetector(
@@ -76,7 +76,7 @@ class SubjectsScreen extends StatelessWidget {
           );
         },
         child: Container(
-          height: screenWidth * 0.18,
+          height: screenWidth * 0.20,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
             gradient: const LinearGradient(
@@ -86,7 +86,7 @@ class SubjectsScreen extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Image.asset(iconPath, height: screenWidth * 0.1),
+              Image.asset(iconPath, height: screenWidth * 0.15),
               const SizedBox(width: 15),
               Text(
                 text,
