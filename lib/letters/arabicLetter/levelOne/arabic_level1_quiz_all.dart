@@ -60,19 +60,19 @@ class _ArabicLetterQuizScreenState extends State<ArabicLetterQuizScreen> {
     // missingLetter
     {
       "type": "missingLetter",
-      "incompleteWord": "م_درسة",
+      "incompleteWord": "م رسة",
       "correctLetter": "د",
       "options": ["ب", "ر", "د", "س"],
     },
     {
       "type": "missingLetter",
-      "incompleteWord": "_تار",
+      "incompleteWord": " ار",
       "correctLetter": "ق",
       "options": ["ف", "ك", "ق", "غ"],
     },
     {
       "type": "missingLetter",
-      "incompleteWord": "حقي_ة",
+      "incompleteWord": "حقي ة",
       "correctLetter": "ب",
       "options": ["ب", "د", "ذ", "ز"],
     },
@@ -169,10 +169,10 @@ class _ArabicLetterQuizScreenState extends State<ArabicLetterQuizScreen> {
         feedbackIcon = Icons.check_circle;
         flutterTts.speak("إجابة صحيحة! أحسنت!");
       } else {
-        feedbackMessage = "😅 إجابة غير صحيحة، حاول مرة أخرى!";
+        feedbackMessage = "😅 إجابة غير صحيحة";
         feedbackColor = Colors.red;
         feedbackIcon = Icons.cancel;
-        flutterTts.speak("إجابة غير صحيحة، حاول مرة أخرى");
+        flutterTts.speak("إجابة غير صحيحة");
       }
     });
 
@@ -201,10 +201,9 @@ class _ArabicLetterQuizScreenState extends State<ArabicLetterQuizScreen> {
     return Scaffold(
       backgroundColor: Colors.orange[50],
       appBar: AppBar(
-        title:
-            const Text('كويز الحروف للأطفال', style: TextStyle(fontSize: 24)),
+        title: const Text(' كويز الحروف', style: TextStyle(fontSize: 24)),
         centerTitle: true,
-        backgroundColor: Colors.deepOrange,
+        backgroundColor: const Color.fromARGB(255, 255, 152, 34),
       ),
       body: Center(
         child: Padding(
