@@ -73,7 +73,7 @@ class ArabicLevel2HomeScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         mainAxisSpacing: 16,
         crossAxisSpacing: 16,
-        childAspectRatio: 0.59,
+        childAspectRatio: 0.75,
         children: [
           // زر الكويز الشامل
           _buildTile(

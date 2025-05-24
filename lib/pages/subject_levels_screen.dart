@@ -40,9 +40,9 @@ class SubjectLevelsScreen extends StatelessWidget {
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          const SizedBox(height: 50),
+          Image.asset("images/subject_fox.jpg", height: screenWidth * 0.7),
           const SizedBox(height: 40),
-          Image.asset("images/subject_fox.jpg", height: screenWidth * 0.6),
-          const SizedBox(height: 30),
           _buildLevelButton(context, tr('Practice')),
           _buildLevelButton(context, tr('Quiz')),
           _buildLevelButton(context, tr('Library')),
@@ -56,7 +56,7 @@ class SubjectLevelsScreen extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     return Padding(
       padding: EdgeInsets.symmetric(
-        vertical: screenWidth * 0.02,
+        vertical: screenWidth * 0.01,
         horizontal: screenWidth * 0.1,
       ),
       child: GestureDetector(
