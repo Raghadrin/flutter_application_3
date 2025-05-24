@@ -47,7 +47,6 @@ class _ArabicLevel1QuizScreenState extends State<ArabicLevel1QuizScreen> {
       "options": ["البيت", "يأكل", "يلعب"],
       "answer": "البيت"
     },
-   
   ];
 
   @override
@@ -81,7 +80,7 @@ class _ArabicLevel1QuizScreenState extends State<ArabicLevel1QuizScreen> {
 
   Future<void> _evaluateSpeech(String expected) async {
     if (isSpeaking || answerSubmitted) return;
-    
+
     bool available = await speech.initialize();
     if (!available) return;
 
@@ -115,7 +114,7 @@ class _ArabicLevel1QuizScreenState extends State<ArabicLevel1QuizScreen> {
 
   void _evaluateChoice(String selected, String correct) async {
     if (answerSubmitted) return;
-    
+
     final isCorrect = selected == correct;
     final color = isCorrect ? Colors.green : Colors.red;
 
@@ -139,7 +138,7 @@ class _ArabicLevel1QuizScreenState extends State<ArabicLevel1QuizScreen> {
       feedbackColor = Colors.transparent;
       answerSubmitted = false;
     });
-    
+
     if (currentIndex < questions.length) {
       startTimer();
     } else {
@@ -288,8 +287,6 @@ class _ArabicLevel1QuizScreenState extends State<ArabicLevel1QuizScreen> {
     );
   }
 
-  
-
   @override
   void dispose() {
     _timer?.cancel();
@@ -306,7 +303,8 @@ class _ArabicLevel1QuizScreenState extends State<ArabicLevel1QuizScreen> {
       child: Scaffold(
         backgroundColor: const Color(0xFFFFF8E1),
         appBar: AppBar(
-          title: const Text("📝 كويز المستوى 1", style: TextStyle(fontSize: 26)),
+          title:
+              const Text("📝 كويز المستوى 1", style: TextStyle(fontSize: 26)),
           centerTitle: true,
           backgroundColor: Colors.orange,
         ),
@@ -319,13 +317,16 @@ class _ArabicLevel1QuizScreenState extends State<ArabicLevel1QuizScreen> {
               children: [
                 Text(
                   "السؤال ${currentIndex + 1} من ${questions.length}",
-                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 24, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 10),
                 Text(
                   "⏰ الوقت المتبقي: $timeLeft ثانية",
-                  style: TextStyle(color: timeLeft < 10 ? Colors.red : Colors.grey[700], fontSize: 18),
+                  style: TextStyle(
+                      color: timeLeft < 10 ? Colors.red : Colors.grey[700],
+                      fontSize: 18),
                 ),
                 const SizedBox(height: 20),
                 if (current['type'] == 'speech') ...[
@@ -341,21 +342,25 @@ class _ArabicLevel1QuizScreenState extends State<ArabicLevel1QuizScreen> {
                   const SizedBox(height: 24),
                   ElevatedButton.icon(
                     icon: const Icon(Icons.volume_up, size: 28),
-                    label: const Text("استمع للجملة", style: TextStyle(fontSize: 22)),
+                    label: const Text("استمع للجملة",
+                        style: TextStyle(fontSize: 22)),
                     onPressed: () => _speak(current['text']),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.orange,
-                      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 16),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 30, vertical: 16),
                     ),
                   ),
                   const SizedBox(height: 12),
                   ElevatedButton.icon(
                     icon: const Icon(Icons.mic, size: 28),
-                    label: const Text("أجب بصوتك", style: TextStyle(fontSize: 22)),
+                    label:
+                        const Text("أجب بصوتك", style: TextStyle(fontSize: 22)),
                     onPressed: () => _evaluateSpeech(current['text']),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.deepOrangeAccent,
-                      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 16),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 30, vertical: 16),
                     ),
                   ),
                 ] else if (current['type'] == 'choice') ...[
@@ -374,8 +379,10 @@ class _ArabicLevel1QuizScreenState extends State<ArabicLevel1QuizScreen> {
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       child: ElevatedButton(
-                        onPressed: () => _evaluateChoice(option, current['answer']),
-                        child: Text(option, style: const TextStyle(fontSize: 24)),
+                        onPressed: () =>
+                            _evaluateChoice(option, current['answer']),
+                        child:
+                            Text(option, style: const TextStyle(fontSize: 24)),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.orange.shade100,
                           minimumSize: const Size.fromHeight(60),
@@ -385,7 +392,7 @@ class _ArabicLevel1QuizScreenState extends State<ArabicLevel1QuizScreen> {
                   }),
                 ] else if (current['type'] == 'missing_word') ...[
                   _buildMissingWordQuestion(current),
-                 ],
+                ],
                 const SizedBox(height: 20),
                 if (feedback.isNotEmpty)
                   AnimatedContainer(
@@ -399,9 +406,9 @@ class _ArabicLevel1QuizScreenState extends State<ArabicLevel1QuizScreen> {
                     child: Text(
                       feedback,
                       style: TextStyle(
-                        color: feedbackColor,
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold),
+                          color: feedbackColor,
+                          fontSize: 26,
+                          fontWeight: FontWeight.bold),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -411,10 +418,12 @@ class _ArabicLevel1QuizScreenState extends State<ArabicLevel1QuizScreen> {
                     padding: const EdgeInsets.only(bottom: 15),
                     child: ElevatedButton(
                       onPressed: _nextQuestion,
-                      child: const Text("التالي", style: TextStyle(fontSize: 22)),
+                      child:
+                          const Text("التالي", style: TextStyle(fontSize: 22)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
-                        padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 16),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 50, vertical: 16),
                       ),
                     ),
                   ),
@@ -423,10 +432,12 @@ class _ArabicLevel1QuizScreenState extends State<ArabicLevel1QuizScreen> {
                     padding: const EdgeInsets.only(bottom: 30),
                     child: ElevatedButton(
                       onPressed: _skipQuestion,
-                      child: const Text("تخطي السؤال", style: TextStyle(fontSize: 22)),
+                      child: const Text("تخطي السؤال",
+                          style: TextStyle(fontSize: 22)),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey,
-                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                        backgroundColor: Colors.orange,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 40, vertical: 16),
                       ),
                     ),
                   ),
