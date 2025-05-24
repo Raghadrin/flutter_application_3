@@ -85,7 +85,7 @@ class ArabicLevel2HomeScreen extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => const ArabicLevel2QuizAllScreen(),
+                  builder: (_) => const ArabicLevel2WordQuizScreen(),
                 ),
               );
             },
