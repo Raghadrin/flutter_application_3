@@ -56,7 +56,7 @@ class LevelsScreen extends StatelessWidget {
   List<Map<String, dynamic>> _getLevelsForSubject(String subject) {
     if (subject == "English") {
       return [
-        {"title": "Letters", "screen": EnglishSentenceSelectionScreen()},
+        {"title": "Letters", "screen": EnglishLevel1HomeScreen()},
       ];
     } else if (subject == "Arabic") {
       return [

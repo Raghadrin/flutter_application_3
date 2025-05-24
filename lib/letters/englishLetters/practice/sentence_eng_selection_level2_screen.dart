@@ -1,118 +1,145 @@
 import 'package:flutter/material.dart';
-import 'english_level2_screen.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+import 'package:lottie/lottie.dart';
 
-class EnglishSentenceSelectionLevel2Screen extends StatelessWidget {
+import 'english_level2_screen.dart';
+import 'english_level2_quiz_all_screen.dart';
+
+class EnglishLevel2HomeScreen extends StatelessWidget {
+  final FlutterTts tts = FlutterTts();
+
+  EnglishLevel2HomeScreen({super.key});
+
+  void _speak(String text) async {
+    await tts.setLanguage("en-US");
+    await tts.setSpeechRate(0.4);
+    await tts.speak(text);
+  }
+
   final List<Map<String, String>> sentences = [
     {
       "emoji": "🏫",
       "title": "School Activity",
-      "text": "The hardworking boy goes to school every morning with energy."
+      "text": "The hardworking boy goes to school every morning with energy.",
+      "animation": "assets/animations/school.json",
     },
     {
       "emoji": "🩺",
       "title": "Treating Patients",
-      "text": "The doctor treats patients at the hospital using precise tools."
+      "text": "The doctor treats patients at the hospital using precise tools.",
+      "animation": "assets/animations/doctor.json",
     },
     {
       "emoji": "🚦",
       "title": "Obeying the Law",
-      "text": "The red car stopped at the red light in respect of the law."
+      "text": "The red car stopped at the red light in respect of the law.",
+      "animation": "assets/animations/traffic.json",
     },
     {
       "emoji": "📚",
       "title": "Daily Reading",
-      "text": "I read a useful book in the library every day after school."
+      "text": "I read a useful book in the library every day after school.",
+      "animation": "assets/animations/read.json",
     },
     {
       "emoji": "👩‍🍳",
       "title": "Healthy Cooking",
-      "text": "Mom prepares delicious food with healthy ingredients for the family."
+      "text": "Mom prepares delicious food with healthy ingredients for the family.",
+      "animation": "assets/animations/cook.json",
     },
   ];
 
   @override
   Widget build(BuildContext context) {
+    _speak("Welcome to Level 2. Please choose a sentence to start learning.");
+
     return Scaffold(
       backgroundColor: const Color(0xFFFFF8E1),
       appBar: AppBar(
         backgroundColor: Colors.orange,
         elevation: 0,
-        centerTitle: true,
         title: const Text(
-          "📚 Choose Your Sentence",
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+          "English - Level 2",
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
         ),
+        centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      body: GridView.count(
+        crossAxisCount: 2,
+        padding: const EdgeInsets.all(16),
+        mainAxisSpacing: 16,
+        crossAxisSpacing: 16,
+        childAspectRatio: 0.75,
+        children: [
+          _buildTile(
+            context,
+            title: "Level 2 Quiz",
+            jsonPath: "assets/animations/quiz.json",
+            onTap: () {
+              _speak("Let's begin the quiz.");
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const EnglishLevel2WordQuizScreen(),
+                ),
+              );
+            },
+          ),
+          ...sentences.map((sentence) {
+            return _buildTile(
+              context,
+              title: sentence["title"]!,
+              jsonPath: sentence["animation"]!,
+              onTap: () {
+                _speak("You selected: ${sentence["title"]}");
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => EnglishLevel2Screen(
+                      sentence: sentence["text"]!,
+                    ),
+                  ),
+                );
+              },
+            );
+          }).toList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTile(
+    BuildContext context, {
+    required String title,
+    required String jsonPath,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: Colors.orange, width: 3),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        padding: const EdgeInsets.all(12),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              "👇 Tap the sentence you want to learn",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.orange,
+            Lottie.asset(jsonPath, height: 100),
+            const SizedBox(height: 12),
+            Text(
+              title,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+                color: Colors.deepOrange,
               ),
               textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 20),
-            Expanded(
-              child: GridView.builder(
-                itemCount: sentences.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: 0.85,
-                ),
-                itemBuilder: (context, index) {
-                  final sentence = sentences[index];
-                  return GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => EnglishLevel2Screen(
-                            sentence: sentence["text"]!,
-                          ),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.orange.shade100,
-                        borderRadius: BorderRadius.circular(18),
-                        border: Border.all(color: Colors.orange, width: 2),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Colors.black26,
-                            blurRadius: 4,
-                            offset: Offset(2, 2),
-                          ),
-                        ],
-                      ),
-                      padding: const EdgeInsets.all(10),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(sentence["emoji"]!, style: const TextStyle(fontSize: 36)),
-                          const SizedBox(height: 8),
-                          Text(
-                            sentence["title"]!,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.brown,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
             ),
           ],
         ),

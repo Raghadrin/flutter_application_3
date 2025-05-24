@@ -1,7 +1,21 @@
 import 'package:flutter/material.dart';
-import 'english_level3_screen.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+import 'package:lottie/lottie.dart';
 
-class EnglishSentenceSelectionLevel3Screen extends StatelessWidget {
+import 'english_level3_screen.dart';
+import 'english_level3_quiz_all_screen.dart';
+
+class EnglishLevel3HomeScreen extends StatelessWidget {
+  final FlutterTts tts = FlutterTts();
+
+  EnglishLevel3HomeScreen({super.key});
+
+  void _speak(String text) async {
+    await tts.setLanguage("en-US");
+    await tts.setSpeechRate(0.4);
+    await tts.speak(text);
+  }
+
   final List<Map<String, dynamic>> stories = [
     {
       'emoji': '🌳',
@@ -19,7 +33,8 @@ class EnglishSentenceSelectionLevel3Screen extends StatelessWidget {
         "Sami and his father",
         "Played a lot",
         "Birds"
-      ]
+      ],
+      'animation': 'assets/animations/park.json',
     },
     {
       'emoji': '🌧️',
@@ -37,7 +52,8 @@ class EnglishSentenceSelectionLevel3Screen extends StatelessWidget {
         "It gets wet",
         "Small boats",
         "Coats and boots"
-      ]
+      ],
+      'animation': 'assets/animations/rain.json',
     },
     {
       'emoji': '📖',
@@ -55,7 +71,8 @@ class EnglishSentenceSelectionLevel3Screen extends StatelessWidget {
         "Before bedtime",
         "Her mom",
         "Beautiful places"
-      ]
+      ],
+      'animation': 'assets/animations/book.json',
     },
     {
       'emoji': '🏫',
@@ -73,7 +90,8 @@ class EnglishSentenceSelectionLevel3Screen extends StatelessWidget {
         "Reading, writing, and math",
         "The teacher",
         "Because he encourages them"
-      ]
+      ],
+      'animation': 'assets/animations/school.json',
     },
     {
       'emoji': '🏖️',
@@ -91,34 +109,58 @@ class EnglishSentenceSelectionLevel3Screen extends StatelessWidget {
         "Sandcastles",
         "In the water",
         "Delicious food"
-      ]
+      ],
+      'animation': 'assets/animations/beach.json',
     },
   ];
 
   @override
   Widget build(BuildContext context) {
+    _speak("Welcome to Level 3. Please choose a story to begin.");
+
     return Scaffold(
-      backgroundColor: const Color(0xFFFDF7E4),
+      backgroundColor: const Color(0xFFFFF8E1),
       appBar: AppBar(
         backgroundColor: Colors.orange,
+        elevation: 0,
         centerTitle: true,
-        title: const Text("📚 Choose a Story",
-            style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white)),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: GridView.builder(
-          itemCount: stories.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            mainAxisSpacing: 24,
-            crossAxisSpacing: 24,
-            childAspectRatio: 1,
+        title: const Text(
+          "📖 English - Level 3",
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
           ),
-          itemBuilder: (context, index) {
-            final story = stories[index];
-            return GestureDetector(
+        ),
+      ),
+      body: GridView.count(
+        crossAxisCount: 2,
+        padding: const EdgeInsets.all(16),
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+        childAspectRatio: 0.75,
+        children: [
+          _buildTile(
+            context,
+            title: "Level 3 Quiz",
+            jsonPath: "assets/animations/quiz.json",
+            onTap: () {
+              _speak("Let's start the final quiz.");
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const EnglishLevel3QuizAllScreen(),
+                ),
+              );
+            },
+          ),
+          ...stories.map((story) {
+            return _buildTile(
+              context,
+              title: story['title'],
+              jsonPath: story['animation'],
               onTap: () {
+                _speak("You selected: ${story["title"]}");
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -131,40 +173,43 @@ class EnglishSentenceSelectionLevel3Screen extends StatelessWidget {
                   ),
                 );
               },
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.orange.shade100,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.orange.shade300),
-                  boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
-                ),
-                padding: const EdgeInsets.all(10),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    FittedBox(
-                      child: Text(
-                        story['emoji'],
-                        style: const TextStyle(fontSize: 30),
-                      ),
-                    ),
-                    const SizedBox(height: 30),
-                    Text(
-                      story['title'],
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF4E342E),
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
             );
-          },
+          }).toList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTile(
+    BuildContext context, {
+    required String title,
+    required String jsonPath,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: Colors.orange, width: 3),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Lottie.asset(jsonPath, height: 100),
+            const SizedBox(height: 12),
+            Text(
+              title,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+                color: Colors.deepOrange,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       ),
     );
