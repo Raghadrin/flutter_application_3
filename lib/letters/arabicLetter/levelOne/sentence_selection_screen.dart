@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_3/letters/arabicLetter/levelOne/arabic_level1_quiz_all.dart';
 import 'arabic_level1_screen.dart';
 
 class SentenceSelectionScreen extends StatelessWidget {
@@ -37,6 +38,43 @@ class SentenceSelectionScreen extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
+
+            // ✅ مربع كويز مضاف قبل الشبكة
+           GestureDetector(
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const ArabicQuizWithSentenceEvaluation(),
+      ),
+    );
+  },
+  child: Container(
+    margin: const EdgeInsets.only(bottom: 20),
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: Colors.deepOrange.shade100,
+      borderRadius: BorderRadius.circular(20),
+      border: Border.all(color: Colors.deepOrange, width: 2),
+    ),
+    child: Row(
+      children: const [
+        Icon(Icons.quiz, size: 32, color: Colors.deepOrange),
+        SizedBox(width: 12),
+        Text(
+          "ابدأ الكويز الشامل",
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.deepOrange,
+          ),
+        ),
+      ],
+    ),
+  ),
+),
+
+            // الشبكة الأصلية
             Expanded(
               child: GridView.builder(
                 itemCount: sentences.length,
@@ -86,7 +124,6 @@ class SentenceSelectionScreen extends StatelessWidget {
                               color: Colors.brown,
                             ),
                           ),
-                          // ✅ Removed the sentence text from view
                         ],
                       ),
                     ),

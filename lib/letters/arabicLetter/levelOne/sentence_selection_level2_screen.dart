@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'arabic_level2_screen.dart';
+import 'arabic_level2_quiz_all_screen.dart'; // ✅ تأكد من إضافة هذا الملف
 
 class SentenceSelectionLevel2Screen extends StatelessWidget {
   final List<Map<String, String>> sentences = [
@@ -57,6 +58,48 @@ class SentenceSelectionLevel2Screen extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
+
+            /// ✅ كرت الكويز
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const ArabicLevel2QuizAllScreen(),
+                  ),
+                );
+              },
+              child: Container(
+                margin: const EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.deepOrange,
+                  borderRadius: BorderRadius.circular(18),
+                  boxShadow: const [
+                    BoxShadow(
+                        color: Colors.black26,
+                        blurRadius: 4,
+                        offset: Offset(2, 2)),
+                  ],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Icon(Icons.quiz, size: 28, color: Colors.white),
+                    SizedBox(width: 10),
+                    Text(
+                      "ابدأ الكويز الشامل 📝",
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            /// ✅ الشبكة
             Expanded(
               child: GridView.builder(
                 itemCount: sentences.length,
@@ -73,8 +116,8 @@ class SentenceSelectionLevel2Screen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) =>
-                              ArabicLevel2Screen(sentence: sentence["text"]!),
+                          builder: (_) => ArabicLevel2Screen(
+                              sentence: sentence["text"]!),
                         ),
                       );
                     },
@@ -106,7 +149,6 @@ class SentenceSelectionLevel2Screen extends StatelessWidget {
                               color: Colors.brown,
                             ),
                           ),
-                          // ✅ Removed the sentence text from view
                         ],
                       ),
                     ),
