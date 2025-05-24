@@ -66,7 +66,7 @@ class _ArabicLetterQuizScreenState extends State<ArabicLetterQuizScreen> {
     },
     {
       "type": "missingLetter",
-      "incompleteWord": " ار",
+      "incompleteWord":  "  طار     ",
       "correctLetter": "ق",
       "options": ["ف", "ك", "ق", "غ"],
     },
@@ -208,20 +208,96 @@ class _ArabicLetterQuizScreenState extends State<ArabicLetterQuizScreen> {
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
-          child: finished
-              ? Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text("النتيجة النهائية:",
-                        style: TextStyle(
-                            fontSize: 26, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 30),
-                    Text(
-                        "${((correctAnswers / questions.length) * 100).round()}%",
-                        style:
-                            const TextStyle(fontSize: 50, color: Colors.green)),
-                  ],
-                )
+        child: finished
+    ? Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text(
+            "النتيجة النهائية:",
+            style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 30),
+          Column(
+            children: [
+              Text(
+                "${((correctAnswers / questions.length) * 100).round()}%",
+                style: const TextStyle(
+                  fontSize: 60,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepOrange,
+                ),
+              ),
+              const SizedBox(height: 20),
+              if ((correctAnswers / questions.length) >= 0.8)
+                const Text("🌟 ممتاز! استمِر!",
+                    style: TextStyle(fontSize: 24, color: Colors.green))
+              else if ((correctAnswers / questions.length) >= 0.5)
+                const Text("👏 جيد جدًا! حاول أن تتحسن أكثر",
+                    style: TextStyle(fontSize: 24, color: Colors.orange))
+              else
+                const Text("😅 لا بأس، حاول مرة أخرى!",
+                    style: TextStyle(fontSize: 24, color: Colors.red)),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(3, (index) {
+                  final threshold =
+                      (index + 1) * (questions.length / 3);
+                  return Icon(
+                    Icons.star,
+                    color: correctAnswers >= threshold
+                        ? Colors.amber
+                        : Colors.grey[400],
+                    size: 40,
+                  );
+                }),
+              ),
+              const SizedBox(height: 30),
+              ElevatedButton.icon(
+                onPressed: () {
+                  setState(() {
+                    currentIndex = 0;
+                    correctAnswers = 0;
+                    feedbackMessage = '';
+                    feedbackColor = Colors.transparent;
+                    feedbackIcon = null;
+                    _speakQuestion(questions[0]);
+                  });
+                },
+                icon: const Icon(Icons.replay),
+                label: const Text("إعادة المحاولة",
+                    style:
+                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepOrange,
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20)),
+                ),
+              ),
+              const SizedBox(height: 15),
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.pop(context); // أو الانتقال إلى شاشة أخرى
+                },
+                icon: const Icon(Icons.arrow_forward),
+                label: const Text("التالي",
+                    style:
+                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20)),
+                ),
+              ),
+            ],
+          ),
+        ],
+      )
+
               : _buildQuestion(questions[currentIndex]),
         ),
       ),
