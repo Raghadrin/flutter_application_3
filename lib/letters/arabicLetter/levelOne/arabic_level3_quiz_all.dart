@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
@@ -16,12 +15,16 @@ class _ArabicLevel3QuizAllScreenState extends State<ArabicLevel3QuizAllScreen> {
   bool answered = false;
   int correctAnswers = 0;
 
-  final String story = "في صباح مشمس من أيام الربيع، قرر سامي أن يذهب مع والده في نزهة إلى الحديقة العامة القريبة من منزلهم. "
-      "جهزوا سلة الطعام التي كانت مليئة بالفاكهة والعصائر والسندويشات اللذيذة، ثم انطلقوا بسعادة. عندما وصلا، كانت الحديقة تعج بالأطفال والعائلات، وكانت الطيور تزقزق فوق الأشجار. "
-      "ركض سامي نحو أرجوحة كبيرة وبدأ يتأرجح عاليًا وهو يضحك. انضم إليه أصدقاؤه لاحقًا، فلعبوا معًا لعبة الغميضة وتسابقوا بين الأشجار. "
-      "بعد اللعب، جلسوا جميعًا على البطانية التي فرشها والده، وبدأوا يتناولون الطعام وهم يتحدثون عن ألعابهم المدرسية. "
-      "وبينما كانوا يأكلون، لاحظ سامي طيورًا كثيرة تحلق في السماء على شكل حرف V، فسأل والده عنها، فأجابه بأن هذه الطيور تهاجر مع تغير الفصول. "
-      "ابتسم سامي وأكمل تناول تفاحته الحمراء بينما كانت الشمس تغرب ببطء، لتختتم يومًا مليئًا بالمرح والمعرفة.";
+  String feedbackMessage = '';
+  Color feedbackColor = Colors.transparent;
+  IconData? feedbackIcon;
+
+  final String story = "في يوم ربيعي جميل، ذهب سامي مع والده إلى الحديقة القريبة. "
+      "أحضرا معهما سلة طعام مليئة بالفاكهة والعصائر. "
+      "لعب سامي على الأرجوحة وضحك كثيرًا، ثم انضم إليه أصدقاؤه. "
+      "جلسوا لاحقًا لتناول الطعام. "
+      "رأى سامي طيورًا تطير في السماء على شكل حرف V، فسأل والده، فأجابه بأنها تهاجر. "
+      "ابتسم سامي وأكل تفاحته الحمراء، وكان يومًا ممتعًا.";
 
   final List<Map<String, dynamic>> questions = [
     {
@@ -81,30 +84,42 @@ class _ArabicLevel3QuizAllScreenState extends State<ArabicLevel3QuizAllScreen> {
   Widget build(BuildContext context) {
     if (currentStep > questions.length) {
       int scorePercent = ((correctAnswers / questions.length) * 100).round();
+      String finalMessage;
+      Color msgColor;
+
+      if (scorePercent >= 90) {
+        finalMessage = "ممتاز جدًا 🎉";
+        msgColor = Colors.green;
+      } else if (scorePercent >= 70) {
+        finalMessage = "عمل رائع 👏";
+        msgColor = Colors.orange;
+      } else {
+        finalMessage = "أحسنت المحاولة 💪";
+        msgColor = Colors.red;
+      }
+
       return Scaffold(
-        backgroundColor: const Color(0xFFFFF8E1),
+        backgroundColor: Colors.orange[50],
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text("🎉 أحسنت!", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+              const Text("النتيجة النهائية", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
               const SizedBox(height: 20),
-              Text("لقد حصلت على: $scorePercent%",
-                  style: const TextStyle(fontSize: 22, color: Colors.brown)),
-              const SizedBox(height: 30),
-              ElevatedButton.icon(
-                icon: const Icon(Icons.replay),
-                label: const Text("إعادة الكويز", style: TextStyle(fontSize: 20)),
-                onPressed: () {
-                  setState(() {
-                    currentStep = 0;
-                    correctAnswers = 0;
-                    selectedAnswerIndex = -1;
-                    answered = false;
-                  });
-                },
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-              ),
+              Text("$scorePercent%",
+                  style: const TextStyle(fontSize: 50, color: Colors.deepOrange, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 16),
+              Text(finalMessage, style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: msgColor)),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 18),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                ),
+                child: const Text("التالي ⏭️", style: TextStyle(fontSize: 24, color: Colors.white)),
+              )
             ],
           ),
         ),
@@ -129,12 +144,14 @@ class _ArabicLevel3QuizAllScreenState extends State<ArabicLevel3QuizAllScreen> {
 
   Widget _buildStoryPage() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const Text("القصة", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.deepOrange)),
-        const SizedBox(height: 16),
-        Expanded(
+        const Text("القصة", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.deepOrange)),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 250,
           child: Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(12),
@@ -144,22 +161,22 @@ class _ArabicLevel3QuizAllScreenState extends State<ArabicLevel3QuizAllScreen> {
               child: Text(
                 story,
                 textAlign: TextAlign.right,
-                style: const TextStyle(fontSize: 18, height: 1.6),
+                style: const TextStyle(fontSize: 22, height: 1.8, color: Colors.black87),
               ),
             ),
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         ElevatedButton.icon(
           icon: const Icon(Icons.volume_up),
-          label: const Text("تشغيل القصة", style: TextStyle(fontSize: 18)),
+          label: const Text("تشغيل القصة", style: TextStyle(fontSize: 20)),
           onPressed: () => speak(story),
           style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
         ElevatedButton.icon(
           icon: const Icon(Icons.arrow_forward),
-          label: const Text("ابدأ الأسئلة", style: TextStyle(fontSize: 18)),
+          label: const Text("ابدأ الأسئلة", style: TextStyle(fontSize: 20)),
           onPressed: () {
             setState(() {
               currentStep = 1;
@@ -175,64 +192,126 @@ class _ArabicLevel3QuizAllScreenState extends State<ArabicLevel3QuizAllScreen> {
   Widget _buildQuestionPage() {
     final current = questions[currentStep - 1];
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text("${currentStep}/${questions.length}", style: const TextStyle(fontSize: 16, color: Colors.grey)),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Expanded(
-              child: Text(current['question'], style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            ),
-            IconButton(
-              icon: const Icon(Icons.volume_up),
-              onPressed: () => speak(current['question']),
-            )
-          ],
-        ),
-        const SizedBox(height: 20),
-        ...List.generate(current['options'].length, (index) {
-          final option = current['options'][index];
-          final isSelected = selectedAnswerIndex == index;
-
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 6),
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: isSelected ? Colors.orange.shade300 : Colors.orange.shade100,
-                minimumSize: const Size.fromHeight(50),
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.orange[50],
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text("السؤال $currentStep من ${questions.length}",
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.deepOrange)),
+          const SizedBox(height: 12),
+          Card(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            elevation: 4,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      current['question'],
+                      textAlign: TextAlign.right,
+                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.volume_up, size: 28),
+                    onPressed: () => speak(current['question']),
+                  ),
+                ],
               ),
-              onPressed: () {
-                setState(() {
-                  selectedAnswerIndex = index;
-                  answered = true;
-                });
-              },
-              child: Text(option, style: const TextStyle(fontSize: 18)),
             ),
-          );
-        }),
-        const Spacer(),
-        ElevatedButton.icon(
-          icon: const Icon(Icons.arrow_forward),
-          label: const Text("التالي", style: TextStyle(fontSize: 18)),
-          onPressed: () {
-            if (selectedAnswerIndex == current['answerIndex']) {
-              correctAnswers++;
-            }
-            setState(() {
-              currentStep++;
-              selectedAnswerIndex = -1;
-              answered = false;
-              if (currentStep <= questions.length) {
-                speak(questions[currentStep - 1]['question']);
-              }
-            });
-          },
-          style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-        ),
-      ],
+          ),
+          const SizedBox(height: 24),
+          ...List.generate(current['options'].length, (index) {
+            final option = current['options'][index];
+            final isSelected = selectedAnswerIndex == index;
+
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    selectedAnswerIndex = index;
+                    answered = true;
+                    if (index == current['answerIndex']) {
+                      correctAnswers++;
+                      feedbackMessage = "إجابة صحيحة ✅";
+                      feedbackColor = Colors.green;
+                      feedbackIcon = Icons.check_circle;
+                      speak("إجابة صحيحة");
+                    } else {
+                      feedbackMessage = "إجابة خاطئة ❌";
+                      feedbackColor = Colors.red;
+                      feedbackIcon = Icons.cancel;
+                      speak("إجابة خاطئة");
+                    }
+                  });
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isSelected ? Colors.orange : Colors.white,
+                  side: const BorderSide(color: Colors.orange, width: 2),
+                  padding: const EdgeInsets.symmetric(vertical: 18),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  elevation: 3,
+                ),
+                child: Center(
+                  child: Text(
+                    option,
+                    style: TextStyle(
+                      fontSize: 20,
+                      color: isSelected ? Colors.white : Colors.black,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }),
+          if (feedbackMessage.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(feedbackIcon, color: feedbackColor, size: 28),
+                  const SizedBox(width: 10),
+                  Text(
+                    feedbackMessage,
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: feedbackColor),
+                  ),
+                ],
+              ),
+            ),
+          const Spacer(),
+          ElevatedButton.icon(
+            icon: const Icon(Icons.arrow_forward),
+            label: const Text("التالي", style: TextStyle(fontSize: 20)),
+            onPressed: () {
+              setState(() {
+                currentStep++;
+                selectedAnswerIndex = -1;
+                answered = false;
+                feedbackMessage = '';
+                feedbackColor = Colors.transparent;
+                feedbackIcon = null;
+                if (currentStep <= questions.length) {
+                  speak(questions[currentStep - 1]['question']);
+                }
+              });
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

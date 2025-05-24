@@ -17,105 +17,21 @@ class _ArabicLetterQuizScreenState extends State<ArabicLetterQuizScreen> {
   IconData? feedbackIcon;
 
   final List<Map<String, dynamic>> questions = [
-    // position
-    {
-      "type": "position",
-      "word": "بنت",
-      "letter": "ب",
-      "correctPosition": "بداية",
-    },
-    {
-      "type": "position",
-      "word": "كتاب",
-      "letter": "ت",
-      "correctPosition": "وسط",
-    },
-    {
-      "type": "position",
-      "word": "قلب",
-      "letter": "ب",
-      "correctPosition": "نهاية",
-    },
-
-    // letterChoice
-    {
-      "type": "letterChoice",
-      "prompt": "اختر حرف الشين",
-      "correctLetter": "ش",
-      "options": ["س", "ش", "ص", "ث"],
-    },
-    {
-      "type": "letterChoice",
-      "prompt": "اختر حرف العين",
-      "correctLetter": "ع",
-      "options": ["غ", "ق", "ع"],
-    },
-    {
-      "type": "letterChoice",
-      "prompt": "اختر حرف الذال",
-      "correctLetter": "ذ",
-      "options": ["ز", "د", "ذ"],
-    },
-
-    // missingLetter
-    {
-      "type": "missingLetter",
-      "incompleteWord": "م رسة",
-      "correctLetter": "د",
-      "options": ["ب", "ر", "د", "س"],
-    },
-    {
-      "type": "missingLetter",
-      "incompleteWord":  "  طار     ",
-      "correctLetter": "ق",
-      "options": ["ف", "ك", "ق", "غ"],
-    },
-    {
-      "type": "missingLetter",
-      "incompleteWord": "حقي ة",
-      "correctLetter": "ب",
-      "options": ["ب", "د", "ذ", "ز"],
-    },
-
-    // audioMatch
-    {
-      "type": "audioMatch",
-      "audioLetter": "ت",
-      "correctLetter": "ت",
-      "options": ["ت", "د", "س"]
-    },
-    {
-      "type": "audioMatch",
-      "audioLetter": "ع",
-      "correctLetter": "ع",
-      "options": ["غ", "ق", "ع"]
-    },
-    {
-      "type": "audioMatch",
-      "audioLetter": "ذ",
-      "correctLetter": "ذ",
-      "options": ["ز", "د", "ذ"]
-    },
-
-    // wordWithLetter
-    {
-      "type": "wordWithLetter",
-      "targetLetter": "ر",
-      "correctWord": "قمر",
-      "options": ["شمس", "قمر", "بيت"],
-    },
-    {
-      "type": "wordWithLetter",
-      "targetLetter": "ف",
-      "correctWord": "فيل",
-      "options": ["فيل", "نمر", "كلب"],
-    },
-    {
-      "type": "wordWithLetter",
-      "targetLetter": "ك",
-      "correctWord": "كتاب",
-      "options": ["قمر", "بيت", "كتاب"],
-    },
+    {"type": "position", "word": "بنت", "letter": "ب", "correctPosition": "بداية"},
+    {"type": "position", "word": "كتاب", "letter": "ت", "correctPosition": "وسط"},
+    {"type": "position", "word": "قلب", "letter": "ب", "correctPosition": "نهاية"},
+    {"type": "letterChoice", "prompt": "اختر حرف الشين", "correctLetter": "ش", "options": ["س", "ش", "ص", "ث"]},
+    {"type": "letterChoice", "prompt": "اختر حرف العين", "correctLetter": "ع", "options": ["غ", "ق", "ع"]},
+    {"type": "letterChoice", "prompt": "اختر حرف الذال", "correctLetter": "ذ", "options": ["ز", "د", "ذ"]},
+    {"type": "missingLetter", "incompleteWord": "م رسة", "correctLetter": "د", "options": ["ب", "ر", "د", "س"]},
+    {"type": "missingLetter", "incompleteWord": " طار ", "correctLetter": "ق", "options": ["ف", "ك", "ق", "غ"]},
+    {"type": "missingLetter", "incompleteWord": "حقي ة", "correctLetter": "ب", "options": ["ب", "د", "ذ", "ز"]},
+    {"type": "audioMatch", "audioLetter": "ت", "correctLetter": "ت", "options": ["ت", "د", "س"]},
+    {"type": "audioMatch", "audioLetter": "ع", "correctLetter": "ع", "options": ["غ", "ق", "ع"]},
+    {"type": "audioMatch", "audioLetter": "ذ", "correctLetter": "ذ", "options": ["ز", "د", "ذ"]},
+    {"type": "wordWithLetter", "targetLetter": "ر", "correctWord": "قمر", "options": ["شمس", "قمر", "بيت"]},
+    {"type": "wordWithLetter", "targetLetter": "ف", "correctWord": "فيل", "options": ["فيل", "نمر", "كلب"]},
+    {"type": "wordWithLetter", "targetLetter": "ك", "correctWord": "كتاب", "options": ["قمر", "بيت", "كتاب"]},
   ];
 
   @override
@@ -130,8 +46,7 @@ class _ArabicLetterQuizScreenState extends State<ArabicLetterQuizScreen> {
     String text = "";
     switch (question["type"]) {
       case "position":
-        text =
-            "أين يقع الحرف ${question["letter"]} في كلمة ${question["word"]}";
+        text = "أين يقع الحرف ${question["letter"]} في كلمة ${question["word"]}";
         break;
       case "letterChoice":
         text = question["prompt"];
@@ -152,10 +67,10 @@ class _ArabicLetterQuizScreenState extends State<ArabicLetterQuizScreen> {
   void checkAnswer(String selected) {
     final q = questions[currentIndex];
     bool isCorrect = false;
+
     if (q["type"] == "position") {
       isCorrect = selected == q["correctPosition"];
-    } else if (["letterChoice", "audioMatch", "missingLetter"]
-        .contains(q["type"])) {
+    } else if (["letterChoice", "audioMatch", "missingLetter"].contains(q["type"])) {
       isCorrect = selected == q["correctLetter"];
     } else if (q["type"] == "wordWithLetter") {
       isCorrect = selected == q["correctWord"];
@@ -164,28 +79,25 @@ class _ArabicLetterQuizScreenState extends State<ArabicLetterQuizScreen> {
     setState(() {
       if (isCorrect) {
         correctAnswers++;
-        feedbackMessage = "🎉 إجابة صحيحة! أحسنت!";
+        feedbackMessage = "🎉 إجابة صحيحة!";
         feedbackColor = Colors.green;
         feedbackIcon = Icons.check_circle;
-        flutterTts.speak("إجابة صحيحة! أحسنت!");
+        flutterTts.speak("إجابة صحيحة");
       } else {
-        feedbackMessage = "😅 إجابة غير صحيحة";
+        feedbackMessage = "❌ إجابة خاطئة";
         feedbackColor = Colors.red;
         feedbackIcon = Icons.cancel;
-        flutterTts.speak("إجابة غير صحيحة");
+        flutterTts.speak("إجابة خاطئة");
       }
     });
 
-    Future.delayed(const Duration(seconds: 4), () {
+    Future.delayed(const Duration(seconds: 2), () {
       setState(() {
         currentIndex++;
         feedbackMessage = '';
         feedbackColor = Colors.transparent;
         feedbackIcon = null;
       });
-      if (currentIndex < questions.length) {
-        _speakQuestion(questions[currentIndex]);
-      }
     });
   }
 
@@ -197,203 +109,108 @@ class _ArabicLetterQuizScreenState extends State<ArabicLetterQuizScreen> {
 
   @override
   Widget build(BuildContext context) {
-    bool finished = currentIndex >= questions.length;
-    return Scaffold(
-      backgroundColor: Colors.orange[50],
-      appBar: AppBar(
-        title: const Text(' كويز الحروف', style: TextStyle(fontSize: 24)),
-        centerTitle: true,
-        backgroundColor: const Color.fromARGB(255, 255, 152, 34),
-      ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-        child: finished
-    ? Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text(
-            "النتيجة النهائية:",
-            style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 30),
-          Column(
+    if (currentIndex >= questions.length) {
+      int scorePercent = ((correctAnswers / questions.length) * 100).round();
+      String message;
+      Color color;
+
+      if (scorePercent >= 90) {
+        message = "🌟 ممتاز جدًا!";
+        color = Colors.green;
+      } else if (scorePercent >= 70) {
+        message = "👏 عمل رائع!";
+        color = Colors.orange;
+      } else {
+        message = "😅 حاول مرة أخرى!";
+        color = Colors.red;
+      }
+
+      return Scaffold(
+        backgroundColor: Colors.orange[50],
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                "${((correctAnswers / questions.length) * 100).round()}%",
-                style: const TextStyle(
-                  fontSize: 60,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.deepOrange,
-                ),
-              ),
+              const Text("النتيجة النهائية", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
               const SizedBox(height: 20),
-              if ((correctAnswers / questions.length) >= 0.8)
-                const Text("🌟 ممتاز! استمِر!",
-                    style: TextStyle(fontSize: 24, color: Colors.green))
-              else if ((correctAnswers / questions.length) >= 0.5)
-                const Text("👏 جيد جدًا! حاول أن تتحسن أكثر",
-                    style: TextStyle(fontSize: 24, color: Colors.orange))
-              else
-                const Text("😅 لا بأس، حاول مرة أخرى!",
-                    style: TextStyle(fontSize: 24, color: Colors.red)),
+              Text("$scorePercent%", style: const TextStyle(fontSize: 60, color: Colors.deepOrange, fontWeight: FontWeight.bold)),
               const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(3, (index) {
-                  final threshold =
-                      (index + 1) * (questions.length / 3);
-                  return Icon(
-                    Icons.star,
-                    color: correctAnswers >= threshold
-                        ? Colors.amber
-                        : Colors.grey[400],
-                    size: 40,
-                  );
-                }),
-              ),
+              Text(message, style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: color)),
               const SizedBox(height: 30),
-              ElevatedButton.icon(
-                onPressed: () {
-                  setState(() {
-                    currentIndex = 0;
-                    correctAnswers = 0;
-                    feedbackMessage = '';
-                    feedbackColor = Colors.transparent;
-                    feedbackIcon = null;
-                    _speakQuestion(questions[0]);
-                  });
-                },
-                icon: const Icon(Icons.replay),
-                label: const Text("إعادة المحاولة",
-                    style:
-                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepOrange,
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 24, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20)),
-                ),
-              ),
-              const SizedBox(height: 15),
-              ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.pop(context); // أو الانتقال إلى شاشة أخرى
-                },
-                icon: const Icon(Icons.arrow_forward),
-                label: const Text("التالي",
-                    style:
-                        TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 24, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20)),
+                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 18),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 ),
+                child: const Text("التالي ⏭️", style: TextStyle(fontSize: 24, color: Colors.white)),
               ),
             ],
           ),
-        ],
-      )
+        ),
+      );
+    }
 
-              : _buildQuestion(questions[currentIndex]),
+    final q = questions[currentIndex];
+    return Scaffold(
+      backgroundColor: Colors.orange[50],
+      appBar: AppBar(
+        title: const Text('كويز الحروف', style: TextStyle(fontSize: 26)),
+        backgroundColor: Colors.deepOrange,
+        centerTitle: true,
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              _buildQuestionWidget(q),
+              if (feedbackMessage.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(feedbackIcon, color: feedbackColor, size: 32),
+                      const SizedBox(width: 10),
+                      Text(feedbackMessage,
+                          style: TextStyle(fontSize: 24, color: feedbackColor, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
-    );
-  }
-
-  Widget _buildQuestion(Map<String, dynamic> q) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _buildQuestionWidget(q),
-        if (feedbackMessage.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: feedbackColor.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: feedbackColor, width: 2),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(feedbackIcon, color: feedbackColor, size: 30),
-                  const SizedBox(width: 10),
-                  Text(
-                    feedbackMessage,
-                    style: TextStyle(fontSize: 22, color: feedbackColor),
-                  ),
-                ],
-              ),
-            ),
-          ),
-      ],
     );
   }
 
   Widget _buildQuestionWidget(Map<String, dynamic> q) {
     switch (q["type"]) {
       case "position":
-        return _buildChoiceQuestion(
-            "أين يقع الحرف '${q['letter']}' في الكلمة '${q['word']}'؟",
-            ["بداية", "وسط", "نهاية"]);
+        return _buildChoiceQuestion("أين يقع الحرف '${q['letter']}' في الكلمة '${q['word']}'؟", ["بداية", "وسط", "نهاية"]);
       case "letterChoice":
         return _buildChoiceQuestion(q["prompt"], q["options"]);
       case "missingLetter":
-        return _buildChoiceQuestion(
-            "ما هو الحرف الناقص في: ${q["incompleteWord"]}", q["options"]);
+        return _buildChoiceQuestion("ما هو الحرف الناقص في: ${q["incompleteWord"]}", q["options"]);
       case "audioMatch":
         return Column(
           children: [
-            const Text("🎧 استمع واختر الحرف الذي سمعته",
-                style: TextStyle(fontSize: 24)),
+            const Text("🎧 استمع واختر الحرف", style: TextStyle(fontSize: 24)),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () => _playSound(q["audioLetter"]),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.amberAccent,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18)),
-                elevation: 5,
-              ),
-              child: const Icon(Icons.volume_up, size: 40, color: Colors.white),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.amberAccent, padding: const EdgeInsets.all(16)),
+              child: const Icon(Icons.volume_up, size: 40),
             ),
-            const SizedBox(height: 30),
-            Wrap(
-              spacing: 20,
-              runSpacing: 20,
-              alignment: WrapAlignment.center,
-              children: q["options"].map<Widget>((opt) {
-                return ElevatedButton(
-                  onPressed: () => checkAnswer(opt),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.amberAccent.shade700,
-                    minimumSize: const Size(140, 60),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18)),
-                    elevation: 5,
-                  ),
-                  child: Text(opt,
-                      style: const TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white)),
-                );
-              }).toList(),
-            ),
+            const SizedBox(height: 20),
+            _answerButtons(q["options"]),
           ],
         );
       case "wordWithLetter":
-        return _buildChoiceQuestion(
-            "اختر الكلمة التي تحتوي على الحرف '${q["targetLetter"]}'",
-            q["options"]);
+        return _buildChoiceQuestion("اختر الكلمة التي تحتوي على الحرف '${q["targetLetter"]}'", q["options"]);
       default:
         return const Text("سؤال غير معروف");
     }
@@ -409,57 +226,36 @@ class _ArabicLetterQuizScreenState extends State<ArabicLetterQuizScreen> {
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: Colors.orange, width: 3),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.orange.withOpacity(0.2),
-                spreadRadius: 2,
-                blurRadius: 6,
-                offset: Offset(0, 3),
-              )
-            ],
           ),
           child: Column(
             children: [
-              Text(
-                "سؤال ${currentIndex + 1}",
-                style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.deepOrange),
-              ),
+              Text("سؤال ${currentIndex + 1}", style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.deepOrange)),
               const SizedBox(height: 10),
-              Text(
-                question,
-                textAlign: TextAlign.center,
-                style:
-                    const TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
-              ),
+              Text(question, textAlign: TextAlign.center, style: const TextStyle(fontSize: 24)),
             ],
           ),
         ),
-        Wrap(
-          spacing: 20,
-          runSpacing: 20,
-          alignment: WrapAlignment.center,
-          children: options.map<Widget>((opt) {
-            return ElevatedButton(
-              onPressed: () => checkAnswer(opt),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.amberAccent.shade700,
-                minimumSize: const Size(140, 60),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18)),
-                elevation: 5,
-              ),
-              child: Text(opt,
-                  style: const TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white)),
-            );
-          }).toList(),
-        ),
+        _answerButtons(options),
       ],
+    );
+  }
+
+  Widget _answerButtons(List options) {
+    return Wrap(
+      spacing: 20,
+      runSpacing: 20,
+      alignment: WrapAlignment.center,
+      children: options.map<Widget>((opt) {
+        return ElevatedButton(
+          onPressed: () => checkAnswer(opt),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.orange,
+            minimumSize: const Size(140, 60),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          ),
+          child: Text(opt, style: const TextStyle(fontSize: 28, color: Colors.white, fontWeight: FontWeight.bold)),
+        );
+      }).toList(),
     );
   }
 }
