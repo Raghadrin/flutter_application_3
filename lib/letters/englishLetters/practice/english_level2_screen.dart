@@ -220,8 +220,32 @@ int calculateSimilarityPercentage(String expected, String spoken) {
                   ),
                   const SizedBox(height: 20),
                   buildFeedback(feedbackPerWord[index + 100]),
-                ],
+              const SizedBox(height: 24),
+ElevatedButton.icon(
+  onPressed: () {
+    if (index < wordList.length - 1) {
+      controller.nextPage(
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOut,
+      );
+    }
+  },
+  icon: const Icon(Icons.arrow_forward),
+  label: const Text(
+    "Next",
+    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+  ),
+  style: ElevatedButton.styleFrom(
+    backgroundColor: Colors.blueAccent,
+    padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(14),
+    ),
+  ),
+),
+  ],
               ),
+              
             );
           },
         );
@@ -448,15 +472,15 @@ int calculateSimilarityPercentage(String expected, String spoken) {
                             );
                           }).toList(),
                         ),
-                        const SizedBox(height: 24),
+                        const SizedBox(height: 18),
 Row(
                          
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             ElevatedButton.icon(
-                              icon: const Icon(Icons.volume_up, size: 28),
+                              icon: const Icon(Icons.volume_up, size:18),
                               label: const Text("Speak Word",
-                                  style: TextStyle(fontSize: 20)),
+                                  style: TextStyle(fontSize: 15)),
                               onPressed: () => speak(word),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.orange,
@@ -466,9 +490,9 @@ Row(
                             ),
                             const SizedBox(width: 16),
                             ElevatedButton.icon(
-                              icon: const Icon(Icons.mic, size: 28),
+                              icon: const Icon(Icons.mic, size: 18),
                               label: const Text("Evaluate",
-                                  style: TextStyle(fontSize: 20)),
+                                  style: TextStyle(fontSize: 16)),
                               onPressed: () => evaluateWord(word, index),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.orange,

@@ -10,8 +10,7 @@ class SunduqAlDadGame extends StatefulWidget {
   State<SunduqAlDadGame> createState() => _SunduqAlDadGameState();
 }
 
-class _SunduqAlDadGameState extends State<SunduqAlDadGame>
-    with TickerProviderStateMixin {
+class _SunduqAlDadGameState extends State<SunduqAlDadGame> with TickerProviderStateMixin {
   final FlutterTts tts = FlutterTts();
   final Random random = Random();
   bool showResult = false;
@@ -99,90 +98,129 @@ class _SunduqAlDadGameState extends State<SunduqAlDadGame>
     return Scaffold(
       backgroundColor: const Color(0xFFFFF3E0),
       appBar: AppBar(
-        title:
-            const Text("🎁 صندوق الضاد", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+        title: const Text("🎁 صندوق الضاد", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
         backgroundColor: Colors.deepOrange,
         centerTitle: true,
-        toolbarHeight: 80,
+        toolbarHeight: 70,
       ),
-      body: Stack(
-        children: [
-          SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (currentWord["animation"] != null)
-                    Lottie.asset(
-                      currentWord["animation"],
-                      height: 200,
-                    ),
-                  const SizedBox(height: 12),
-                  Text(
-                    currentWord["word"],
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 44, fontWeight: FontWeight.bold, color: Colors.brown),
-                  ),
-                  const SizedBox(height: 30),
-                  ...options.map((option) => Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        child: ElevatedButton(
-                          onPressed: showResult ? null : () => checkAnswer(option),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange.shade200,
-                            padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 40),
-                            minimumSize: const Size(300, 70),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-                            elevation: 4,
-                          ),
-                          child: Text(
-                            option,
-                            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      )),
-                  const SizedBox(height: 30),
-                  if (showResult)
-                    ScaleTransition(
-                      scale: CurvedAnimation(
-                          parent: _scaleController, curve: Curves.elasticOut),
-                      child: Column(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.deepOrange, width: 2),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                padding: const EdgeInsets.all(12),
+                margin: const EdgeInsets.only(bottom: 16),
+                child: Lottie.asset(
+                  currentWord["animation"],
+                  height: 150,
+                ),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 6)],
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Center(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            correct ? "✅ أحسنت! الإجابة صحيحة" : "❌ خطأ! حاول مجددًا",
-                            style: TextStyle(
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                              color: correct ? Colors.green : Colors.red,
-                            ),
-                            textAlign: TextAlign.center,
+                            currentWord["word"],
+                            style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.brown),
                           ),
-                          const SizedBox(height: 16),
-                          Text(
-                            currentWord["desc"],
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(fontSize: 24, fontStyle: FontStyle.italic),
-                          ),
-                          const SizedBox(height: 24),
-                          ElevatedButton.icon(
-                            onPressed: loadNewWord,
-                            icon: const Icon(Icons.refresh),
-                            label: const Text("كلمة جديدة", style: TextStyle(fontSize: 24)),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.deepOrange,
-                              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 40),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                            ),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            icon: const Icon(Icons.volume_up, color: Colors.deepOrange, size: 30),
+                            onPressed: () {
+                              tts.speak(currentWord["word"]);
+                            },
                           ),
                         ],
                       ),
                     ),
-                ],
+                    Center(
+                      child: TextButton.icon(
+                        onPressed: () {
+                          tts.speak(currentWord["desc"]);
+                        },
+                        icon: const Icon(Icons.record_voice_over, color: Colors.orange),
+                        label: const Text("استمع للشرح", style: TextStyle(fontSize: 18, color: Colors.orange)),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    ...options.map((option) => Center(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 6),
+                            child: ElevatedButton(
+                              onPressed: showResult ? null : () => checkAnswer(option),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.orange.shade200,
+                                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                minimumSize: const Size(260, 50),
+                              ),
+                              child: Text(option, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                            ),
+                          ),
+                        )),
+                  ],
+                ),
               ),
-            ),
+              const SizedBox(height: 24),
+              if (showResult)
+                ScaleTransition(
+                  scale: CurvedAnimation(parent: _scaleController, curve: Curves.elasticOut),
+                  child: Column(
+                    children: [
+                      Center(
+                        child: Text(
+                          correct ? "✅ أحسنت! الإجابة صحيحة" : "❌ خطأ! حاول مجددًا",
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: correct ? Colors.green : Colors.red,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Center(
+                        child: Text(
+                          currentWord["desc"],
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 20, fontStyle: FontStyle.italic),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Center(
+                        child: ElevatedButton.icon(
+                          onPressed: loadNewWord,
+                          icon: const Icon(Icons.refresh),
+                          label: const Text("كلمة جديدة", style: TextStyle(fontSize: 20)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.deepOrange,
+                            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 30),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

@@ -414,9 +414,9 @@ Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             ElevatedButton.icon(
-                              icon: const Icon(Icons.volume_up, size: 28),
+                              icon: const Icon(Icons.volume_up, size: 18),
                               label: const Text("Speak Word",
-                                  style: TextStyle(fontSize: 20)),
+                                  style: TextStyle(fontSize: 15)),
                               onPressed: () => speak(word),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.orange,
@@ -426,9 +426,9 @@ Row(
                             ),
                             const SizedBox(width: 16),
                             ElevatedButton.icon(
-                              icon: const Icon(Icons.mic, size: 28),
+                              icon: const Icon(Icons.mic, size: 18),
                               label: const Text("Evaluate",
-                                  style: TextStyle(fontSize: 20)),
+                                  style: TextStyle(fontSize: 15)),
                               onPressed: () => evaluateWord(word, index),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.orange,
