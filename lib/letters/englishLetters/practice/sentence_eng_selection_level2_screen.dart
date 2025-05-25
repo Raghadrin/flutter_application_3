@@ -21,13 +21,13 @@ class EnglishLevel2HomeScreen extends StatelessWidget {
       "emoji": "🏞️",
       "title": "A day at the park",
       "text":   "Today we went to the park. The sun was shining. We played on the swings and had fun.",
-      "animation": "images/new_images/apples.json",
+      "animation": "images/park.json",
     },
     {
       "emoji":  "🎂",
       "title":  "My Birthday",
       "text":"It was my birthday last week. I got a big cake and balloons. My friends came to play with me.",
-      "animation": "images/write.json",
+      "animation": "images/cake.json",
     },
     
   {
