@@ -18,56 +18,45 @@ class _EnglishLevel3QuizAllScreenState extends State<EnglishLevel3QuizAllScreen>
   String feedbackMessage = '';
   Color feedbackColor = Colors.transparent;
   IconData? feedbackIcon;
+final String story = "One rainy afternoon, Emma heard a soft meow outside her window. "
+    "She opened the door and saw a tiny kitten shivering on the porch. "
+    "Emma quickly brought it inside, dried its fur, and gave it warm milk. "
+    "She made posters and asked her neighbors if they lost a kitten. "
+    "Two days later, a boy named Alex came and said it was his. "
+    "Emma smiled and gave the kitten back. Alex thanked her, and they became good friends.";
 
-  final String story = "On a beautiful spring day, Sami went to the nearby park with his father. "
-      "They brought a basket full of fruits and juices. "
-      "Sami played on the swing and laughed a lot, then his friends joined him. "
-      "Later, they sat down to eat. "
-      "Sami saw birds flying in a V shape in the sky, and asked his father, who told him they were migrating. "
-      "Sami smiled and ate his red apple. It was a fun day.";
-
-  final List<Map<String, dynamic>> questions = [
-    {
-      "question": "What is the title of the story?",
-      "options": ["Trip to the beach", "Picnic in the park", "Adventure in the forest"],
-      "answerIndex": 1,
-    },
-    {
-      "question": "Who accompanied Sami?",
-      "options": ["His friends", "His father", "The teacher"],
-      "answerIndex": 1,
-    },
-    {
-      "question": "What was in the food basket?",
-      "options": ["Books and juices", "Fruits and sandwiches", "Toys and candy"],
-      "answerIndex": 1,
-    },
-    {
-      "question": "What did Sami do first in the park?",
-      "options": ["Ran to the swing", "Ate food", "Played with his friends"],
-      "answerIndex": 0,
-    },
-    {
-      "question": "What was the park full of?",
-      "options": ["Cars", "Children and families", "Books"],
-      "answerIndex": 1,
-    },
-    {
-      "question": "What did Sami see in the sky?",
-      "options": ["Planes", "Birds in a V shape", "Dark clouds"],
-      "answerIndex": 1,
-    },
-    {
-      "question": "What were the birds doing?",
-      "options": ["Building nests", "Migrating", "Singing"],
-      "answerIndex": 1,
-    },
-    {
-      "question": "What did Sami eat at the end?",
-      "options": ["A red apple", "A banana", "A cake"],
-      "answerIndex": 0,
-    },
-  ];
+final List<Map<String, dynamic>> questions = [
+  {
+    "question": "What did Emma hear?",
+    "options": ["A knock on the door", "A soft meow", "Thunder"],
+    "answerIndex": 1,
+  },
+  {
+    "question": "Where was the kitten when Emma found it?",
+    "options": ["In the garden", "On her bed", "On the porch"],
+    "answerIndex": 2,
+  },
+  {
+    "question": "What did Emma give to the kitten?",
+    "options": ["Water", "Milk", "Bread"],
+    "answerIndex": 1,
+  },
+  {
+    "question": "What did Emma do to find the kitten’s owner?",
+    "options": ["Posted online", "Made posters", "Called the police"],
+    "answerIndex": 1,
+  },
+  {
+    "question": "Who claimed the kitten after two days?",
+    "options": ["Her friend Lily", "A boy named Alex", "Her neighbor's dog"],
+    "answerIndex": 1,
+  },
+  {
+    "question": "What happened after Emma gave the kitten back?",
+    "options": ["They became friends", "She cried", "Alex left silently"],
+    "answerIndex": 0,
+  },
+];
 
   @override
   void initState() {

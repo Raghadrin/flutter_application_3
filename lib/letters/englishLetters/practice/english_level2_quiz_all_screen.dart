@@ -15,55 +15,54 @@ class _EnglishLevel2WordQuizScreenState extends State<EnglishLevel2WordQuizScree
   String feedbackMessage = '';
   Color feedbackColor = Colors.transparent;
   IconData? feedbackIcon;
-
-  final List<Map<String, dynamic>> questions = [
-    {
-      "type": "sentenceChoice",
-      "question": "Choose the sentence that has the word 'apple'",
-      "correct": "Laila ate a red apple.",
-      "options": [
-        "Ahmad went to the market.",
-        "Laila ate a red apple.",
-        "Sami played in the park."
-      ]
-    },
-    {
-      "type": "synonymChoice",
-      "question": "What is a synonym of 'happy'?",
-      "correct": "Joyful",
-      "options": ["Joyful", "Hungry", "Angry"]
-    },
-    {
-      "type": "oppositeChoice",
-      "question": "What is the opposite of 'big'?",
-      "correct": "Small",
-      "options": ["Tall", "Small", "Old"]
-    },
-    {
-      "type": "categoryChoice",
-      "question": "Which word belongs to the category 'fruits'?",
-      "correct": "Apple",
-      "options": ["Apple", "Pen", "Door"]
-    },
-    {
-      "type": "audioWord",
-      "sound": "apple",
-      "correct": "Apple",
-      "options": ["Apple", "Banana", "Orange"],
-    },
-    {
-      "type": "missingWord",
-      "sentence": "Sami ate a       red fruit.",
-      "correct": "Apple",
-      "options": ["Banana", "Apple", "Apples"],
-    },
-    {
-      "type": "wordWithLetter",
-      "letter": "s",
-      "correct": "Sun",
-      "options": ["Apple", "Sun", "Pen"],
-    },
-  ];
+final List<Map<String, dynamic>> questions = [
+  {
+    "type": "sentenceChoice",
+    "question": "Choose the sentence that includes the word 'environment'.",
+    "correct": "We must protect the environment from pollution.",
+    "options": [
+      "He fixed his broken bicycle.",
+      "We must protect the environment from pollution.",
+      "My sister painted a beautiful picture."
+    ]
+  },
+  {
+    "type": "synonymChoice",
+    "question": "What is a synonym of 'intelligent'?",
+    "correct": "Smart",
+    "options": ["Tall", "Smart", "Loud"]
+  },
+  {
+    "type": "oppositeChoice",
+    "question": "What is the opposite of 'ancient'?",
+    "correct": "Modern",
+    "options": ["Old", "Modern", "Big"]
+  },
+  {
+    "type": "categoryChoice",
+    "question": "Which word belongs to the category 'instruments'?",
+    "correct": "Violin",
+    "options": ["Violin", "Window", "Jacket"]
+  },
+  {
+    "type": "audioWord",
+    "sound": "curiosity", // TTS or pre-recorded
+    "correct": "Curiosity",
+    "options": ["Curiosity", "Generosity", "Velocity"]
+  },
+  {
+    "type": "missingWord",
+    "sentence": "She delivered a       speech about climate change.",
+    "correct": "powerful",
+    "options": ["colorful", "powerful", "peaceful"]
+  },
+  {
+    "type": "wordWithLetter",
+    "letter": "q",
+    "correct": "Question",
+    "options": ["Answer", "Question", "Lesson"]
+  },
+];
 
   @override
   void initState() {

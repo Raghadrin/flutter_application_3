@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:lottie/lottie.dart';
 
-import 'english_level2_screen.dart';
 import 'english_level2_quiz_all_screen.dart';
+import 'english_level2_screen.dart';
 
 class EnglishLevel2HomeScreen extends StatelessWidget {
   final FlutterTts tts = FlutterTts();
@@ -18,35 +18,38 @@ class EnglishLevel2HomeScreen extends StatelessWidget {
 
   final List<Map<String, String>> sentences = [
     {
-      "emoji": "🏫",
-      "title": "School Activity",
-      "text": "The hardworking boy goes to school every morning with energy.",
-      "animation": "assets/animations/school.json",
+      "emoji": "🏞️",
+      "title": "A day at the park",
+      "text":   "Today we went to the park. The sun was shining. We played on the swings and had fun.",
+      "animation": "images/new_images/apples.json",
     },
     {
-      "emoji": "🩺",
-      "title": "Treating Patients",
-      "text": "The doctor treats patients at the hospital using precise tools.",
-      "animation": "assets/animations/doctor.json",
+      "emoji":  "🎂",
+      "title":  "My Birthday",
+      "text":"It was my birthday last week. I got a big cake and balloons. My friends came to play with me.",
+      "animation": "images/write.json",
     },
-    {
-      "emoji": "🚦",
-      "title": "Obeying the Law",
-      "text": "The red car stopped at the red light in respect of the law.",
-      "animation": "assets/animations/traffic.json",
-    },
-    {
-      "emoji": "📚",
-      "title": "Daily Reading",
-      "text": "I read a useful book in the library every day after school.",
-      "animation": "assets/animations/read.json",
-    },
-    {
-      "emoji": "👩‍🍳",
-      "title": "Healthy Cooking",
-      "text": "Mom prepares delicious food with healthy ingredients for the family.",
-      "animation": "assets/animations/cook.json",
-    },
+    
+  {
+    "emoji": "🐶",
+    "title": "A Fun Morning with My Dog",
+    "text": "My dog is very playful. He runs fast in the park every morning and loves chasing butterflies.",
+    "animation": "images/Dog.json",
+  },
+  {
+    "emoji": "🚗",
+    "title": "Helping Dad Wash the Car",
+    "text": "Every Saturday, Dad washes the car carefully. He uses a sponge, water, and soap to make it shine.",
+    "animation": "images/car.json",
+  },
+  {
+    "emoji": "📖",
+    "title": "Reading Stories at the Library",
+    "text": "We visit the library every week. I enjoy sitting with my friends and reading stories about space and animals.",
+    "animation": "images/read.json",
+  },
+
+
   ];
 
   @override
@@ -58,15 +61,15 @@ class EnglishLevel2HomeScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.orange,
         elevation: 0,
+        centerTitle: true,
         title: const Text(
           "English - Level 2",
           style: TextStyle(
-            color: Colors.black,
             fontSize: 24,
             fontWeight: FontWeight.bold,
+            color: Colors.black,
           ),
         ),
-        centerTitle: true,
       ),
       body: GridView.count(
         crossAxisCount: 2,
@@ -78,14 +81,12 @@ class EnglishLevel2HomeScreen extends StatelessWidget {
           _buildTile(
             context,
             title: "Level 2 Quiz",
-            jsonPath: "assets/animations/quiz.json",
+            jsonPath: "images/new_images/Quiz.json",
             onTap: () {
               _speak("Let's begin the quiz.");
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (_) => const EnglishLevel2WordQuizScreen(),
-                ),
+                MaterialPageRoute(builder: (_) => const EnglishLevel2WordQuizScreen()),
               );
             },
           ),
@@ -99,9 +100,7 @@ class EnglishLevel2HomeScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => EnglishLevel2Screen(
-                      sentence: sentence["text"]!,
-                    ),
+                    builder: (_) => EnglishLevel2Screen(sentence: sentence["text"]!),
                   ),
                 );
               },
@@ -134,12 +133,12 @@ class EnglishLevel2HomeScreen extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               title,
+              textAlign: TextAlign.center,
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
                 color: Colors.deepOrange,
               ),
-              textAlign: TextAlign.center,
             ),
           ],
         ),

@@ -7,6 +7,7 @@ class EnglishLevel3Screen extends StatefulWidget {
   final String storyText;
   final List<String> questions;
   final List<String> correctAnswers;
+  final List<List<String>> answerChoices;
 
   const EnglishLevel3Screen({
     super.key,
@@ -14,6 +15,7 @@ class EnglishLevel3Screen extends StatefulWidget {
     required this.storyText,
     required this.questions,
     required this.correctAnswers,
+    required this.answerChoices,
   });
 
   @override
@@ -34,10 +36,6 @@ class _EnglishLevel3ScreenState extends State<EnglishLevel3Screen> {
   String voiceFeedback = '';
   Color feedbackColor = Colors.transparent;
 
-  final List<String> dummyOptions = [
-    "the beach", "friends", "food", "the park", "clouds", "playing"
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -53,19 +51,6 @@ class _EnglishLevel3ScreenState extends State<EnglishLevel3Screen> {
   Future<void> speak(String text) async {
     await flutterTts.stop();
     await flutterTts.speak(text);
-  }
-
-  String normalize(String input) {
-    return input.toLowerCase().replaceAll(RegExp(r'[^a-z\s]'), '').trim();
-  }
-
-  double similarity(String a, String b) {
-    int match = 0;
-    int minLen = a.length < b.length ? a.length : b.length;
-    for (int i = 0; i < minLen; i++) {
-      if (a[i] == b[i]) match++;
-    }
-    return (match / b.length * 100);
   }
 
   Future<void> evaluateStorySpeech() async {
@@ -85,52 +70,33 @@ class _EnglishLevel3ScreenState extends State<EnglishLevel3Screen> {
       pauseFor: const Duration(seconds: 20),
       partialResults: false,
       onResult: (val) {
-        final expected = normalize(widget.storyText);
-        final spoken = normalize(val.recognizedWords);
+        final spoken = val.recognizedWords.toLowerCase().trim();
+        final expected = widget.storyText.toLowerCase().trim();
 
-        List<String> expectedWords = expected.split(' ');
-        List<String> spokenWords = spoken.split(' ');
-
-        int matchCount = 0;
+        final spokenWords = spoken.split(' ');
+        final expectedWords = expected.split(' ');
+        int match = 0;
         for (int i = 0; i < expectedWords.length; i++) {
-          if (i < spokenWords.length) {
-            double score = similarity(spokenWords[i], expectedWords[i]);
-            if (score >= 80 || (expectedWords[i].length <= 3 && score >= 60)) {
-              matchCount++;
-            }
+          if (i < spokenWords.length && spokenWords[i] == expectedWords[i]) {
+            match++;
           }
         }
 
-        double finalScore = (matchCount / expectedWords.length * 100).clamp(0, 100);
-
-        String feedback;
-        Color color;
-        if (finalScore >= 80) {
-          feedback = "✅ Excellent!\nScore: ${finalScore.toStringAsFixed(1)}%";
-          color = Colors.green;
-        } else if (finalScore >= 70) {
-          feedback = "✨ Good effort\nScore: ${finalScore.toStringAsFixed(1)}%";
-          color = Colors.orange;
-        } else {
-          feedback = "❌ Try again\nScore: ${finalScore.toStringAsFixed(1)}%";
-          color = Colors.red;
-        }
-
-        setState(() {
-          voiceScore = finalScore;
-          feedbackColor = color;
-          voiceFeedback = feedback;
+      double percentage = (match / expectedWords.length * 100).clamp(0, 100).toDouble();  setState(() {
+          voiceScore = percentage;
+          voiceFeedback = percentage >= 60
+              ? '✅ Excellent!\nScore: ${percentage.toStringAsFixed(1)}%'
+              : percentage >= 20
+                  ? '✨ Good effort\nScore: ${percentage.toStringAsFixed(1)}%'
+                  : '❌ Try again\nScore: ${percentage.toStringAsFixed(1)}%';
+          feedbackColor = percentage >= 80
+              ? Colors.green
+              : percentage >= 60
+                  ? Colors.orange
+                  : Colors.red;
         });
       },
     );
-  }
-
-  List<String> generateOptions(String correct) {
-    final options = <String>{correct};
-    while (options.length < 4) {
-      options.add(dummyOptions[(options.length * 2 + correct.length) % dummyOptions.length]);
-    }
-    return options.toList()..shuffle();
   }
 
   Widget buildStoryTab() {
@@ -162,7 +128,12 @@ class _EnglishLevel3ScreenState extends State<EnglishLevel3Screen> {
               child: Text(
                 widget.storyText,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.brown),
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.brown,
+                  height: 1.6,
+                ),
               ),
             ),
             const SizedBox(height: 20),
@@ -218,7 +189,7 @@ class _EnglishLevel3ScreenState extends State<EnglishLevel3Screen> {
             const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(4, (i) {
+              children: List.generate(widget.questions.length, (i) {
                 return Icon(i < correctCount ? Icons.star : Icons.star_border, color: Colors.orange, size: 28);
               }),
             ),
@@ -241,17 +212,6 @@ class _EnglishLevel3ScreenState extends State<EnglishLevel3Screen> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               ),
             ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              icon: const Icon(Icons.home),
-              label: const Text("Back to stories", style: TextStyle(fontSize: 18)),
-              onPressed: () => Navigator.pop(context),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              ),
-            ),
           ],
         ),
       );
@@ -259,7 +219,7 @@ class _EnglishLevel3ScreenState extends State<EnglishLevel3Screen> {
 
     final question = widget.questions[currentQuestion];
     final correct = widget.correctAnswers[currentQuestion];
-    final options = generateOptions(correct);
+    final options = widget.answerChoices[currentQuestion];
 
     return Padding(
       padding: const EdgeInsets.all(16),
