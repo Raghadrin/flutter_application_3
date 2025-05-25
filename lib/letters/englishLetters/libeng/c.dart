@@ -1,7 +1,9 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:lottie/lottie.dart';
+import 'particle_background.dart';
 
 class HelloWordScreen extends StatefulWidget {
   const HelloWordScreen({super.key});
@@ -10,16 +12,21 @@ class HelloWordScreen extends StatefulWidget {
   State<HelloWordScreen> createState() => _HelloWordScreenState();
 }
 
-class _HelloWordScreenState extends State<HelloWordScreen> {
+class _HelloWordScreenState extends State<HelloWordScreen>
+    with TickerProviderStateMixin {
   final FlutterTts flutterTts = FlutterTts();
   final AudioPlayer _player = AudioPlayer();
 
   bool isConnecting = false;
   bool callStarted = false;
+  bool _fadeIn = false;
   String word = '';
   String message = '';
   String animationPath = '';
   int key = 0;
+
+  late AnimationController _slideController;
+  late Animation<Offset> _slideAnimation;
 
   final List<Map<String, String>> wordCalls = [
     {
@@ -49,6 +56,21 @@ class _HelloWordScreenState extends State<HelloWordScreen> {
     },
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    flutterTts.setLanguage("en-US");
+    flutterTts.setSpeechRate(0.35);
+    _slideController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero).animate(
+      CurvedAnimation(parent: _slideController, curve: Curves.easeOut),
+    );
+  }
+
   Future<void> startCall() async {
     final selected = (wordCalls..shuffle()).first;
     setState(() {
@@ -58,17 +80,28 @@ class _HelloWordScreenState extends State<HelloWordScreen> {
       isConnecting = true;
     });
 
-    await _player.play(AssetSource('audio/ring.mp3'));
-    await Future.delayed(const Duration(seconds: 9));
+    try {
+      await _player.play(AssetSource('audio/ring.mp3'));
+      await Future.delayed(const Duration(seconds: 9));
+    } catch (e) {
+      print("Error playing ring sound: $e");
+    }
 
     setState(() {
       isConnecting = false;
       callStarted = true;
       key++;
+      _fadeIn = false;
     });
 
-    await flutterTts.setLanguage("en-US");
-    await flutterTts.setSpeechRate(0.35);
+    _slideController.reset();
+    await Future.delayed(const Duration(milliseconds: 100));
+    setState(() {
+      _fadeIn = true;
+    });
+    _slideController.forward();
+
+    await flutterTts.awaitSpeakCompletion(true);
     await flutterTts.speak("Hello! I’m $word. $message");
   }
 
@@ -76,6 +109,7 @@ class _HelloWordScreenState extends State<HelloWordScreen> {
     setState(() {
       callStarted = false;
       isConnecting = false;
+      _fadeIn = false;
     });
   }
 
@@ -83,20 +117,37 @@ class _HelloWordScreenState extends State<HelloWordScreen> {
   void dispose() {
     flutterTts.stop();
     _player.dispose();
+    _slideController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.orange.shade50,
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 700),
-        child: isConnecting
-            ? buildConnectingScreen()
-            : callStarted
-                ? buildCallScreen()
-                : buildStartScreen(),
+      body: Stack(
+        children: [
+          AnimatedContainer(
+            duration: const Duration(seconds: 4),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.orange.shade100, Colors.yellow.shade100],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+          ),
+          const ParticleBackground(),
+          Center(
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 700),
+              child: isConnecting
+                  ? buildConnectingScreen()
+                  : callStarted
+                      ? buildCallScreen()
+                      : buildStartScreen(),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -119,49 +170,103 @@ class _HelloWordScreenState extends State<HelloWordScreen> {
   }
 
   Widget buildCallScreen() {
-    return Center(
-      key: ValueKey(key),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Lottie.asset(animationPath, width: 180, height: 180),
-          const SizedBox(height: 20),
-          AnimatedContainer(
-            duration: const Duration(seconds: 1),
-            curve: Curves.easeInOut,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.orange.shade200,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text("📞 Hello! I’m $word",
-                style: const TextStyle(
-                    fontSize: 30,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white)),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 24),
-            child: Text(message,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
+    return AnimatedOpacity(
+      opacity: _fadeIn ? 1.0 : 0.0,
+      duration: const Duration(milliseconds: 700),
+      child: SlideTransition(
+        position: _slideAnimation,
+        child: Center(
+          key: ValueKey(key),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Hero(
+                tag: 'lottie_$word',
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.deepOrangeAccent, width: 2),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Lottie.asset(animationPath, width: 180, height: 180),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Hero(
+                tag: 'title_$word',
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.shade100.withOpacity(0.7),
+                    borderRadius: BorderRadius.circular(30),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.orange.shade200,
+                        blurRadius: 6,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    "📞 Hello! I’m $word",
+                    style: const TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFB3541E),
+                      shadows: [
+                        Shadow(
+                          blurRadius: 2,
+                          color: Colors.white,
+                          offset: Offset(1, 1),
+                        ),
+                      ],
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 24),
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 10,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w500,
-                    color: Colors.black87)),
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 30),
+              ElevatedButton.icon(
+                onPressed: tryAnother,
+                icon: const Icon(Icons.refresh),
+                label: const Text("Try another"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  textStyle: const TextStyle(fontSize: 18),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 20),
-          ElevatedButton.icon(
-            onPressed: tryAnother,
-            icon: const Icon(Icons.refresh),
-            label: const Text("Try another"),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              textStyle: const TextStyle(fontSize: 18),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -186,9 +291,11 @@ class _HelloWordScreenState extends State<HelloWordScreen> {
             label: const Text("Answer Call"),
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.green,
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
               textStyle: const TextStyle(fontSize: 20),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30)),
             ),
           ),
         ],
