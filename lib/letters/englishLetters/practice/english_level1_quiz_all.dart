@@ -17,22 +17,32 @@ class _EnglishLetterQuizScreenState extends State<EnglishLetterQuizScreen> {
   IconData? feedbackIcon;
 
   final List<Map<String, dynamic>> questions = [
-    {"type": "position", "word": "bat", "letter": "b", "correctPosition": "beginning"},
-    {"type": "position", "word": "water", "letter": "t", "correctPosition": "middle"},
-    {"type": "position", "word": "cab", "letter": "b", "correctPosition": "end"},
-    {"type": "letterChoice", "prompt": "Choose the letter S", "correctLetter": "s", "options": ["z", "s", "x", "r"]},
-    {"type": "letterChoice", "prompt": "Choose the letter M", "correctLetter": "m", "options": ["n", "m", "w"]},
-    {"type": "letterChoice", "prompt": "Choose the letter D", "correctLetter": "d", "options": ["p", "b", "d"]},
-    {"type": "missingLetter", "incompleteWord": "_ouse", "correctLetter": "m", "options": ["m", "h", "r", "l"]},
-    {"type": "missingLetter", "incompleteWord": "fi_h", "correctLetter": "s", "options": ["n", "s", "t", "p"]},
-    {"type": "missingLetter", "incompleteWord": "bo_k", "correctLetter": "o", "options": ["a", "o", "u", "i"]},
-    {"type": "audioMatch", "audioLetter": "b", "correctLetter": "b", "options": ["b", "d", "p"]},
-    {"type": "audioMatch", "audioLetter": "m", "correctLetter": "m", "options": ["n", "m", "v"]},
-    {"type": "audioMatch", "audioLetter": "t", "correctLetter": "t", "options": ["f", "t", "s"]},
-    {"type": "wordWithLetter", "targetLetter": "d", "correctWord": "dog", "options": ["cat", "dog", "sun"]},
-    {"type": "wordWithLetter", "targetLetter": "b", "correctWord": "bat", "options": ["bat", "cap", "mat"]},
-    {"type": "wordWithLetter", "targetLetter": "s", "correctWord": "sun", "options": ["sun", "pen", "run"]},
-  ];
+  // نوع: position
+  {"type": "position", "word": "lamp", "letter": "l", "correctPosition": "beginning"},
+  {"type": "position", "word": "piano", "letter": "a", "correctPosition": "middle"},
+  {"type": "position", "word": "frog", "letter": "g", "correctPosition": "end"},
+
+  // نوع: letterChoice
+  {"type": "letterChoice", "prompt": "Choose the letter A", "correctLetter": "a", "options": ["a", "e", "o", "u"]},
+  {"type": "letterChoice", "prompt": "Choose the letter G", "correctLetter": "g", "options": ["k", "g", "h"]},
+  {"type": "letterChoice", "prompt": "Choose the letter R", "correctLetter": "r", "options": ["r", "n", "m"]},
+
+  // نوع: missingLetter
+  {"type": "missingLetter", "incompleteWord": "_ish", "correctLetter": "f", "options": ["f", "d", "t", "l"]},
+  {"type": "missingLetter", "incompleteWord": "do_", "correctLetter": "g", "options": ["g", "t", "n", "b"]},
+  {"type": "missingLetter", "incompleteWord": "ca_", "correctLetter": "t", "options": ["t", "p", "r", "n"]},
+
+  // نوع: audioMatch
+  {"type": "audioMatch", "audioLetter": "c", "correctLetter": "c", "options": ["s", "c", "k"]},
+  {"type": "audioMatch", "audioLetter": "l", "correctLetter": "l", "options": ["l", "n", "r"]},
+  {"type": "audioMatch", "audioLetter": "v", "correctLetter": "v", "options": ["v", "b", "w"]},
+
+  // نوع: wordWithLetter
+  {"type": "wordWithLetter", "targetLetter": "r", "correctWord": "rain", "options": ["sun", "rain", "dog"]},
+  {"type": "wordWithLetter", "targetLetter": "f", "correctWord": "fish", "options": ["bird", "fish", "lion"]},
+  {"type": "wordWithLetter", "targetLetter": "m", "correctWord": "moon", "options": ["star", "moon", "sun"]},
+];
+
 
   @override
   void initState() {
@@ -97,6 +107,10 @@ class _EnglishLetterQuizScreenState extends State<EnglishLetterQuizScreen> {
         feedbackMessage = '';
         feedbackColor = Colors.transparent;
         feedbackIcon = null;
+
+        if (currentIndex < questions.length) {
+      _speakQuestion(questions[currentIndex]); // أضف هذا السطر لنطق السؤال التالي
+    }
       });
     });
   }

@@ -18,35 +18,36 @@ class EnglishLevel1HomeScreen extends StatelessWidget {
 
   final List<Map<String, String>> sentences = [
     {
-      "emoji": "🌞",
-      "title": "Sunrise",
-      "text": "The sun rises every morning",
-      "animation": "images/sun.json",
+      "emoji": "🍎",
+      "title": "The Apple",
+      "text": "The apple is red and sweet.",
+      "animation": "images/new_images/apples.json",
     },
     {
-      "emoji": "✍️",
-      "title": "Homework",
-      "text": "The boy is doing his homework",
+      "emoji":  "🏫",
+      "title": "My School",
+      "text": "I go to school every morning.",
       "animation": "images/write.json",
     },
     {
-      "emoji": "👩‍🍳",
-      "title": "Cooking",
-      "text": "Mom is cooking food",
-      "animation": "images/cook.json",
+      "emoji":"🐶",
+      "title": "My dog",
+      "text": "My dog runs fast in the park.",
+      "animation": "images/Dog.json",
     },
     {
-      "emoji": "🚗",
-      "title": "Road",
-      "text": "The car drives on the road",
-      "animation": "images/car.json",
-    },
-    {
-      "emoji": "📖",
-      "title": "Reading",
-      "text": "I love reading books",
-      "animation": "images/read.json",
-    },
+  "emoji": "🚗",
+  "title": "Washing the Car",
+  "text": "Dad washes the car.",
+  "animation": "images/car.json",
+},
+{
+  "emoji": "📖",
+  "title": "Library Time",
+  "text": "We read at the library.",
+  "animation": "images/read.json",
+},
+
   ];
 
   @override
