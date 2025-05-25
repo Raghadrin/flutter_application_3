@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
-class ArabicLevel3QuizAllScreen extends StatefulWidget {
-  const ArabicLevel3QuizAllScreen({super.key});
+class EnglishLevel3QuizAllScreen extends StatefulWidget {
+  const EnglishLevel3QuizAllScreen({super.key});
 
   @override
-  State<ArabicLevel3QuizAllScreen> createState() => _ArabicLevel3QuizAllScreenState();
+  State<EnglishLevel3QuizAllScreen> createState() => _EnglishLevel3QuizAllScreenState();
 }
 
-class _ArabicLevel3QuizAllScreenState extends State<ArabicLevel3QuizAllScreen> {
+class _EnglishLevel3QuizAllScreenState extends State<EnglishLevel3QuizAllScreen> {
   final FlutterTts flutterTts = FlutterTts();
   int currentStep = 0;
   int selectedAnswerIndex = -1;
@@ -18,61 +18,50 @@ class _ArabicLevel3QuizAllScreenState extends State<ArabicLevel3QuizAllScreen> {
   String feedbackMessage = '';
   Color feedbackColor = Colors.transparent;
   IconData? feedbackIcon;
+final String story = "One rainy afternoon, Emma heard a soft meow outside her window. "
+    "She opened the door and saw a tiny kitten shivering on the porch. "
+    "Emma quickly brought it inside, dried its fur, and gave it warm milk. "
+    "She made posters and asked her neighbors if they lost a kitten. "
+    "Two days later, a boy named Alex came and said it was his. "
+    "Emma smiled and gave the kitten back. Alex thanked her, and they became good friends.";
 
-  final String story = "في يوم ربيعي جميل، ذهب سامي مع والده إلى الحديقة القريبة. "
-      "أحضرا معهما سلة طعام مليئة بالفاكهة والعصائر. "
-      "لعب سامي على الأرجوحة وضحك كثيرًا، ثم انضم إليه أصدقاؤه. "
-      "جلسوا لاحقًا لتناول الطعام. "
-      "رأى سامي طيورًا تطير في السماء على شكل حرف V، فسأل والده، فأجابه بأنها تهاجر. "
-      "ابتسم سامي وأكل تفاحته الحمراء، وكان يومًا ممتعًا.";
-
-  final List<Map<String, dynamic>> questions = [
-    {
-      "question": "ما عنوان القصة؟",
-      "options": ["رحلة إلى البحر", "نزهة في الحديقة", "مغامرة في الغابة"],
-      "answerIndex": 1,
-    },
-    {
-      "question": "من كان يرافق سامي؟",
-      "options": ["أصدقاؤه", "والده", "المعلم"],
-      "answerIndex": 1,
-    },
-    {
-      "question": "ماذا كانت تحتوي سلة الطعام؟",
-      "options": ["كتب والعصائر", "فاكهة وسندويشات", "لعب وحلوى"],
-      "answerIndex": 1,
-    },
-    {
-      "question": "ماذا فعل سامي أولاً عندما وصل الحديقة؟",
-      "options": ["ركض نحو الأرجوحة", "تناول الطعام", "لعب مع أصدقائه"],
-      "answerIndex": 0,
-    },
-    {
-      "question": "بماذا كانت الحديقة تعج؟",
-      "options": ["السيارات", "الأطفال والعائلات", "الكتب"],
-      "answerIndex": 1,
-    },
-    {
-      "question": "ماذا شاهد سامي في السماء؟",
-      "options": ["طائرات", "طيور بشكل V", "غيوم سوداء"],
-      "answerIndex": 1,
-    },
-    {
-      "question": "ماذا كانت تفعل الطيور؟",
-      "options": ["تبني أعشاشًا", "تهاجر", "تغني"],
-      "answerIndex": 1,
-    },
-    {
-      "question": "ماذا أكل سامي في نهاية القصة؟",
-      "options": ["تفاحة حمراء", "موزة", "كعكة"],
-      "answerIndex": 0,
-    },
-  ];
+final List<Map<String, dynamic>> questions = [
+  {
+    "question": "What did Emma hear?",
+    "options": ["A knock on the door", "A soft meow", "Thunder"],
+    "answerIndex": 1,
+  },
+  {
+    "question": "Where was the kitten when Emma found it?",
+    "options": ["In the garden", "On her bed", "On the porch"],
+    "answerIndex": 2,
+  },
+  {
+    "question": "What did Emma give to the kitten?",
+    "options": ["Water", "Milk", "Bread"],
+    "answerIndex": 1,
+  },
+  {
+    "question": "What did Emma do to find the kitten’s owner?",
+    "options": ["Posted online", "Made posters", "Called the police"],
+    "answerIndex": 1,
+  },
+  {
+    "question": "Who claimed the kitten after two days?",
+    "options": ["Her friend Lily", "A boy named Alex", "Her neighbor's dog"],
+    "answerIndex": 1,
+  },
+  {
+    "question": "What happened after Emma gave the kitten back?",
+    "options": ["They became friends", "She cried", "Alex left silently"],
+    "answerIndex": 0,
+  },
+];
 
   @override
   void initState() {
     super.initState();
-    flutterTts.setLanguage("ar-SA");
+    flutterTts.setLanguage("en-US");
   }
 
   Future<void> speak(String text) async {
@@ -88,13 +77,13 @@ class _ArabicLevel3QuizAllScreenState extends State<ArabicLevel3QuizAllScreen> {
       Color msgColor;
 
       if (scorePercent >= 90) {
-        finalMessage = "ممتاز جدًا 🎉";
+        finalMessage = "Excellent 🎉";
         msgColor = Colors.green;
       } else if (scorePercent >= 70) {
-        finalMessage = "عمل رائع 👏";
+        finalMessage = "Great job 👏";
         msgColor = Colors.orange;
       } else {
-        finalMessage = "أحسنت المحاولة 💪";
+        finalMessage = "Nice try 💪";
         msgColor = Colors.red;
       }
 
@@ -104,10 +93,9 @@ class _ArabicLevel3QuizAllScreenState extends State<ArabicLevel3QuizAllScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text("النتيجة النهائية", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+              const Text("Final Score", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
               const SizedBox(height: 20),
-              Text("$scorePercent%",
-                  style: const TextStyle(fontSize: 50, color: Colors.deepOrange, fontWeight: FontWeight.bold)),
+              Text("$scorePercent%", style: const TextStyle(fontSize: 50, color: Colors.deepOrange, fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
               Text(finalMessage, style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: msgColor)),
               const SizedBox(height: 24),
@@ -118,7 +106,7 @@ class _ArabicLevel3QuizAllScreenState extends State<ArabicLevel3QuizAllScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 18),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 ),
-                child: const Text("التالي ⏭️", style: TextStyle(fontSize: 24, color: Colors.white)),
+                child: const Text("Next ⏭️", style: TextStyle(fontSize: 24, color: Colors.white)),
               )
             ],
           ),
@@ -133,7 +121,7 @@ class _ArabicLevel3QuizAllScreenState extends State<ArabicLevel3QuizAllScreen> {
       appBar: AppBar(
         backgroundColor: Colors.orange,
         centerTitle: true,
-        title: const Text("📖 كويز الفهم القرائي", style: TextStyle(fontSize: 20)),
+        title: const Text("📖 Reading Comprehension Quiz", style: TextStyle(fontSize: 20)),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -146,7 +134,7 @@ class _ArabicLevel3QuizAllScreenState extends State<ArabicLevel3QuizAllScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const Text("القصة", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.deepOrange)),
+        const Text("Story", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.deepOrange)),
         const SizedBox(height: 12),
         SizedBox(
           height: 250,
@@ -160,8 +148,8 @@ class _ArabicLevel3QuizAllScreenState extends State<ArabicLevel3QuizAllScreen> {
             child: SingleChildScrollView(
               child: Text(
                 story,
-                textAlign: TextAlign.right,
-                style: const TextStyle(fontSize: 22, height: 1.8, color: Colors.black87),
+                textAlign: TextAlign.left,
+                style: const TextStyle(fontSize: 20, height: 1.6, color: Colors.black87),
               ),
             ),
           ),
@@ -169,14 +157,14 @@ class _ArabicLevel3QuizAllScreenState extends State<ArabicLevel3QuizAllScreen> {
         const SizedBox(height: 12),
         ElevatedButton.icon(
           icon: const Icon(Icons.volume_up),
-          label: const Text("تشغيل القصة", style: TextStyle(fontSize: 20)),
+          label: const Text("Play Story", style: TextStyle(fontSize: 20)),
           onPressed: () => speak(story),
           style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
         ),
         const SizedBox(height: 12),
         ElevatedButton.icon(
           icon: const Icon(Icons.arrow_forward),
-          label: const Text("ابدأ الأسئلة", style: TextStyle(fontSize: 20)),
+          label: const Text("Start Quiz", style: TextStyle(fontSize: 20)),
           onPressed: () {
             setState(() {
               currentStep = 1;
@@ -201,7 +189,7 @@ class _ArabicLevel3QuizAllScreenState extends State<ArabicLevel3QuizAllScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text("السؤال $currentStep من ${questions.length}",
+          Text("Question $currentStep of ${questions.length}",
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.deepOrange)),
           const SizedBox(height: 12),
           Card(
@@ -214,7 +202,6 @@ class _ArabicLevel3QuizAllScreenState extends State<ArabicLevel3QuizAllScreen> {
                   Expanded(
                     child: Text(
                       current['question'],
-                      textAlign: TextAlign.right,
                       style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
                     ),
                   ),
@@ -240,15 +227,15 @@ class _ArabicLevel3QuizAllScreenState extends State<ArabicLevel3QuizAllScreen> {
                     answered = true;
                     if (index == current['answerIndex']) {
                       correctAnswers++;
-                      feedbackMessage = "إجابة صحيحة ✅";
+                      feedbackMessage = "Correct ✅";
                       feedbackColor = Colors.green;
                       feedbackIcon = Icons.check_circle;
-                      speak("إجابة صحيحة");
+                      speak("Correct");
                     } else {
-                      feedbackMessage = "إجابة خاطئة ❌";
+                      feedbackMessage = "Wrong ❌";
                       feedbackColor = Colors.red;
                       feedbackIcon = Icons.cancel;
-                      speak("إجابة خاطئة");
+                      speak("Wrong");
                     }
                   });
                 },
@@ -290,7 +277,7 @@ class _ArabicLevel3QuizAllScreenState extends State<ArabicLevel3QuizAllScreen> {
           const Spacer(),
           ElevatedButton.icon(
             icon: const Icon(Icons.arrow_forward),
-            label: const Text("التالي", style: TextStyle(fontSize: 20)),
+            label: const Text("Next", style: TextStyle(fontSize: 20)),
             onPressed: () {
               setState(() {
                 currentStep++;

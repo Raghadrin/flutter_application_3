@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
-class ArabicLetterQuizScreen extends StatefulWidget {
-  const ArabicLetterQuizScreen({super.key});
+class EnglishLetterQuizScreen extends StatefulWidget {
+  const EnglishLetterQuizScreen({super.key});
 
   @override
-  State<ArabicLetterQuizScreen> createState() => _ArabicLetterQuizScreenState();
+  State<EnglishLetterQuizScreen> createState() => _EnglishLetterQuizScreenState();
 }
 
-class _ArabicLetterQuizScreenState extends State<ArabicLetterQuizScreen> {
+class _EnglishLetterQuizScreenState extends State<EnglishLetterQuizScreen> {
   final FlutterTts flutterTts = FlutterTts();
   int currentIndex = 0;
   int correctAnswers = 0;
@@ -17,22 +17,32 @@ class _ArabicLetterQuizScreenState extends State<ArabicLetterQuizScreen> {
   IconData? feedbackIcon;
 
   final List<Map<String, dynamic>> questions = [
-    {"type": "position", "word": "بنت", "letter": "ب", "correctPosition": "بداية"},
-    {"type": "position", "word": "كتاب", "letter": "ت", "correctPosition": "وسط"},
-    {"type": "position", "word": "قلب", "letter": "ب", "correctPosition": "نهاية"},
-    {"type": "letterChoice", "prompt": "اختر حرف الشين", "correctLetter": "ش", "options": ["س", "ش", "ص", "ث"]},
-    {"type": "letterChoice", "prompt": "اختر حرف العين", "correctLetter": "ع", "options": ["غ", "ق", "ع"]},
-    {"type": "letterChoice", "prompt": "اختر حرف الذال", "correctLetter": "ذ", "options": ["ز", "د", "ذ"]},
-    {"type": "missingLetter", "incompleteWord": "م رسة", "correctLetter": "د", "options": ["ب", "ر", "د", "س"]},
-    {"type": "missingLetter", "incompleteWord": " طار ", "correctLetter": "ق", "options": ["ف", "ك", "ق", "غ"]},
-    {"type": "missingLetter", "incompleteWord": "حقي ة", "correctLetter": "ب", "options": ["ب", "د", "ذ", "ز"]},
-    {"type": "audioMatch", "audioLetter": "ت", "correctLetter": "ت", "options": ["ت", "د", "س"]},
-    {"type": "audioMatch", "audioLetter": "ع", "correctLetter": "ع", "options": ["غ", "ق", "ع"]},
-    {"type": "audioMatch", "audioLetter": "ذ", "correctLetter": "ذ", "options": ["ز", "د", "ذ"]},
-    {"type": "wordWithLetter", "targetLetter": "ر", "correctWord": "قمر", "options": ["شمس", "قمر", "بيت"]},
-    {"type": "wordWithLetter", "targetLetter": "ف", "correctWord": "فيل", "options": ["فيل", "نمر", "كلب"]},
-    {"type": "wordWithLetter", "targetLetter": "ك", "correctWord": "كتاب", "options": ["قمر", "بيت", "كتاب"]},
-  ];
+  // نوع: position
+  {"type": "position", "word": "lamp", "letter": "l", "correctPosition": "beginning"},
+  {"type": "position", "word": "piano", "letter": "a", "correctPosition": "middle"},
+  {"type": "position", "word": "frog", "letter": "g", "correctPosition": "end"},
+
+  // نوع: letterChoice
+  {"type": "letterChoice", "prompt": "Choose the letter A", "correctLetter": "a", "options": ["a", "e", "o", "u"]},
+  {"type": "letterChoice", "prompt": "Choose the letter G", "correctLetter": "g", "options": ["k", "g", "h"]},
+  {"type": "letterChoice", "prompt": "Choose the letter R", "correctLetter": "r", "options": ["r", "n", "m"]},
+
+  // نوع: missingLetter
+  {"type": "missingLetter", "incompleteWord": "_ish", "correctLetter": "f", "options": ["f", "d", "t", "l"]},
+  {"type": "missingLetter", "incompleteWord": "do_", "correctLetter": "g", "options": ["g", "t", "n", "b"]},
+  {"type": "missingLetter", "incompleteWord": "ca_", "correctLetter": "t", "options": ["t", "p", "r", "n"]},
+
+  // نوع: audioMatch
+  {"type": "audioMatch", "audioLetter": "c", "correctLetter": "c", "options": ["s", "c", "k"]},
+  {"type": "audioMatch", "audioLetter": "l", "correctLetter": "l", "options": ["l", "n", "r"]},
+  {"type": "audioMatch", "audioLetter": "v", "correctLetter": "v", "options": ["v", "b", "w"]},
+
+  // نوع: wordWithLetter
+  {"type": "wordWithLetter", "targetLetter": "r", "correctWord": "rain", "options": ["sun", "rain", "dog"]},
+  {"type": "wordWithLetter", "targetLetter": "f", "correctWord": "fish", "options": ["bird", "fish", "lion"]},
+  {"type": "wordWithLetter", "targetLetter": "m", "correctWord": "moon", "options": ["star", "moon", "sun"]},
+];
+
 
   @override
   void initState() {
@@ -41,24 +51,24 @@ class _ArabicLetterQuizScreenState extends State<ArabicLetterQuizScreen> {
   }
 
   Future<void> _speakQuestion(Map<String, dynamic> question) async {
-    await flutterTts.setLanguage("ar-SA");
+    await flutterTts.setLanguage("en-US");
     await flutterTts.setSpeechRate(0.4);
     String text = "";
     switch (question["type"]) {
       case "position":
-        text = "أين يقع الحرف ${question["letter"]} في كلمة ${question["word"]}";
+        text = "Where is the letter ${question["letter"]} in the word ${question["word"]}?";
         break;
       case "letterChoice":
         text = question["prompt"];
         break;
       case "missingLetter":
-        text = "ما هو الحرف الناقص في كلمة ${question["incompleteWord"]}";
+        text = "What is the missing letter in the word ${question["incompleteWord"]}?";
         break;
       case "audioMatch":
-        text = "استمع جيدًا ثم اختر الحرف الصحيح";
+        text = "Listen carefully and choose the correct letter.";
         break;
       case "wordWithLetter":
-        text = "اختر الكلمة التي تحتوي على الحرف ${question["targetLetter"]}";
+        text = "Choose the word that contains the letter ${question["targetLetter"]}.";
         break;
     }
     await flutterTts.speak(text);
@@ -79,15 +89,15 @@ class _ArabicLetterQuizScreenState extends State<ArabicLetterQuizScreen> {
     setState(() {
       if (isCorrect) {
         correctAnswers++;
-        feedbackMessage = "🎉 إجابة صحيحة!";
+        feedbackMessage = "🎉 Correct!";
         feedbackColor = Colors.green;
         feedbackIcon = Icons.check_circle;
-        flutterTts.speak("إجابة صحيحة");
+        flutterTts.speak("Correct answer");
       } else {
-        feedbackMessage = "❌ إجابة خاطئة";
+        feedbackMessage = "❌ Wrong!";
         feedbackColor = Colors.red;
         feedbackIcon = Icons.cancel;
-        flutterTts.speak("إجابة خاطئة");
+        flutterTts.speak("Wrong answer");
       }
     });
 
@@ -97,12 +107,16 @@ class _ArabicLetterQuizScreenState extends State<ArabicLetterQuizScreen> {
         feedbackMessage = '';
         feedbackColor = Colors.transparent;
         feedbackIcon = null;
+
+        if (currentIndex < questions.length) {
+      _speakQuestion(questions[currentIndex]); // أضف هذا السطر لنطق السؤال التالي
+    }
       });
     });
   }
 
   Future<void> _playSound(String letter) async {
-    await flutterTts.setLanguage("ar-SA");
+    await flutterTts.setLanguage("en-US");
     await flutterTts.setSpeechRate(0.5);
     await flutterTts.speak(letter);
   }
@@ -115,13 +129,13 @@ class _ArabicLetterQuizScreenState extends State<ArabicLetterQuizScreen> {
       Color color;
 
       if (scorePercent >= 90) {
-        message = "🌟 ممتاز جدًا!";
+        message = "🌟 Excellent!";
         color = Colors.green;
       } else if (scorePercent >= 70) {
-        message = "👏 عمل رائع!";
+        message = "👏 Great job!";
         color = Colors.orange;
       } else {
-        message = "😅 حاول مرة أخرى!";
+        message = "😅 Try again!";
         color = Colors.red;
       }
 
@@ -131,7 +145,7 @@ class _ArabicLetterQuizScreenState extends State<ArabicLetterQuizScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text("النتيجة النهائية", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+              const Text("Final Score", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
               const SizedBox(height: 20),
               Text("$scorePercent%", style: const TextStyle(fontSize: 60, color: Colors.deepOrange, fontWeight: FontWeight.bold)),
               const SizedBox(height: 20),
@@ -144,7 +158,7 @@ class _ArabicLetterQuizScreenState extends State<ArabicLetterQuizScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 18),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 ),
-                child: const Text("التالي ⏭️", style: TextStyle(fontSize: 24, color: Colors.white)),
+                child: const Text("Next ⏭️", style: TextStyle(fontSize: 24, color: Colors.white)),
               ),
             ],
           ),
@@ -156,7 +170,7 @@ class _ArabicLetterQuizScreenState extends State<ArabicLetterQuizScreen> {
     return Scaffold(
       backgroundColor: Colors.orange[50],
       appBar: AppBar(
-        title: const Text('كويز الحروف', style: TextStyle(fontSize: 26)),
+        title: const Text('Letter Quiz', style: TextStyle(fontSize: 26)),
         backgroundColor: Colors.deepOrange,
         centerTitle: true,
       ),
@@ -175,8 +189,7 @@ class _ArabicLetterQuizScreenState extends State<ArabicLetterQuizScreen> {
                     children: [
                       Icon(feedbackIcon, color: feedbackColor, size: 32),
                       const SizedBox(width: 10),
-                      Text(feedbackMessage,
-                          style: TextStyle(fontSize: 24, color: feedbackColor, fontWeight: FontWeight.bold)),
+                      Text(feedbackMessage, style: TextStyle(fontSize: 24, color: feedbackColor, fontWeight: FontWeight.bold)),
                     ],
                   ),
                 ),
@@ -190,15 +203,15 @@ class _ArabicLetterQuizScreenState extends State<ArabicLetterQuizScreen> {
   Widget _buildQuestionWidget(Map<String, dynamic> q) {
     switch (q["type"]) {
       case "position":
-        return _buildChoiceQuestion("أين يقع الحرف '${q['letter']}' في الكلمة '${q['word']}'؟", ["بداية", "وسط", "نهاية"]);
+        return _buildChoiceQuestion("Where is the letter '${q['letter']}' in the word '${q['word']}'?", ["beginning", "middle", "end"]);
       case "letterChoice":
         return _buildChoiceQuestion(q["prompt"], q["options"]);
       case "missingLetter":
-        return _buildChoiceQuestion("ما هو الحرف الناقص في: ${q["incompleteWord"]}", q["options"]);
+        return _buildChoiceQuestion("What is the missing letter in: ${q["incompleteWord"]}", q["options"]);
       case "audioMatch":
         return Column(
           children: [
-            const Text("🎧 استمع واختر الحرف", style: TextStyle(fontSize: 24)),
+            const Text("🎧 Listen and choose the letter", style: TextStyle(fontSize: 24)),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () => _playSound(q["audioLetter"]),
@@ -210,9 +223,9 @@ class _ArabicLetterQuizScreenState extends State<ArabicLetterQuizScreen> {
           ],
         );
       case "wordWithLetter":
-        return _buildChoiceQuestion("اختر الكلمة التي تحتوي على الحرف '${q["targetLetter"]}'", q["options"]);
+        return _buildChoiceQuestion("Choose the word that has the letter '${q["targetLetter"]}'", q["options"]);
       default:
-        return const Text("سؤال غير معروف");
+        return const Text("Unknown question");
     }
   }
 
@@ -229,7 +242,7 @@ class _ArabicLetterQuizScreenState extends State<ArabicLetterQuizScreen> {
           ),
           child: Column(
             children: [
-              Text("سؤال ${currentIndex + 1}", style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.deepOrange)),
+              Text("Question ${currentIndex + 1}", style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.deepOrange)),
               const SizedBox(height: 10),
               Text(question, textAlign: TextAlign.center, style: const TextStyle(fontSize: 24)),
             ],

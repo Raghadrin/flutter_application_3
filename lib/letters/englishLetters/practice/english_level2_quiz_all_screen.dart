@@ -1,70 +1,68 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
-class ArabicLevel2WordQuizScreen extends StatefulWidget {
-  const ArabicLevel2WordQuizScreen({super.key});
+class EnglishLevel2WordQuizScreen extends StatefulWidget {
+  const EnglishLevel2WordQuizScreen({super.key});
 
   @override
-  State<ArabicLevel2WordQuizScreen> createState() => _ArabicLevel2WordQuizScreenState();
+  State<EnglishLevel2WordQuizScreen> createState() => _EnglishLevel2WordQuizScreenState();
 }
 
-class _ArabicLevel2WordQuizScreenState extends State<ArabicLevel2WordQuizScreen> {
+class _EnglishLevel2WordQuizScreenState extends State<EnglishLevel2WordQuizScreen> {
   final FlutterTts flutterTts = FlutterTts();
   int currentIndex = 0;
   int correctAnswers = 0;
   String feedbackMessage = '';
   Color feedbackColor = Colors.transparent;
   IconData? feedbackIcon;
-
-  final List<Map<String, dynamic>> questions = [
-    {
-      "type": "sentenceChoice",
-      "question": "اختر الجملة التي تحتوي على كلمة تفاحة",
-      "correct": "أكلت ليلى تفاحة حمراء.",
-      "options": [
-        "ذهب أحمد إلى السوق.",
-        "أكلت ليلى تفاحة حمراء.",
-        "لعب سامي في الحديقة."
-      ]
-    },
-    {
-      "type": "synonymChoice",
-      "question": "ما مرادف كلمة 'سعيد'؟",
-      "correct": "فرحان",
-      "options": ["فرحان", "جائع", "غاضب"]
-    },
-    {
-      "type": "oppositeChoice",
-      "question": "ما عكس كلمة 'كبير'؟",
-      "correct": "صغير",
-      "options": ["طويل", "صغير", "قديم"]
-    },
-    {
-      "type": "categoryChoice",
-      "question": "أي كلمة تنتمي إلى 'الفواكه'؟",
-      "correct": "تفاح",
-      "options": ["تفاح", "قلم", "باب"]
-    },
-    {
-      "type": "audioWord",
-      "sound": "تفاحة",
-      "correct": "تفاحة",
-      "options": ["تفاحة", "موزة", "برتقالة"],
-    },
-    {
-      "type": "missingWord",
-      "sentence": "أكل سامي       حمراء.",
-      "correct": "تفاحة",
-      "options": ["موزة", "تفاحة", "تفاح"],
-    },
-    {
-      "type": "wordWithLetter",
-      "letter": "س",
-      "correct": "سمكة",
-      "options": ["تفاحة", "سمكة", "قلم"],
-    },
-  ];
+final List<Map<String, dynamic>> questions = [
+  {
+    "type": "sentenceChoice",
+    "question": "Choose the sentence that includes the word 'environment'.",
+    "correct": "We must protect the environment from pollution.",
+    "options": [
+      "He fixed his broken bicycle.",
+      "We must protect the environment from pollution.",
+      "My sister painted a beautiful picture."
+    ]
+  },
+  {
+    "type": "synonymChoice",
+    "question": "What is a synonym of 'intelligent'?",
+    "correct": "Smart",
+    "options": ["Tall", "Smart", "Loud"]
+  },
+  {
+    "type": "oppositeChoice",
+    "question": "What is the opposite of 'ancient'?",
+    "correct": "Modern",
+    "options": ["Old", "Modern", "Big"]
+  },
+  {
+    "type": "categoryChoice",
+    "question": "Which word belongs to the category 'instruments'?",
+    "correct": "Violin",
+    "options": ["Violin", "Window", "Jacket"]
+  },
+  {
+    "type": "audioWord",
+    "sound": "curiosity", // TTS or pre-recorded
+    "correct": "Curiosity",
+    "options": ["Curiosity", "Generosity", "Velocity"]
+  },
+  {
+    "type": "missingWord",
+    "sentence": "She delivered a       speech about climate change.",
+    "correct": "powerful",
+    "options": ["colorful", "powerful", "peaceful"]
+  },
+  {
+    "type": "wordWithLetter",
+    "letter": "q",
+    "correct": "Question",
+    "options": ["Answer", "Question", "Lesson"]
+  },
+];
 
   @override
   void initState() {
@@ -73,7 +71,7 @@ class _ArabicLevel2WordQuizScreenState extends State<ArabicLevel2WordQuizScreen>
   }
 
   Future<void> _speakQuestion() async {
-    await flutterTts.setLanguage("ar-SA");
+    await flutterTts.setLanguage("en-US");
     await flutterTts.setSpeechRate(0.4);
     final q = questions[currentIndex];
     String text = "";
@@ -85,13 +83,13 @@ class _ArabicLevel2WordQuizScreenState extends State<ArabicLevel2WordQuizScreen>
         text = q['question'];
         break;
       case "audioWord":
-        text = "استمع ثم اختر الكلمة الصحيحة";
+        text = "Listen then choose the correct word";
         break;
       case "missingWord":
-        text = "ما الكلمة الناقصة في الجملة: ${q['sentence']}";
+        text = "What is the missing word in the sentence: ${q['sentence']}";
         break;
       case "wordWithLetter":
-        text = "اختر الكلمة التي تحتوي على الحرف ${q['letter']}";
+        text = "Choose a word that contains the letter ${q['letter']}";
         break;
     }
     await flutterTts.speak(text);
@@ -104,15 +102,15 @@ class _ArabicLevel2WordQuizScreenState extends State<ArabicLevel2WordQuizScreen>
     setState(() {
       if (isCorrect) {
         correctAnswers++;
-        feedbackMessage = "🎉 إجابة صحيحة!";
+        feedbackMessage = "🎉 Correct!";
         feedbackColor = Colors.green;
         feedbackIcon = Icons.check_circle;
-        flutterTts.speak("إجابة صحيحة");
+        flutterTts.speak("Correct answer");
       } else {
-        feedbackMessage = "❌ إجابة خاطئة";
+        feedbackMessage = "❌ Wrong!";
         feedbackColor = Colors.red;
         feedbackIcon = Icons.cancel;
-        flutterTts.speak("إجابة خاطئة");
+        flutterTts.speak("Wrong answer");
       }
     });
 
@@ -140,13 +138,13 @@ class _ArabicLevel2WordQuizScreenState extends State<ArabicLevel2WordQuizScreen>
       Color msgColor;
 
       if (scorePercent >= 90) {
-        finalMessage = "ممتاز جدًا 🎉";
+        finalMessage = "Excellent 🎉";
         msgColor = Colors.green;
       } else if (scorePercent >= 70) {
-        finalMessage = "عمل رائع 👏";
+        finalMessage = "Great job 👏";
         msgColor = Colors.orange;
       } else {
-        finalMessage = "أحسنت المحاولة 💪";
+        finalMessage = "Nice try 💪";
         msgColor = Colors.red;
       }
 
@@ -156,7 +154,7 @@ class _ArabicLevel2WordQuizScreenState extends State<ArabicLevel2WordQuizScreen>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text("النتيجة النهائية", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+              const Text("Final Score", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
               const SizedBox(height: 20),
               Text("$scorePercent%",
                   style: const TextStyle(fontSize: 50, color: Colors.deepOrange, fontWeight: FontWeight.bold)),
@@ -170,7 +168,7 @@ class _ArabicLevel2WordQuizScreenState extends State<ArabicLevel2WordQuizScreen>
                   padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 18),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 ),
-                child: const Text("التالي ⏭️", style: TextStyle(fontSize: 24, color: Colors.white)),
+                child: const Text("Next ⏭️", style: TextStyle(fontSize: 24, color: Colors.white)),
               )
             ],
           ),
@@ -182,7 +180,7 @@ class _ArabicLevel2WordQuizScreenState extends State<ArabicLevel2WordQuizScreen>
     return Scaffold(
       backgroundColor: Colors.orange[50],
       appBar: AppBar(
-        title: const Text('كويز الكلمات - مستوى 2', style: TextStyle(fontSize: 26)),
+        title: const Text('Word Quiz - Level 2', style: TextStyle(fontSize: 26)),
         backgroundColor: Colors.deepOrange,
         centerTitle: true,
       ),
@@ -203,18 +201,18 @@ class _ArabicLevel2WordQuizScreenState extends State<ArabicLevel2WordQuizScreen>
                 child: Column(
                   children: [
                     Text(
-                      "السؤال ${currentIndex + 1} من ${questions.length}",
+                      "Question ${currentIndex + 1} of ${questions.length}",
                       style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.deepOrange),
                     ),
                     const SizedBox(height: 12),
                     if (q['type'] == 'missingWord')
                       Text(q['sentence'], style: const TextStyle(fontSize: 24))
                     else if (q['type'] == 'wordWithLetter')
-                      Text("🔠 اختر كلمة تحتوي ${q['letter']}", style: const TextStyle(fontSize: 24))
+                      Text("🔠 Choose a word with '${q['letter']}'", style: const TextStyle(fontSize: 24))
                     else if (q['type'] == 'audioWord')
                       Column(
                         children: [
-                          const Text("🎧 اضغط للاستماع", style: TextStyle(fontSize: 24)),
+                          const Text("🎧 Tap to listen", style: TextStyle(fontSize: 24)),
                           IconButton(
                             icon: const Icon(Icons.volume_up, size: 40),
                             onPressed: () => flutterTts.speak(q['sound']),
@@ -228,17 +226,7 @@ class _ArabicLevel2WordQuizScreenState extends State<ArabicLevel2WordQuizScreen>
                 ),
               ),
               const SizedBox(height: 24),
-              ...List<Widget>.from(
-                q['options'].map((opt) {
-                  if (opt is String) {
-                    return _answerButton(opt);
-                  } else if (opt is Map && opt.containsKey('label')) {
-                    return _answerButton(opt['label']);
-                  } else {
-                    return const SizedBox();
-                  }
-                }),
-              ),
+              ...q['options'].map<Widget>((opt) => _answerButton(opt)).toList(),
               if (feedbackMessage.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.all(16),
@@ -267,7 +255,7 @@ class _ArabicLevel2WordQuizScreenState extends State<ArabicLevel2WordQuizScreen>
       child: ElevatedButton.icon(
         onPressed: _speakQuestion,
         icon: const Icon(Icons.volume_up),
-        label: const Text("اقرأ السؤال", style: TextStyle(fontSize: 20)),
+        label: const Text("Read the question", style: TextStyle(fontSize: 20)),
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.deepOrange,
           foregroundColor: Colors.white,

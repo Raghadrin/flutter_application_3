@@ -1,124 +1,172 @@
+// ✅ EnglishLevel3HomeScreen with shorter stories and full answerChoices added
 import 'package:flutter/material.dart';
-import 'english_level3_screen.dart';
+import 'package:flutter_tts/flutter_tts.dart';
+import 'package:lottie/lottie.dart';
 
-class EnglishSentenceSelectionLevel3Screen extends StatelessWidget {
+import 'english_level3_screen.dart';
+import 'english_level3_quiz_all_screen.dart';
+
+class EnglishLevel3HomeScreen extends StatelessWidget {
+  final FlutterTts tts = FlutterTts();
+
+  EnglishLevel3HomeScreen({super.key});
+
+  void _speak(String text) async {
+    await tts.setLanguage("en-US");
+    await tts.setSpeechRate(0.4);
+    await tts.speak(text);
+  }
+
   final List<Map<String, dynamic>> stories = [
     {
-      'emoji': '🌳',
-      'title': 'A Day in the Park',
+      'emoji': '🛰️',
+      'title': 'Journey to the Stars',
       'paragraph':
-          'On a sunny morning, Sami went to the park with his father. He played with his friends a lot, then they sat together to eat and watch birds flying in the sky.',
+          'Leen loved stars. One day, her school announced a science fair. She built a rocket model and talked about a mission to Saturn\'s moon, Titan. Everyone was impressed.',
       'questions': [
-        "What is the title of the story?",
-        "Who went to the park?",
-        "What did Sami do with his friends?",
-        "What did they see in the sky?"
+        "Who is the story about?",
+        "What did the school announce?",
+        "What planet's moon did she choose?",
+        "How did people react?"
       ],
       'answers': [
-        "A Day in the Park",
-        "Sami and his father",
-        "Played a lot",
-        "Birds"
-      ]
+        "Leen",
+        "A science fair",
+        "Titan",
+        "They were impressed"
+      ],
+      'answerChoices': [
+        ["Leen", "Noor", "Adam", "Hana"],
+        ["A picnic", "A science fair", "A sports day", "A painting contest"],
+        ["Earth", "Jupiter", "Titan", "Venus"],
+        ["They were bored", "They were impressed", "They were confused", "They laughed"]
+      ],
+      'animation': 'assets/animations/space.json',
     },
     {
-      'emoji': '🌧️',
-      'title': 'Rainy Games',
+      'emoji': '🧪',
+      'title': 'The Science Fair Mystery',
       'paragraph':
-          'In the winter, it rains and the ground gets wet. Children love wearing coats and boots, playing in water and making small boats.',
+          'Noor built a color-sorting robot. On the fair day, it didn\'t work! She found a loose wire and fixed it. Her robot worked and she was proud.',
       'questions': [
-        "In which season did the story happen?",
-        "What happens to the ground?",
-        "What do the children play with?",
-        "What do they wear?"
+        "What did Noor build?",
+        "What went wrong?",
+        "How did she fix it?",
+        "How did she feel?"
       ],
       'answers': [
-        "Winter",
-        "It gets wet",
-        "Small boats",
-        "Coats and boots"
-      ]
+        "A color-sorting robot",
+        "It didn’t work",
+        "She fixed the wire",
+        "She was proud"
+      ],
+      'answerChoices': [
+        ["A painting", "A volcano", "A color-sorting robot", "A telescope"],
+        ["It was too slow", "It didn’t work", "It exploded", "It was too big"],
+        ["She rebuilt it", "She fixed the wire", "She changed the code", "She painted it"],
+        ["She was sad", "She was proud", "She was tired", "She was nervous"]
+      ],
+      'animation': 'assets/animations/robot.json',
     },
     {
-      'emoji': '📖',
-      'title': 'Bedtime Story',
+      'emoji': '🎨',
+      'title': 'The Art of Patience',
       'paragraph':
-          'Sarah loves reading stories before bedtime. Every night, she chooses a fun story to read with her mom, then closes her eyes and dreams of beautiful places.',
+          'Adam rushed his painting. It looked messy. He tried again slowly, using leaves and sand. The result was beautiful. He learned to be patient.',
       'questions': [
-        "Who loves reading stories?",
-        "When does she read the story?",
-        "Who reads with her?",
-        "What does she dream of?"
+        "What was Adam doing?",
+        "Why was the first painting messy?",
+        "What materials did he use?",
+        "What did he learn?"
       ],
       'answers': [
-        "Sarah",
-        "Before bedtime",
-        "Her mom",
-        "Beautiful places"
-      ]
+        "Painting",
+        "He rushed",
+        "Leaves and sand",
+        "To be patient"
+      ],
+      'answerChoices': [
+        ["Writing", "Drawing", "Painting", "Running"],
+        ["He used too much paint", "He rushed", "He was sleepy", "He was confused"],
+        ["Paper and pencils", "Stones", "Leaves and sand", "Watercolors only"],
+        ["To be fast", "To copy others", "To be patient", "To win"]
+      ],
+      'animation': 'assets/animations/art.json',
     },
     {
-      'emoji': '🏫',
-      'title': 'At School',
+      'emoji': '🌋',
+      'title': 'The Sleeping Volcano',
       'paragraph':
-          'At school, students learn reading, writing, and math. They love the teacher because he helps them understand and always encourages them to work hard.',
+          'Hana lived near a volcano. She wrote a story about it using facts and legends. People loved it, and she became a storyteller in her village.',
       'questions': [
-        "Where does the story happen?",
-        "What do students learn?",
-        "Who do they love?",
-        "Why do they love him?"
+        "Where did Hana live?",
+        "What did she write about?",
+        "What did people think?",
+        "What did she become?"
       ],
       'answers': [
-        "At school",
-        "Reading, writing, and math",
-        "The teacher",
-        "Because he encourages them"
-      ]
-    },
-    {
-      'emoji': '🏖️',
-      'title': 'Beach Vacation',
-      'paragraph':
-          'The family went to the beach on vacation. They built sandcastles, swam in the water, and ate delicious food under the warm sun.',
-      'questions': [
-        "Where did the family go?",
-        "What did they build?",
-        "Where did they swim?",
-        "What did they eat?"
+        "Near a volcano",
+        "A volcano story",
+        "They loved it",
+        "A storyteller"
       ],
-      'answers': [
-        "To the beach",
-        "Sandcastles",
-        "In the water",
-        "Delicious food"
-      ]
+      'answerChoices': [
+        ["Near a beach", "Near a school", "Near a volcano", "In a city"],
+        ["A science report", "A poem", "A volcano story", "A journal"],
+        ["They ignored it", "They loved it", "They laughed", "They were unsure"],
+        ["A teacher", "A writer", "A storyteller", "A singer"]
+      ],
+      'animation': 'assets/animations/volcano.json',
     },
   ];
 
   @override
   Widget build(BuildContext context) {
+    _speak("Welcome to Level 3. Please choose a story to begin.");
+
     return Scaffold(
-      backgroundColor: const Color(0xFFFDF7E4),
+      backgroundColor: const Color(0xFFFFF8E1),
       appBar: AppBar(
         backgroundColor: Colors.orange,
+        elevation: 0,
         centerTitle: true,
-        title: const Text("📚 Choose a Story",
-            style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.white)),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: GridView.builder(
-          itemCount: stories.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            mainAxisSpacing: 24,
-            crossAxisSpacing: 24,
-            childAspectRatio: 1,
+        title: const Text(
+          "📖 English - Level 3",
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
           ),
-          itemBuilder: (context, index) {
-            final story = stories[index];
-            return GestureDetector(
+        ),
+      ),
+      body: GridView.count(
+        crossAxisCount: 2,
+        padding: const EdgeInsets.all(16),
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+        childAspectRatio: 0.75,
+        children: [
+          _buildTile(
+            context,
+            title: "Level 3 Quiz",
+            jsonPath: "assets/animations/quiz.json",
+            onTap: () {
+              _speak("Let's start the final quiz.");
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const EnglishLevel3QuizAllScreen(),
+                ),
+              );
+            },
+          ),
+          ...stories.map((story) {
+            return _buildTile(
+              context,
+              title: story['title'],
+              jsonPath: story['animation'],
               onTap: () {
+                _speak("You selected: ${story["title"]}");
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -127,44 +175,48 @@ class EnglishSentenceSelectionLevel3Screen extends StatelessWidget {
                       storyText: story['paragraph'],
                       questions: List<String>.from(story['questions']),
                       correctAnswers: List<String>.from(story['answers']),
+                      answerChoices: List<List<String>>.from(story['answerChoices']),
                     ),
                   ),
                 );
               },
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.orange.shade100,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.orange.shade300),
-                  boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
-                ),
-                padding: const EdgeInsets.all(10),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    FittedBox(
-                      child: Text(
-                        story['emoji'],
-                        style: const TextStyle(fontSize: 30),
-                      ),
-                    ),
-                    const SizedBox(height: 30),
-                    Text(
-                      story['title'],
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF4E342E),
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
             );
-          },
+          }).toList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTile(
+    BuildContext context, {
+    required String title,
+    required String jsonPath,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: Colors.orange, width: 3),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Lottie.asset(jsonPath, height: 100),
+            const SizedBox(height: 12),
+            Text(
+              title,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+                color: Colors.deepOrange,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       ),
     );
