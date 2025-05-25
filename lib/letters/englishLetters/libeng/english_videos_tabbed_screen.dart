@@ -142,15 +142,7 @@ class EnglishVideosTabbedScreen extends StatelessWidget {
                             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                           ),
                           const SizedBox(height: 6),
-                          Text(
-                            video['description']!,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.grey[700],
-                              height: 1.3,
-                            ),
-                          ),
+                         
                         ],
                       ),
                     ),
