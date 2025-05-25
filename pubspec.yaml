@@ -59,6 +59,7 @@ dependencies:
   flutter_inappwebview: ^6.1.5
   animated_text_kit: ^4.2.3
   flutter_launcher_icons: ^0.13.1
+  flutter_gen: ^5.10.0
   
   
 
@@ -70,7 +71,7 @@ flutter_icons:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  intl: ^0.19.0 
+  intl: 0.20.2 
   
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -92,9 +93,15 @@ flutter:
     - images/
     - assets/
     - assets/sounds/
-    - assets/audio/
+    - assets/audio/ 
+    -  assets/sounds/voices-parent/
     - assets/langs/
     -  images/new_images/
+    -  images/parent_image/
+   
+    
+    
+    
     
   
 
