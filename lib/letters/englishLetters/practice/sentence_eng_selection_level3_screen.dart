@@ -41,7 +41,7 @@ class EnglishLevel3HomeScreen extends StatelessWidget {
         ["Earth", "Jupiter", "Titan", "Venus"],
         ["They were bored", "They were impressed", "They were confused", "They laughed"]
       ],
-      'animation': 'assets/animations/space.json',
+      'animation': 'images/space.json',
     },
     {
       'emoji': '🧪',
@@ -66,7 +66,7 @@ class EnglishLevel3HomeScreen extends StatelessWidget {
         ["She rebuilt it", "She fixed the wire", "She changed the code", "She painted it"],
         ["She was sad", "She was proud", "She was tired", "She was nervous"]
       ],
-      'animation': 'assets/animations/robot.json',
+      'animation': 'images/robot.json',
     },
     {
       'emoji': '🎨',
@@ -91,7 +91,7 @@ class EnglishLevel3HomeScreen extends StatelessWidget {
         ["Paper and pencils", "Stones", "Leaves and sand", "Watercolors only"],
         ["To be fast", "To copy others", "To be patient", "To win"]
       ],
-      'animation': 'assets/animations/art.json',
+      'animation': 'images/art.json',
     },
     {
       'emoji': '🌋',
@@ -116,7 +116,7 @@ class EnglishLevel3HomeScreen extends StatelessWidget {
         ["They ignored it", "They loved it", "They laughed", "They were unsure"],
         ["A teacher", "A writer", "A storyteller", "A singer"]
       ],
-      'animation': 'assets/animations/volcano.json',
+      'animation': 'images/volcano.json',
     },
   ];
 
@@ -149,7 +149,7 @@ class EnglishLevel3HomeScreen extends StatelessWidget {
           _buildTile(
             context,
             title: "Level 3 Quiz",
-            jsonPath: "assets/animations/quiz.json",
+            jsonPath: "images/new_images/Quiz.json",
             onTap: () {
               _speak("Let's start the final quiz.");
               Navigator.push(
