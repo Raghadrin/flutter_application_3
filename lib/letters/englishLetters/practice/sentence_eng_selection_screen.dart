@@ -12,63 +12,89 @@ class EnglishLevel1HomeScreen extends StatelessWidget {
 
   EnglishLevel1HomeScreen({super.key});
 
-  void _speak(String text) async {
-    await tts.setLanguage("en-US");
-    await tts.setSpeechRate(0.4);
+  Future<void> configureTts(BuildContext context) async {
+    final langCode = context.locale.languageCode;
+
+    if (langCode == 'ar') {
+      await tts.setLanguage("ar-SA");
+      await tts.setVoice({
+        'name': 'ar-xa-x-arm-local',
+        'locale': 'ar-SA',
+      });
+    } else {
+      await tts.setLanguage("en-US");
+      await tts.setVoice({
+        'name': 'en-gb-x-rjs-local',
+        'locale': 'en-US',
+      });
+    }
+
+    await tts.setSpeechRate(0.45);
+    await tts.setPitch(1.0);
+  }
+
+  Future<void> _speak(BuildContext context, String text) async {
+    await configureTts(context);
     await tts.speak(text);
   }
 
   final List<Map<String, String>> sentences = [
     {
-      "emoji": "🍎",
-      "title": "The Apple",
-      "text": "The apple is red and sweet.",
+      "title": LocaleKeys.appleTitle,
+      "text": LocaleKeys.appleText,
       "animation": "images/new_images/apples.json",
     },
     {
-      "emoji": "🏫",
-      "title": "My School",
-      "text": "I go to school every morning.",
+      "title": LocaleKeys.schoolTitle,
+      "text": LocaleKeys.schoolText,
       "animation": "images/write.json",
     },
     {
-      "emoji": "🐶",
-      "title": "My dog",
-      "text": "My dog runs fast in the park.",
+      "title": LocaleKeys.dogTitle,
+      "text": LocaleKeys.dogText,
       "animation": "images/Dog.json",
     },
     {
-      "emoji": "🚗",
-      "title": "Washing the Car",
-      "text": "Dad washes the car.",
+      "title": LocaleKeys.carTitle,
+      "text": LocaleKeys.carText,
       "animation": "images/car.json",
     },
     {
-      "emoji": "📖",
-      "title": "Library Time",
-      "text": "We read at the library.",
+      "title": LocaleKeys.libraryTitle,
+      "text": LocaleKeys.libraryText,
       "animation": "images/read.json",
     },
   ];
 
   @override
   Widget build(BuildContext context) {
-    _speak(tr(LocaleKeys.tts_welcome));
+    _speak(context, tr(LocaleKeys.tts_welcome));
 
     return Scaffold(
       backgroundColor: const Color(0xFFFFF8E1),
       appBar: AppBar(
         backgroundColor: Colors.orange,
         elevation: 0,
-        centerTitle: true,
         title: Text(
-          LocaleKeys.english_level1_title.tr(),
+          tr(LocaleKeys.english_level1_title),
           style: const TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
             color: Colors.black,
           ),
         ),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.language, color: Colors.black),
+            onPressed: () {
+              final newLocale = context.locale.languageCode == 'ar'
+                  ? const Locale('en')
+                  : const Locale('ar');
+              context.setLocale(newLocale);
+            },
+          )
+        ],
       ),
       body: GridView.count(
         crossAxisCount: 2,
@@ -79,10 +105,10 @@ class EnglishLevel1HomeScreen extends StatelessWidget {
         children: [
           _buildTile(
             context,
-            title: LocaleKeys.level1_quiz_title.tr(),
+            title: tr(LocaleKeys.level1_quiz_title),
             jsonPath: "images/new_images/Quiz.json",
             onTap: () {
-              _speak(tr(LocaleKeys.tts_start_quiz));
+              _speak(context, tr(LocaleKeys.tts_start_quiz));
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -91,18 +117,19 @@ class EnglishLevel1HomeScreen extends StatelessWidget {
               );
             },
           ),
-          ...sentences.map((sentence) {
+          ...sentences.map((s) {
             return _buildTile(
               context,
-              title: sentence["title"]!,
-              jsonPath: sentence["animation"]!,
+              title: tr(s["title"]!),
+              jsonPath: s["animation"]!,
               onTap: () {
-                _speak("You selected: ${sentence["title"]}");
+                _speak(context, "${tr(LocaleKeys.selectedPrefix)} ${tr(s["title"]!)}");
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) =>
-                        EnglishLevel1Screen(sentence: sentence["text"]!),
+                    builder: (_) => EnglishLevel1Screen(
+                      sentence: tr(s["text"]!),
+                    ),
                   ),
                 );
               },

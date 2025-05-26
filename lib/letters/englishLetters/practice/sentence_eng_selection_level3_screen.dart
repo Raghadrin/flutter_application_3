@@ -12,16 +12,27 @@ class EnglishLevel3HomeScreen extends StatelessWidget {
 
   EnglishLevel3HomeScreen({super.key});
 
-  void _speak(String text) async {
-    await tts.setLanguage("en-US");
-    await tts.setSpeechRate(0.4);
+  Future<void> configureTts(BuildContext context) async {
+    final langCode = context.locale.languageCode;
+    if (langCode == 'ar') {
+      await tts.setLanguage("ar-SA");
+      await tts.setVoice({'name': 'ar-xa-x-arm-local', 'locale': 'ar-SA'});
+    } else {
+      await tts.setLanguage("en-US");
+      await tts.setVoice({'name': 'en-gb-x-rjs-local', 'locale': 'en-US'});
+    }
+    await tts.setSpeechRate(0.45);
+    await tts.setPitch(1.0);
+  }
+
+  Future<void> _speak(BuildContext context, String text) async {
+    await configureTts(context);
     await tts.speak(text);
   }
 
   final List<Map<String, dynamic>> stories = [
     {
-      'emoji': '🛰️',
-      'title': 'Journey to the Stars',
+      'title': LocaleKeys.story1Title,
       'paragraph': "Leen loved stars. One day, her school announced a science fair. She built a rocket model and talked about a mission to Saturn's moon, Titan. Everyone was impressed.",
       'questions': [
         "Who is the story about?",
@@ -39,8 +50,7 @@ class EnglishLevel3HomeScreen extends StatelessWidget {
       'animation': 'images/space.json',
     },
     {
-      'emoji': '🧪',
-      'title': 'The Science Fair Mystery',
+      'title': LocaleKeys.story2Title,
       'paragraph': "Noor built a color-sorting robot. On the fair day, it didn’t work! She found a loose wire and fixed it. Her robot worked and she was proud.",
       'questions': [
         "What did Noor build?",
@@ -58,8 +68,7 @@ class EnglishLevel3HomeScreen extends StatelessWidget {
       'animation': 'images/robot.json',
     },
     {
-      'emoji': '🎨',
-      'title': 'The Art of Patience',
+      'title': LocaleKeys.story3Title,
       'paragraph': "Adam rushed his painting. It looked messy. He tried again slowly, using leaves and sand. The result was beautiful. He learned to be patient.",
       'questions': [
         "What was Adam doing?",
@@ -77,8 +86,7 @@ class EnglishLevel3HomeScreen extends StatelessWidget {
       'animation': 'images/art.json',
     },
     {
-      'emoji': '🌋',
-      'title': 'The Sleeping Volcano',
+      'title': LocaleKeys.story4Title,
       'paragraph': "Hana lived near a volcano. She wrote a story about it using facts and legends. People loved it, and she became a storyteller in her village.",
       'questions': [
         "Where did Hana live?",
@@ -99,7 +107,7 @@ class EnglishLevel3HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    _speak(tr(LocaleKeys.tts_level3_welcome));
+    _speak(context, tr(LocaleKeys.tts_level3_welcome));
 
     return Scaffold(
       backgroundColor: const Color(0xFFFFF8E1),
@@ -108,13 +116,24 @@ class EnglishLevel3HomeScreen extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          LocaleKeys.english_level3_title.tr(),
+          tr(LocaleKeys.english_level3_title),
           style: const TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
             color: Colors.black,
           ),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.language, color: Colors.black),
+            onPressed: () {
+              final newLocale = context.locale.languageCode == 'ar'
+                  ? const Locale('en')
+                  : const Locale('ar');
+              context.setLocale(newLocale);
+            },
+          )
+        ],
       ),
       body: GridView.count(
         crossAxisCount: 2,
@@ -125,10 +144,10 @@ class EnglishLevel3HomeScreen extends StatelessWidget {
         children: [
           _buildTile(
             context,
-            title: LocaleKeys.level3_quiz_title.tr(),
+            title: tr(LocaleKeys.level3_quiz_title),
             jsonPath: "images/new_images/Quiz.json",
             onTap: () {
-              _speak(tr(LocaleKeys.tts_start_final_quiz));
+              _speak(context, tr(LocaleKeys.tts_start_final_quiz));
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -140,15 +159,15 @@ class EnglishLevel3HomeScreen extends StatelessWidget {
           ...stories.map((story) {
             return _buildTile(
               context,
-              title: story['title'],
+              title: tr(story['title']),
               jsonPath: story['animation'],
               onTap: () {
-                _speak("You selected: ${story["title"]}");
+                _speak(context, "${tr(LocaleKeys.selectedPrefix)} ${tr(story['title'])}");
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (_) => EnglishLevel3Screen(
-                      title: story['title'],
+                      title: tr(story['title']),
                       storyText: story['paragraph'],
                       questions: List<String>.from(story['questions']),
                       correctAnswers: List<String>.from(story['answers']),

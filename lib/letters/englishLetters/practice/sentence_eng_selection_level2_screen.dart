@@ -12,63 +12,82 @@ class EnglishLevel2HomeScreen extends StatelessWidget {
 
   EnglishLevel2HomeScreen({super.key});
 
-  void _speak(String text) async {
-    await tts.setLanguage("en-US");
-    await tts.setSpeechRate(0.4);
+  Future<void> configureTts(BuildContext context) async {
+    final langCode = context.locale.languageCode;
+    if (langCode == 'ar') {
+      await tts.setLanguage("ar-SA");
+      await tts.setVoice({'name': 'ar-xa-x-arm-local', 'locale': 'ar-SA'});
+    } else {
+      await tts.setLanguage("en-US");
+      await tts.setVoice({'name': 'en-gb-x-rjs-local', 'locale': 'en-US'});
+    }
+    await tts.setSpeechRate(0.45);
+    await tts.setPitch(1.0);
+  }
+
+  Future<void> _speak(BuildContext context, String text) async {
+    await configureTts(context);
     await tts.speak(text);
   }
 
   final List<Map<String, String>> sentences = [
     {
-      "emoji": "🏞️",
-      "title": "A day at the park",
-      "text": "Today we went to the park. The sun was shining. We played on the swings and had fun.",
+      "title": LocaleKeys.parkTitle,
+      "text": LocaleKeys.parkText,
       "animation": "images/park.json",
     },
     {
-      "emoji": "🎂",
-      "title": "My Birthday",
-      "text": "It was my birthday last week. I got a big cake and balloons. My friends came to play with me.",
+      "title": LocaleKeys.birthdayTitle,
+      "text": LocaleKeys.birthdayText,
       "animation": "images/cake.json",
     },
     {
-      "emoji": "🐶",
-      "title": "A Fun Morning with My Dog",
-      "text": "My dog is very playful. He runs fast in the park every morning and loves chasing butterflies.",
-      "animation": "images/Dog.json",
-    },
-    {
-      "emoji": "🚗",
-      "title": "Helping Dad Wash the Car",
-      "text": "Every Saturday, Dad washes the car carefully. He uses a sponge, water, and soap to make it shine.",
-      "animation": "images/car.json",
-    },
-    {
-      "emoji": "📖",
-      "title": "Reading Stories at the Library",
-      "text": "We visit the library every week. I enjoy sitting with my friends and reading stories about space and animals.",
-      "animation": "images/read.json",
-    },
+  "title": LocaleKeys.morningWithDogTitle,
+  "text": LocaleKeys.morningWithDogText,
+  "animation": "images/Dog.json",
+},
+{
+  "title": LocaleKeys.washingCarTitle,
+  "text": LocaleKeys.washingCarText,
+  "animation": "images/car.json",
+},
+{
+  "title": LocaleKeys.readingLibraryTitle,
+  "text": LocaleKeys.readingLibraryText,
+  "animation": "images/read.json",
+},
+
   ];
 
   @override
   Widget build(BuildContext context) {
-    _speak(tr(LocaleKeys.tts_level2_welcome));
+    _speak(context, tr(LocaleKeys.tts_level2_welcome));
 
     return Scaffold(
       backgroundColor: const Color(0xFFFFF8E1),
       appBar: AppBar(
         backgroundColor: Colors.orange,
         elevation: 0,
-        centerTitle: true,
         title: Text(
-          LocaleKeys.english_level2_title.tr(),
+          tr(LocaleKeys.english_level2_title),
           style: const TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
             color: Colors.black,
           ),
         ),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.language, color: Colors.black),
+            onPressed: () {
+              final newLocale = context.locale.languageCode == 'ar'
+                  ? const Locale('en')
+                  : const Locale('ar');
+              context.setLocale(newLocale);
+            },
+          )
+        ],
       ),
       body: GridView.count(
         crossAxisCount: 2,
@@ -79,10 +98,10 @@ class EnglishLevel2HomeScreen extends StatelessWidget {
         children: [
           _buildTile(
             context,
-            title: LocaleKeys.level2_quiz_title.tr(),
+            title: tr(LocaleKeys.level2_quiz_title),
             jsonPath: "images/new_images/Quiz.json",
             onTap: () {
-              _speak(tr(LocaleKeys.tts_start_quiz));
+              _speak(context, tr(LocaleKeys.tts_start_quiz));
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -91,17 +110,19 @@ class EnglishLevel2HomeScreen extends StatelessWidget {
               );
             },
           ),
-          ...sentences.map((sentence) {
+          ...sentences.map((s) {
             return _buildTile(
               context,
-              title: sentence["title"]!,
-              jsonPath: sentence["animation"]!,
+              title: tr(s["title"]!),
+              jsonPath: s["animation"]!,
               onTap: () {
-                _speak("You selected: ${sentence["title"]}");
+                _speak(context, "${tr(LocaleKeys.selectedPrefix)} ${tr(s["title"]!)}");
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => EnglishLevel2Screen(sentence: sentence["text"]!),
+                    builder: (_) => EnglishLevel2Screen(
+                      sentence: tr(s["text"]!),
+                    ),
                   ),
                 );
               },

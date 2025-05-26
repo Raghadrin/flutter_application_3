@@ -8,10 +8,55 @@
     "tts_start_final_quiz": "Let's start the final quiz.","level2_title": "English - Level 2",
     "level2_quiz": "Level 2 Quiz",
     "tts_level2_welcome": "Welcome to Level 2. Please choose a sentence to start learning.",
-    "tts_start_quiz": "Let's begin the quiz."
-  
-,  
+    "tts_start_quiz": "Let's begin the quiz.",
+
     "level1_title": "English - Level 1",
+    "level1_quiz": "Level 1 Quiz",
+    "tts_welcome": "Welcome to Level 1. Please choose a sentence to start learning.",
+    "tts_start_quiz": "Let's begin the quiz.",
+    "selected_prefix": "You selected:",
+
+    "apple_title": "The Apple",
+    "apple_text": "The apple is red and sweet.",
+    "school_title": "My School",
+    "school_text": "I go to school every morning.",
+    "dog_title": "My dog",
+    "dog_text": "My dog runs fast in the park.",
+    "car_title": "Washing the Car",
+    "car_text": "Dad washes the car.",
+    "library_title": "Library Time",
+    "library_text": "We read at the library.",
+     "level2_title": "English - Level 2",
+    "level2_quiz": "Level 2 Quiz",
+    "tts_level2_welcome": "Welcome to Level 2. Please choose a sentence to start learning.",
+    "tts_start_quiz": "Let's begin the quiz.",
+    "selected_prefix": "You selected:",
+
+    "park_title": "A day at the park",
+    "park_text": "Today we went to the park. The sun was shining. We played on the swings and had fun.",
+    "birthday_title": "My Birthday",
+    "birthday_text": "It was my birthday last week. I got a big cake and balloons. My friends came to play with me.",
+"morning_with_dog_title": "A Fun Morning with My Dog",
+    "morning_with_dog_text": "My dog is very playful. He runs fast in the park every morning and loves chasing butterflies.",
+    "washing_car_title": "Helping Dad Wash the Car",
+    "washing_car_text": "Every Saturday, Dad washes the car carefully. He uses a sponge, water, and soap to make it shine.",
+    "reading_library_title": "Reading Stories at the Library",
+    "reading_library_text": "We visit the library every week. I enjoy sitting with my friends and reading stories about space and animals."
+  ,"level3_title": "English - Level 3",
+    "level3_quiz_title": "Level 3 Quiz",
+    "tts_level3_welcome": "Welcome to Level 3. Please choose a story to begin.",
+    "tts_start_final_quiz": "Let's start the final quiz.",
+    "selected_prefix": "You selected:",
+
+    "story1_title": "Journey to the Stars",
+    "story2_title": "The Science Fair Mystery",
+    "story3_title": "The Art of Patience",
+    "story4_title": "The Sleeping Volcano"
+ 
+  
+  
+
+  ,  "level1_title": "English - Level 1",
     "level1_quiz": "Level 1 Quiz",
     "tts_welcome": "Welcome to Level 1. Please choose a sentence to start learning.",
     "tts_start_quiz": "Let's begin the quiz."
