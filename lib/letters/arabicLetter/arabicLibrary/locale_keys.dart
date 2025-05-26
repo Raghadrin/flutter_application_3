@@ -68,14 +68,13 @@ abstract class LocaleKeys {
   static const retry = 'retry';
   static const yes = 'yes';
   static const no = 'no';
-
-  static const arabic_library_title = 'library.arabic_title';
-  static const language_exercises_title = 'library.language_exercises_title';
-  static const language_exercises_desc = 'library.language_exercises_desc';
-  static const educational_videos_title = 'library.educational_videos_title';
-  static const educational_videos_desc = 'library.educational_videos_desc';
-  static const challenges_title = 'library.challenges_title';
-  static const challenges_desc = 'library.challenges_desc';
-  static const sunduq_title = 'library.sunduq_title';
-  static const sunduq_desc = 'library.sunduq_desc';
+static const library_arabic_title = 'library.arabic_title';
+  static const library_language_exercises_title = 'library.language_exercises_title';
+  static const library_language_exercises_desc = 'library.language_exercises_desc';
+  static const library_educational_videos_title = 'library.educational_videos_title';
+  static const library_educational_videos_desc = 'library.educational_videos_desc';
+  static const library_challenges_title = 'library.challenges_title';
+  static const library_challenges_desc = 'library.challenges_desc';
+  static const library_sunduq_title = 'library.sunduq_title';
+  static const library_sunduq_desc = 'library.sunduq_desc';
 }

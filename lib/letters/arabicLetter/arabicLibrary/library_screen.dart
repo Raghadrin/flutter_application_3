@@ -3,6 +3,8 @@ import 'package:flutter_application_3/letters/arabicLetter/arabicLibrary/n.dart'
 import 'full_library_screen.dart';
 import 'arabic_videos_screen.dart';
 import 'FeelingsScreen.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'locale_keys.dart';
 
 class ArabicLibraryScreen extends StatelessWidget {
   const ArabicLibraryScreen({super.key});
@@ -13,8 +15,10 @@ class ArabicLibraryScreen extends StatelessWidget {
       backgroundColor: const Color(0xFFFFF6ED),
       appBar: AppBar(
         backgroundColor: const Color(0xFFFFA726),
-        title: const Text("مكتبة اللغة العربية",
-            style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(
+          LocaleKeys.library_arabic_title.tr(),
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
       ),
       body: Padding(
@@ -27,8 +31,8 @@ class ArabicLibraryScreen extends StatelessWidget {
           children: [
             _buildTile(
               context,
-              title: "تمارين لغوية",
-              description: "تمرن على القضايا اللغوية.",
+              title: LocaleKeys.library_language_exercises_title.tr(),
+              description: LocaleKeys.library_language_exercises_desc.tr(),
               imagePath: "images/one.png",
               onTap: () => Navigator.push(
                 context,
@@ -41,8 +45,8 @@ class ArabicLibraryScreen extends StatelessWidget {
             ),
             _buildTile(
               context,
-              title: "فيديوهات تعليمية",
-              description: "شاهد فيديوهات تشرح العربية.",
+              title: LocaleKeys.library_educational_videos_title.tr(),
+              description: LocaleKeys.library_educational_videos_desc.tr(),
               imagePath: "images/two.png",
               onTap: () => Navigator.push(
                 context,
@@ -53,8 +57,8 @@ class ArabicLibraryScreen extends StatelessWidget {
             ),
             _buildTile(
               context,
-              title: "تحديات والغاز",
-              description: "العب وتحدى نفسك",
+              title: LocaleKeys.library_challenges_title.tr(),
+              description: LocaleKeys.library_challenges_desc.tr(),
               imagePath: "images/feelings_icon.png",
               onTap: () => Navigator.push(
                 context,
@@ -63,11 +67,10 @@ class ArabicLibraryScreen extends StatelessWidget {
                 ),
               ),
             ),
-            
             _buildTile(
               context,
-              title: "صندوق الضاد",
-              description: "كلمات جديدة",
+              title: LocaleKeys.library_sunduq_title.tr(),
+              description: LocaleKeys.library_sunduq_desc.tr(),
               imagePath: "images/4.png",
               onTap: () => Navigator.push(
                 context,
