@@ -47,4 +47,25 @@ abstract class LocaleKeys {
 
   // Shared
   static const selectedPrefix = 'selectedPrefix';
+
+  static const quiz_title = 'quiz_title';
+  static const remaining_time = 'remaining_time';
+  static const question_number = 'question_number';
+  static const score = 'score';
+  static const speak_button = 'speak_button';
+  static const stop_button = 'stop_button';
+  static const speak_placeholder = 'speak_placeholder';
+  static const check_answer = 'check_answer';
+  static const reorder_check = 'reorder_check';
+  static const end_quiz = 'end_quiz';
+  static const final_result = 'final_result';
+  static const your_score = 'your_score';
+  static const percentage = 'percentage';
+  static const your_answers = 'your_answers';
+  static const correct = 'correct';
+  static const wrong = 'wrong';
+  static const close = 'close';
+  static const retry = 'retry';
+  static const yes = 'yes';
+  static const no = 'no';
 }

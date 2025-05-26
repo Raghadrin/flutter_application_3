@@ -20,7 +20,7 @@ class SubjectsScreen extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          tr("Subjects"),
+          tr("subjects"),
           style: const TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
