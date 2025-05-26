@@ -18,16 +18,52 @@ class _EnglishComprehensiveQuizScreenState extends State<EnglishComprehensiveQui
   int remainingSeconds = 180;
   List<String> userOrder = [];
 
-  final List<Map<String, dynamic>> questions = [
-    {'type': 'speak', 'prompt': 'Say the word: strategy', 'answer': 'strategy'},
-    {'type': 'reorder', 'prompt': 'Reorder the sentence: [the, sun, rises, in, the, east]', 'answer': 'the sun rises in the east'},
-    {'type': 'choice', 'prompt': 'Why do students visit the museum?', 'options': ['To learn history', 'To buy gifts', 'To relax'], 'answer': 'To learn history'},
-    {'type': 'yesno', 'prompt': 'Does the sentence "The student went to school early" contain a verb?', 'answer': 'Yes'},
-    {'type': 'speak', 'prompt': 'Read the sentence: The sun shines in the morning.', 'answer': 'The sun shines in the morning'},
-    {'type': 'choice', 'prompt': 'What is the synonym of "loyalty"?', 'options': ['Faithfulness', 'Forgetfulness', 'Deception'], 'answer': 'Faithfulness'},
-    {'type': 'reorder', 'prompt': 'Reorder the sentence: [we, should, protect, the, environment]', 'answer': 'we should protect the environment'},
-    {'type': 'choice', 'prompt': 'Which sentence is grammatically correct?', 'options': ['She play in the park', 'He ate the apple', 'They was going home'], 'answer': 'He ate the apple'},
-  ];
+ final List<Map<String, dynamic>> questions = [
+  {
+    'type': 'speak',
+    'prompt': 'Say the word: butterfly',
+    'answer': 'butterfly',
+  },
+  {
+    'type': 'reorder',
+    'prompt': 'Reorder the sentence: [the, cat, sleeps, on, the, sofa]',
+    'answer': 'the cat sleeps on the sofa',
+  },
+  {
+    'type': 'choice',
+    'prompt': 'What do plants need to grow?',
+    'options': ['Sunlight', 'Chocolate', 'Plastic'],
+    'answer': 'Sunlight',
+  },
+  {
+    'type': 'yesno',
+    'prompt': 'Is "run" a verb?',
+    'answer': 'Yes',
+  },
+  {
+    'type': 'speak',
+    'prompt': 'Read the sentence: The boy is reading a book.',
+    'answer': 'The boy is reading a book',
+  },
+  {
+    'type': 'choice',
+    'prompt': 'Which word means the same as "happy"?',
+    'options': ['Sad', 'Angry', 'Joyful'],
+    'answer': 'Joyful',
+  },
+  {
+    'type': 'reorder',
+    'prompt': 'Reorder the sentence: [we, are, playing, football, outside]',
+    'answer': 'we are playing football outside',
+  },
+  {
+    'type': 'choice',
+    'prompt': 'Which sentence is grammatically correct?',
+    'options': ['He go to school', 'They eats lunch', 'She is singing a song'],
+    'answer': 'She is singing a song',
+  },
+];
+
 
   int currentIndex = 0;
   int score = 0;

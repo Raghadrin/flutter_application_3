@@ -51,7 +51,7 @@
     "story1_title": "Journey to the Stars",
     "story2_title": "The Science Fair Mystery",
     "story3_title": "The Art of Patience",
-    "story4_title": "The Sleeping Volcano"
+    "story4_title": "The Dormant Volcano"
  
   
   
@@ -402,7 +402,21 @@
   "child_progress_body": "Sample screen to display child progress",
   "support_title": "Parent Emotional Support",
 "support_tab_arabic": "Arabic",
-"support_tab_english": "English"
+"support_tab_english": "English",
+  "quiz": {
+    "title": "Quiz",
+    "ready": "🎓 Ready to start the quiz?",
+    "start": "Start Quiz",
+    "check_answer": "Check Answer",
+    "finish_now": "Finish Quiz Now",
+    "result_title": "🎯 Final Score",
+    "score": "You got",
+    "percentage": "Percentage",
+    "retry": "Retry",
+    "close": "Close",
+    "correct": "Correct answer!",
+    "wrong": "Wrong!"
+  }
 
 
   }
