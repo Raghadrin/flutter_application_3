@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:lottie/lottie.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'locale_keys.dart';
 
 import 'english_level2_quiz_all_screen.dart';
 import 'english_level2_screen.dart';
@@ -20,41 +22,38 @@ class EnglishLevel2HomeScreen extends StatelessWidget {
     {
       "emoji": "🏞️",
       "title": "A day at the park",
-      "text":   "Today we went to the park. The sun was shining. We played on the swings and had fun.",
+      "text": "Today we went to the park. The sun was shining. We played on the swings and had fun.",
       "animation": "images/park.json",
     },
     {
-      "emoji":  "🎂",
-      "title":  "My Birthday",
-      "text":"It was my birthday last week. I got a big cake and balloons. My friends came to play with me.",
+      "emoji": "🎂",
+      "title": "My Birthday",
+      "text": "It was my birthday last week. I got a big cake and balloons. My friends came to play with me.",
       "animation": "images/cake.json",
     },
-    
-  {
-    "emoji": "🐶",
-    "title": "A Fun Morning with My Dog",
-    "text": "My dog is very playful. He runs fast in the park every morning and loves chasing butterflies.",
-    "animation": "images/Dog.json",
-  },
-  {
-    "emoji": "🚗",
-    "title": "Helping Dad Wash the Car",
-    "text": "Every Saturday, Dad washes the car carefully. He uses a sponge, water, and soap to make it shine.",
-    "animation": "images/car.json",
-  },
-  {
-    "emoji": "📖",
-    "title": "Reading Stories at the Library",
-    "text": "We visit the library every week. I enjoy sitting with my friends and reading stories about space and animals.",
-    "animation": "images/read.json",
-  },
-
-
+    {
+      "emoji": "🐶",
+      "title": "A Fun Morning with My Dog",
+      "text": "My dog is very playful. He runs fast in the park every morning and loves chasing butterflies.",
+      "animation": "images/Dog.json",
+    },
+    {
+      "emoji": "🚗",
+      "title": "Helping Dad Wash the Car",
+      "text": "Every Saturday, Dad washes the car carefully. He uses a sponge, water, and soap to make it shine.",
+      "animation": "images/car.json",
+    },
+    {
+      "emoji": "📖",
+      "title": "Reading Stories at the Library",
+      "text": "We visit the library every week. I enjoy sitting with my friends and reading stories about space and animals.",
+      "animation": "images/read.json",
+    },
   ];
 
   @override
   Widget build(BuildContext context) {
-    _speak("Welcome to Level 2. Please choose a sentence to start learning.");
+    _speak(tr(LocaleKeys.tts_level2_welcome));
 
     return Scaffold(
       backgroundColor: const Color(0xFFFFF8E1),
@@ -62,9 +61,9 @@ class EnglishLevel2HomeScreen extends StatelessWidget {
         backgroundColor: Colors.orange,
         elevation: 0,
         centerTitle: true,
-        title: const Text(
-          "English - Level 2",
-          style: TextStyle(
+        title: Text(
+          LocaleKeys.english_level2_title.tr(),
+          style: const TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
             color: Colors.black,
@@ -80,13 +79,15 @@ class EnglishLevel2HomeScreen extends StatelessWidget {
         children: [
           _buildTile(
             context,
-            title: "Level 2 Quiz",
+            title: LocaleKeys.level2_quiz_title.tr(),
             jsonPath: "images/new_images/Quiz.json",
             onTap: () {
-              _speak("Let's begin the quiz.");
+              _speak(tr(LocaleKeys.tts_start_quiz));
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const EnglishLevel2WordQuizScreen()),
+                MaterialPageRoute(
+                  builder: (_) => const EnglishLevel2WordQuizScreen(),
+                ),
               );
             },
           ),

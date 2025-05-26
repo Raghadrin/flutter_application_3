@@ -1,7 +1,8 @@
-// ✅ EnglishLevel3HomeScreen with shorter stories and full answerChoices added
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:lottie/lottie.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'locale_keys.dart';
 
 import 'english_level3_screen.dart';
 import 'english_level3_quiz_all_screen.dart';
@@ -21,20 +22,14 @@ class EnglishLevel3HomeScreen extends StatelessWidget {
     {
       'emoji': '🛰️',
       'title': 'Journey to the Stars',
-      'paragraph':
-          'Leen loved stars. One day, her school announced a science fair. She built a rocket model and talked about a mission to Saturn\'s moon, Titan. Everyone was impressed.',
+      'paragraph': "Leen loved stars. One day, her school announced a science fair. She built a rocket model and talked about a mission to Saturn's moon, Titan. Everyone was impressed.",
       'questions': [
         "Who is the story about?",
         "What did the school announce?",
         "What planet's moon did she choose?",
         "How did people react?"
       ],
-      'answers': [
-        "Leen",
-        "A science fair",
-        "Titan",
-        "They were impressed"
-      ],
+      'answers': ["Leen", "A science fair", "Titan", "They were impressed"],
       'answerChoices': [
         ["Leen", "Noor", "Adam", "Hana"],
         ["A picnic", "A science fair", "A sports day", "A painting contest"],
@@ -46,20 +41,14 @@ class EnglishLevel3HomeScreen extends StatelessWidget {
     {
       'emoji': '🧪',
       'title': 'The Science Fair Mystery',
-      'paragraph':
-          'Noor built a color-sorting robot. On the fair day, it didn\'t work! She found a loose wire and fixed it. Her robot worked and she was proud.',
+      'paragraph': "Noor built a color-sorting robot. On the fair day, it didn’t work! She found a loose wire and fixed it. Her robot worked and she was proud.",
       'questions': [
         "What did Noor build?",
         "What went wrong?",
         "How did she fix it?",
         "How did she feel?"
       ],
-      'answers': [
-        "A color-sorting robot",
-        "It didn’t work",
-        "She fixed the wire",
-        "She was proud"
-      ],
+      'answers': ["A color-sorting robot", "It didn’t work", "She fixed the wire", "She was proud"],
       'answerChoices': [
         ["A painting", "A volcano", "A color-sorting robot", "A telescope"],
         ["It was too slow", "It didn’t work", "It exploded", "It was too big"],
@@ -71,20 +60,14 @@ class EnglishLevel3HomeScreen extends StatelessWidget {
     {
       'emoji': '🎨',
       'title': 'The Art of Patience',
-      'paragraph':
-          'Adam rushed his painting. It looked messy. He tried again slowly, using leaves and sand. The result was beautiful. He learned to be patient.',
+      'paragraph': "Adam rushed his painting. It looked messy. He tried again slowly, using leaves and sand. The result was beautiful. He learned to be patient.",
       'questions': [
         "What was Adam doing?",
         "Why was the first painting messy?",
         "What materials did he use?",
         "What did he learn?"
       ],
-      'answers': [
-        "Painting",
-        "He rushed",
-        "Leaves and sand",
-        "To be patient"
-      ],
+      'answers': ["Painting", "He rushed", "Leaves and sand", "To be patient"],
       'answerChoices': [
         ["Writing", "Drawing", "Painting", "Running"],
         ["He used too much paint", "He rushed", "He was sleepy", "He was confused"],
@@ -96,20 +79,14 @@ class EnglishLevel3HomeScreen extends StatelessWidget {
     {
       'emoji': '🌋',
       'title': 'The Sleeping Volcano',
-      'paragraph':
-          'Hana lived near a volcano. She wrote a story about it using facts and legends. People loved it, and she became a storyteller in her village.',
+      'paragraph': "Hana lived near a volcano. She wrote a story about it using facts and legends. People loved it, and she became a storyteller in her village.",
       'questions': [
         "Where did Hana live?",
         "What did she write about?",
         "What did people think?",
         "What did she become?"
       ],
-      'answers': [
-        "Near a volcano",
-        "A volcano story",
-        "They loved it",
-        "A storyteller"
-      ],
+      'answers': ["Near a volcano", "A volcano story", "They loved it", "A storyteller"],
       'answerChoices': [
         ["Near a beach", "Near a school", "Near a volcano", "In a city"],
         ["A science report", "A poem", "A volcano story", "A journal"],
@@ -122,7 +99,7 @@ class EnglishLevel3HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    _speak("Welcome to Level 3. Please choose a story to begin.");
+    _speak(tr(LocaleKeys.tts_level3_welcome));
 
     return Scaffold(
       backgroundColor: const Color(0xFFFFF8E1),
@@ -130,9 +107,9 @@ class EnglishLevel3HomeScreen extends StatelessWidget {
         backgroundColor: Colors.orange,
         elevation: 0,
         centerTitle: true,
-        title: const Text(
-          "📖 English - Level 3",
-          style: TextStyle(
+        title: Text(
+          LocaleKeys.english_level3_title.tr(),
+          style: const TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
             color: Colors.black,
@@ -148,10 +125,10 @@ class EnglishLevel3HomeScreen extends StatelessWidget {
         children: [
           _buildTile(
             context,
-            title: "Level 3 Quiz",
+            title: LocaleKeys.level3_quiz_title.tr(),
             jsonPath: "images/new_images/Quiz.json",
             onTap: () {
-              _speak("Let's start the final quiz.");
+              _speak(tr(LocaleKeys.tts_start_final_quiz));
               Navigator.push(
                 context,
                 MaterialPageRoute(

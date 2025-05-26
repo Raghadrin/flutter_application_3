@@ -1,5 +1,29 @@
 
- { "library": {
+ {
+  
+  "english": {
+    "level3_title": "📖 English - Level 3",
+    "level3_quiz": "Level 3 Quiz",
+    "tts_level3_welcome": "Welcome to Level 3. Please choose a story to begin.",
+    "tts_start_final_quiz": "Let's start the final quiz.","level2_title": "English - Level 2",
+    "level2_quiz": "Level 2 Quiz",
+    "tts_level2_welcome": "Welcome to Level 2. Please choose a sentence to start learning.",
+    "tts_start_quiz": "Let's begin the quiz."
+  
+,  
+    "level1_title": "English - Level 1",
+    "level1_quiz": "Level 1 Quiz",
+    "tts_welcome": "Welcome to Level 1. Please choose a sentence to start learning.",
+    "tts_start_quiz": "Let's begin the quiz."
+  },"library": {"english_title": "English Library",
+    "language_exercises_title": "Language Exercises",
+    "language_exercises_desc": "Practice grammar and vocabulary.",
+    "educational_videos_title": "Educational Videos",
+    "educational_videos_desc": "Watch videos to improve your English.",
+    "challenges_title": "Challenges & Riddles",
+    "challenges_desc": "Play and challenge your mind.",
+    "feelings_title": "Who's There?",
+    "feelings_desc": "Explore feelings with fun games.",
     "arabic_title": "Arabic Language Library",
     "language_exercises_title": "Language Exercises",
     "language_exercises_desc": "Practice language-related issues.",

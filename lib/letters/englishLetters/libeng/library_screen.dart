@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_3/letters/englishLetters/libeng/english_videos_tabbed_screen.dart';
 import 'c.dart';
 import 'full_library_screen.dart';
-
 import 'FeelingsScreen.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'locale_keys.dart';
 
 class EnglishLibraryScreen extends StatelessWidget {
   const EnglishLibraryScreen({super.key});
@@ -14,9 +15,9 @@ class EnglishLibraryScreen extends StatelessWidget {
       backgroundColor: const Color(0xFFFFF6ED),
       appBar: AppBar(
         backgroundColor: const Color(0xFFFFA726),
-        title: const Text(
-          "English Library",
-          style: TextStyle(fontWeight: FontWeight.bold),
+        title: Text(
+          LocaleKeys.library_english_title.tr(),
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
       ),
@@ -30,22 +31,20 @@ class EnglishLibraryScreen extends StatelessWidget {
           children: [
             _buildTile(
               context,
-              title: "Language Exercises",
-              description: "Practice grammar and vocabulary.",
+              title: LocaleKeys.library_language_exercises_title.tr(),
+              description: LocaleKeys.library_language_exercises_desc.tr(),
               imagePath: "images/one.png",
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => const EnglishLibrary1Screen(
-                  
-                  ),
+                  builder: (_) => const EnglishLibrary1Screen(),
                 ),
               ),
             ),
             _buildTile(
               context,
-              title: "Educational Videos",
-              description: "Watch videos to improve your English.",
+              title: LocaleKeys.library_educational_videos_title.tr(),
+              description: LocaleKeys.library_educational_videos_desc.tr(),
               imagePath: "images/two.png",
               onTap: () => Navigator.push(
                 context,
@@ -56,8 +55,8 @@ class EnglishLibraryScreen extends StatelessWidget {
             ),
             _buildTile(
               context,
-              title: "Challenges & Riddles",
-              description: "Play and challenge your mind.",
+              title: LocaleKeys.library_challenges_title.tr(),
+              description: LocaleKeys.library_challenges_desc.tr(),
               imagePath: "images/3.png",
               onTap: () => Navigator.push(
                 context,
@@ -68,8 +67,8 @@ class EnglishLibraryScreen extends StatelessWidget {
             ),
             _buildTile(
               context,
-              title: "Whoe's There?",
-              description: "Explore feelings with fun games.",
+              title: LocaleKeys.library_feelings_title.tr(),
+              description: LocaleKeys.library_feelings_desc.tr(),
               imagePath: "images/feelings_icon.png",
               onTap: () => Navigator.push(
                 context,

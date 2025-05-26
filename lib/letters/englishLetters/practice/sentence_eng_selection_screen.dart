@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:lottie/lottie.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'locale_keys.dart';
 
 import 'english_level1_quiz_all.dart';
 import 'english_level1_screen.dart';
@@ -24,35 +26,34 @@ class EnglishLevel1HomeScreen extends StatelessWidget {
       "animation": "images/new_images/apples.json",
     },
     {
-      "emoji":  "🏫",
+      "emoji": "🏫",
       "title": "My School",
       "text": "I go to school every morning.",
       "animation": "images/write.json",
     },
     {
-      "emoji":"🐶",
+      "emoji": "🐶",
       "title": "My dog",
       "text": "My dog runs fast in the park.",
       "animation": "images/Dog.json",
     },
     {
-  "emoji": "🚗",
-  "title": "Washing the Car",
-  "text": "Dad washes the car.",
-  "animation": "images/car.json",
-},
-{
-  "emoji": "📖",
-  "title": "Library Time",
-  "text": "We read at the library.",
-  "animation": "images/read.json",
-},
-
+      "emoji": "🚗",
+      "title": "Washing the Car",
+      "text": "Dad washes the car.",
+      "animation": "images/car.json",
+    },
+    {
+      "emoji": "📖",
+      "title": "Library Time",
+      "text": "We read at the library.",
+      "animation": "images/read.json",
+    },
   ];
 
   @override
   Widget build(BuildContext context) {
-    _speak("Welcome to Level 1. Please choose a sentence to start learning.");
+    _speak(tr(LocaleKeys.tts_welcome));
 
     return Scaffold(
       backgroundColor: const Color(0xFFFFF8E1),
@@ -60,9 +61,9 @@ class EnglishLevel1HomeScreen extends StatelessWidget {
         backgroundColor: Colors.orange,
         elevation: 0,
         centerTitle: true,
-        title: const Text(
-          "English - Level 1",
-          style: TextStyle(
+        title: Text(
+          LocaleKeys.english_level1_title.tr(),
+          style: const TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
             color: Colors.black,
@@ -78,13 +79,15 @@ class EnglishLevel1HomeScreen extends StatelessWidget {
         children: [
           _buildTile(
             context,
-            title: "Level 1 Quiz",
+            title: LocaleKeys.level1_quiz_title.tr(),
             jsonPath: "images/new_images/Quiz.json",
             onTap: () {
-              _speak("Let's begin the quiz.");
+              _speak(tr(LocaleKeys.tts_start_quiz));
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const EnglishLetterQuizScreen()),
+                MaterialPageRoute(
+                  builder: (_) => const EnglishLetterQuizScreen(),
+                ),
               );
             },
           ),
@@ -98,7 +101,8 @@ class EnglishLevel1HomeScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => EnglishLevel1Screen(sentence: sentence["text"]!),
+                    builder: (_) =>
+                        EnglishLevel1Screen(sentence: sentence["text"]!),
                   ),
                 );
               },
