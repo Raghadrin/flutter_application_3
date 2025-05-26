@@ -40,13 +40,9 @@ abstract class LocaleKeys {
   static const startQuiz3 = 'startQuiz3';
 
   static const story1Title = 'stories.story1.title';
- 
   static const story2Title = 'stories.story2.title';
- 
   static const story3Title = 'stories.story3.title';
- 
   static const story4Title = 'stories.story4.title';
- 
   static const story5Title = 'stories.story5.title';
 
   // Shared

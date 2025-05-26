@@ -151,15 +151,17 @@ class ArabicLevel3HomeScreen extends StatelessWidget {
           ...stories.map((story) {
             return _buildTile(
               context,
-              title: story['title'],
+title: tr(story['title']),
+
               jsonPath: story['animation'],
               onTap: () {
-                _speak(context, "${tr(LocaleKeys.selectedPrefix)} ${story['title']}");
+                _speak(context, "${tr(LocaleKeys.selectedPrefix)} ${tr(story['title'])}");
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (_) => ArabicLevel3Screen(
-                      title: story['title'],
+                      title: tr(story['title']),
+
                       storyText: story['paragraph'],
                       questions: List<String>.from(story['questions']),
                       correctAnswers: List<String>.from(story['answers']),
