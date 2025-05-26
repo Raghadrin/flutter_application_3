@@ -1,25 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:lottie/lottie.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import 'arabic_level3_screen.dart';
 import 'arabic_level3_quiz_all.dart';
+import 'locale_keys.dart';
 
 class ArabicLevel3HomeScreen extends StatelessWidget {
   final FlutterTts tts = FlutterTts();
 
   ArabicLevel3HomeScreen({super.key});
 
-  void _speak(String text) async {
-    await tts.setLanguage("ar-SA");
-    await tts.setSpeechRate(0.4);
+  Future<void> configureTts(BuildContext context) async {
+    final langCode = context.locale.languageCode;
+
+    if (langCode == 'ar') {
+      await tts.setLanguage("ar-SA");
+      await tts.setVoice({
+        'name': 'ar-xa-x-arm-local',
+        'locale': 'ar-SA',
+      });
+    } else {
+      await tts.setLanguage("en-US");
+      await tts.setVoice({
+        'name': 'en-gb-x-rjs-local',
+        'locale': 'en-US',
+      });
+    }
+
+    await tts.setSpeechRate(0.45);
+    await tts.setPitch(1.0);
+  }
+
+  Future<void> _speak(BuildContext context, String text) async {
+    await configureTts(context);
     await tts.speak(text);
   }
 
-  final List<Map<String, dynamic>> stories = [
+ final List<Map<String, dynamic>> stories = [
     {
       'emoji': '🌳',
-      'title': 'يوم في الحديقة',
+      'title': LocaleKeys.story1Title 
+,
       'paragraph':
           'في صباحٍ مشمس، ذهب سامي مع والده إلى الحديقة. كانت الأشجار خضراء، والعصافير تغني. لعب سامي كثيرًا بالأرجوحة والزحليقة، ثم جلس مع والده ليتناولا العصير ويشاهدوا الطيور وهي تطير في السماء',
       'questions': [
@@ -33,7 +56,7 @@ class ArabicLevel3HomeScreen extends StatelessWidget {
     },
     {
       'emoji': '🌧️',
-      'title': 'ألعاب المطر',
+        'title': LocaleKeys.story2Title ,
       'paragraph':
           'في فصل الشتاء، تهطل الأمطار وتصبح الأرض مبللة. يخرج الأطفال بفرح ليلعبوا في البرك الصغيرة، ويصنعوا قوارب ورقية يتركونها تبحر في الماء. يرتدون المعاطف والأحذية الطويلة ليبقوا جافين أثناء اللعب',
       'questions': [
@@ -47,7 +70,7 @@ class ArabicLevel3HomeScreen extends StatelessWidget {
     },
     {
       'emoji': '📖',
-      'title': 'قصة قبل النوم',
+     'title': LocaleKeys.story3Title ,
       'paragraph':
           'تحب سارة قراءة القصص قبل النوم. تجلس بجانب والدتها وتفتح كتابها المفضل. كل ليلة، تسافر بخيالها إلى أماكن جميلة من خلال القصص، وتحلم بأنها بطلة في عالم من المغامرات',
       'questions': ["من تحب القراءة؟", "متى؟", "من معها؟", "بماذا تحلم؟"],
@@ -56,7 +79,7 @@ class ArabicLevel3HomeScreen extends StatelessWidget {
     },
     {
       'emoji': '🏫',
-      'title': 'في المدرسة',
+           'title': LocaleKeys.story4Title ,
       'paragraph':
           'في المدرسة، يتعلم التلاميذ القراءة والكتابة والحساب. يحب الأطفال معلميهم لأنهم يشجعونهم دائمًا على التعلم والاجتهاد. في الفصل، يتشاركون في الأنشطة ويعملون معًا كفريق',
       'questions': ["أين؟", "ماذا يتعلمون؟", "من يحبون؟", "لماذا؟"],
@@ -65,7 +88,7 @@ class ArabicLevel3HomeScreen extends StatelessWidget {
     },
     {
       'emoji': '🏖️',
-      'title': 'عطلة على الشاطئ',
+          'title': LocaleKeys.story5Title ,
       'paragraph':
           'ذهبت العائلة إلى البحر في العطلة. لعب الأطفال بالرمل وبنوا قلاعًا كبيرة. سبحوا في الماء وركضوا على الشاطئ. بعد اللعب، جلسوا معًا وتناولوا طعامًا لذيذًا وهم يشاهدون الأمواج',
       'questions': ["أين ذهبوا؟", "ماذا بنوا؟", "أين سبحوا؟", "ماذا أكلوا؟"],
@@ -76,7 +99,7 @@ class ArabicLevel3HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    _speak("مرحباً في المستوى الثالث. اختر قصة لتبدأ.");
+    _speak(context, tr(LocaleKeys.level3WelcomeMessage));
 
     return Scaffold(
       backgroundColor: const Color(0xFFFFF8E1),
@@ -84,28 +107,39 @@ class ArabicLevel3HomeScreen extends StatelessWidget {
         backgroundColor: Colors.orange,
         elevation: 0,
         centerTitle: true,
-        title: const Text(
-          "📖 اللغة العربية - المستوى 3",
-          style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Color.fromARGB(255, 0, 0, 0)),
+        title: Text(
+          tr(LocaleKeys.arabicLevel3Title),
+          style: const TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.language, color: Colors.black),
+            onPressed: () {
+              final newLocale = context.locale.languageCode == 'ar'
+                  ? const Locale('en')
+                  : const Locale('ar');
+              context.setLocale(newLocale);
+            },
+          )
+        ],
       ),
       body: GridView.count(
         crossAxisCount: 2,
         padding: const EdgeInsets.all(16),
-        crossAxisSpacing: 16,
         mainAxisSpacing: 16,
+        crossAxisSpacing: 16,
         childAspectRatio: 0.75,
         children: [
-          // زر الكويز الشامل
           _buildTile(
             context,
-            title: "اختبار المرحلة الثالثة",
+            title: tr(LocaleKeys.quizButton3),
             jsonPath: "images/new_images/Quiz.json",
             onTap: () {
-              _speak("لنبدأ الكويز الشامل.");
+              _speak(context, tr(LocaleKeys.startQuiz3));
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -114,14 +148,13 @@ class ArabicLevel3HomeScreen extends StatelessWidget {
               );
             },
           ),
-          // بقية القصص
           ...stories.map((story) {
             return _buildTile(
               context,
               title: story['title'],
               jsonPath: story['animation'],
               onTap: () {
-                _speak("اخترت: ${story["title"]}");
+                _speak(context, "${tr(LocaleKeys.selectedPrefix)} ${story['title']}");
                 Navigator.push(
                   context,
                   MaterialPageRoute(

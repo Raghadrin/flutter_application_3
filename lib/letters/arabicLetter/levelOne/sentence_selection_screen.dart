@@ -1,72 +1,100 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:lottie/lottie.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import 'arabic_level1_screen.dart';
 import 'arabic_level1_quiz_all.dart';
+import 'locale_keys.dart';
 
 class ArabicLevel1HomeScreen extends StatelessWidget {
   final FlutterTts tts = FlutterTts();
 
   ArabicLevel1HomeScreen({super.key});
 
-  void _speak(String text) async {
-    await tts.setLanguage("ar-SA");
-    await tts.setSpeechRate(0.4);
+  Future<void> configureTts(BuildContext context) async {
+    final langCode = context.locale.languageCode;
+
+    if (langCode == 'ar') {
+      await tts.setLanguage("ar-SA");
+      await tts.setVoice({
+        'name': 'ar-xa-x-arm-local', // صوت عربي - ذكوري أو أنثوي حسب الجهاز
+        'locale': 'ar-SA',
+      });
+    } else {
+      await tts.setLanguage("en-US"); // لهجة إنجليزية بريطانية
+      await tts.setVoice({
+        'name': 'en-gb-x-rjs-local', // غيّر حسب الأصوات المتاحة
+        'locale': 'en-US',
+      });
+    }
+
+    await tts.setSpeechRate(0.45);
+    await tts.setPitch(1.0);
+  }
+
+  Future<void> _speak(BuildContext context, String text) async {
+    await configureTts(context);
     await tts.speak(text);
   }
 
-  final List<Map<String, String>> sentences = [
+  final List<Map<String, String>> sentenceKeys = [
     {
-      "emoji": "🌞",
-      "title": "شروق الشمس",
-      "text": "الشمس تشرق كل صباح",
-      "animation": "images/sun.json",
+      "title": LocaleKeys.sunriseTitle,
+      "text": LocaleKeys.sunriseText,
+      "animation": "images/sun.json"
     },
     {
-      "emoji": "✍️",
-      "title": "كتابة الواجب",
-      "text": "الولد يكتب الواجب",
-      "animation": "images/write.json",
+      "title": LocaleKeys.writeTitle,
+      "text": LocaleKeys.writeText,
+      "animation": "images/write.json"
     },
     {
-      "emoji": "👩‍🍳",
-      "title": "الطبخ",
-      "text": "الأم تطبخ الطعام",
-      "animation": "images/cook.json",
+      "title": LocaleKeys.cookTitle,
+      "text": LocaleKeys.cookText,
+      "animation": "images/cook.json"
     },
     {
-      "emoji": "🚗",
-      "title": "الطريق",
-      "text": "السيارة تسير في الطريق",
-      "animation": "images/car.json",
+      "title": LocaleKeys.carTitle,
+      "text": LocaleKeys.carText,
+      "animation": "images/car.json"
     },
     {
-      "emoji": "📖",
-      "title": "القراءة",
-      "text": "أنا أحب القراءة",
-      "animation": "images/read.json",
+      "title": LocaleKeys.readTitle,
+      "text": LocaleKeys.readText,
+      "animation": "images/read.json"
     },
   ];
 
   @override
   Widget build(BuildContext context) {
-    _speak("مرحباً في المستوى الأول. اختر جملة لتبدأ التعلم.");
+    _speak(context, tr(LocaleKeys.welcomeMessage));
 
     return Scaffold(
       backgroundColor: const Color(0xFFFFF8E1),
       appBar: AppBar(
         backgroundColor: Colors.orange,
         elevation: 0,
-        title: const Text(
-          "اللغة العربية - المستوى 1",
-          style: TextStyle(
+        title: Text(
+          tr(LocaleKeys.arabicLevel1Title),
+          style: const TextStyle(
             color: Colors.black,
             fontSize: 24,
             fontWeight: FontWeight.bold,
           ),
         ),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.language, color: Colors.black),
+            onPressed: () {
+              final newLocale = context.locale.languageCode == 'ar'
+                  ? const Locale('en')
+                  : const Locale('ar');
+              context.setLocale(newLocale);
+            },
+          )
+        ],
       ),
       body: GridView.count(
         crossAxisCount: 2,
@@ -75,32 +103,30 @@ class ArabicLevel1HomeScreen extends StatelessWidget {
         crossAxisSpacing: 16,
         childAspectRatio: 0.75,
         children: [
-          // زر الكويز الشامل
           _buildTile(
             context,
-            title: "اختبار المرحلة الاولى",
+            title: tr(LocaleKeys.quizButton),
             jsonPath: "images/new_images/Quiz.json",
             onTap: () {
-              _speak("لنبدأ الاختبار.");
+              _speak(context, tr(LocaleKeys.startQuiz));
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                    builder: (_) => const ArabicLetterQuizScreen()),
+                MaterialPageRoute(builder: (_) => const ArabicLetterQuizScreen()),
               );
             },
           ),
-          ...sentences.map((sentence) {
+          ...sentenceKeys.map((s) {
             return _buildTile(
               context,
-              title: sentence["title"]!,
-              jsonPath: sentence["animation"]!,
+              title: tr(s["title"]!),
+              jsonPath: s["animation"]!,
               onTap: () {
-                _speak("اخترت: ${sentence["title"]}");
+                _speak(context, "${tr(LocaleKeys.selectedPrefix)} ${tr(s["title"]!)}");
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (_) =>
-                        ArabicLevel1Screen(sentence: sentence["text"]!),
+                        ArabicLevel1Screen(sentence: tr(s["text"]!)),
                   ),
                 );
               },

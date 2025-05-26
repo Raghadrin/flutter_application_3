@@ -1,4 +1,88 @@
-{  "settings": "Settings",
+
+  {
+  "arabicLevel1Title": "Arabic - Level 1",
+  "welcomeMessage": "Welcome to Level 1. Choose a sentence to begin learning.",
+  "startQuiz": "Let's start the quiz.",
+  "quizButton": "Level 1 Quiz",
+
+  "arabicLevel2Title": "Arabic - Level 2",
+  "level2WelcomeMessage": "Welcome to Level 2. Choose a sentence to begin learning.",
+  "quizButton2": "Level 2 Quiz",
+  "startQuiz2": "Let's start the quiz.",
+
+  "arabicLevel3Title": "Arabic - Level 3",
+  "level3WelcomeMessage": "Welcome to Level 3. Choose a story to begin.",
+  "quizButton3": "Level 3 Quiz",
+  "startQuiz3": "Let's start the full quiz.",
+
+  "selectedPrefix": "You selected:",
+
+  "sentences": {
+    "sunrise": {
+      "title": "Sunrise",
+      "text": "The sun rises every morning"
+    },
+    "write": {
+      "title": "Homework Writing",
+      "text": "The boy writes his homework"
+    },
+    "cook": {
+      "title": "Cooking",
+      "text": "The mother cooks the food"
+    },
+    "car": {
+      "title": "The Road",
+      "text": "The car is driving on the road"
+    },
+    "read": {
+      "title": "Reading",
+      "text": "I love reading"
+    },
+    "school": {
+      "title": "School Activity",
+      "text": "The diligent boy goes to school every morning with energy"
+    },
+    "doctor": {
+      "title": "Treating Patients",
+      "text": "The doctor treats patients in the hospital using precise tools"
+    },
+    "traffic": {
+      "title": "Respecting the Law",
+      "text": "The red car stopped at the red light in respect of the law"
+    },
+    "library": {
+      "title": "Library",
+      "text": "I read a useful book in the library every day after school"
+    },
+    "deliciousFood": {
+      "title": "Delicious Food",
+      "text": "The mother prepares delicious food with healthy ingredients to care for the family"
+    }
+  },
+
+  "stories": {
+    "story1": {
+      "title": "A Day in the Park"
+       },
+    "story2": {
+      "title": "Rain Games"
+      },
+    "story3": {
+      "title": "Bedtime Story"
+       },
+    "story4": {
+      "title": "At School"
+     },
+    "story5": {
+      "title": "Beach Vacation"
+    }
+  },
+  "arabic_level1_title": "Arabic - Level 1",
+  "quiz_button": "Level 1 Quiz",
+  "welcome_message": "Welcome to Level 1. Choose a sentence to begin learning.",
+  "start_quiz": "Let's start the quiz.",
+  "selected": "You selected: {{title}}",
+ "settings": "Settings",
 "profile": "Profile",
 "lightMode": "Light Mode",
 "darkMode": "Dark Mode",
