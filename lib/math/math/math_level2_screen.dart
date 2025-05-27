@@ -1,34 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:lottie/lottie.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../games/compare_quantities_game.dart';
 import '../games/operation_sorting_game.dart';
 import '../games/two_step_word_problem_game.dart';
 import '../games/hard_equation_game.dart';
 import '../quiz/level2_quiz.dart';
+import '../translations/locale_keys.dart';
 
 class MathLevel2Screen extends StatelessWidget {
   final FlutterTts tts = FlutterTts();
 
   MathLevel2Screen({super.key});
 
-  void _speak(String text) async {
+  void _speak(BuildContext context, String key) async {
     await tts.setLanguage("en-US");
     await tts.setSpeechRate(0.2);
-    await tts.speak(text);
+    await tts.speak(tr(key));
   }
 
-  void _speakIntro() async {
+  void _speakIntro(BuildContext context) async {
     await tts.setLanguage("en-US");
     await tts.setSpeechRate(0.4);
-    await tts.speak(
-        "Welcome to Math Level 2. Let's compare, calculate, and solve word problems together!");
+    await tts.speak(tr(LocaleKeys.math_level2_welcome));
   }
 
   @override
   Widget build(BuildContext context) {
-    _speakIntro();
+    _speakIntro(context);
 
     return Scaffold(
       backgroundColor: const Color(0xFFFFF6ED),
@@ -36,11 +37,11 @@ class MathLevel2Screen extends StatelessWidget {
         centerTitle: true,
         backgroundColor: const Color(0xFFFFA726),
         elevation: 0,
-        leading: BackButton(color: const Color.fromARGB(255, 0, 0, 0)),
-        title: const Text(
-          "Math - Level 2",
-          style: TextStyle(
-            color: Color.fromARGB(255, 0, 0, 0),
+        leading: const BackButton(color: Colors.black),
+        title: Text(
+          tr(LocaleKeys.math_level2_title),
+          style: const TextStyle(
+            color: Colors.black,
             fontSize: 24,
             fontWeight: FontWeight.bold,
             fontFamily: 'Arial',
@@ -56,58 +57,47 @@ class MathLevel2Screen extends StatelessWidget {
         children: [
           _buildGameTile(
             context,
-            title: "Compare Quantities",
+            titleKey: LocaleKeys.compare_quantities,
             jsonPath: "images/new_images/toys.json",
             onTap: () {
-              _speak("Let's compare quantities.");
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => const CompareQuantitiesGame()));
+              _speak(context, LocaleKeys.tts_compare);
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const CompareQuantitiesGame()));
             },
           ),
           _buildGameTile(
             context,
-            title: "Choose Operation",
+            titleKey: LocaleKeys.choose_operation,
             jsonPath: "images/new_images/operation.json",
             onTap: () {
-              _speak("Choose the correct operation.");
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => const OperationSortingGame()));
+              _speak(context, LocaleKeys.tts_choose);
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const OperationSortingGame()));
             },
           ),
           _buildGameTile(
             context,
-            title: "Word Problem",
+            titleKey: LocaleKeys.word_problem,
             jsonPath: "images/new_images/think.json",
             onTap: () {
-              _speak("Solve the story problem.");
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => const TwoStepWordProblemGame()));
+              _speak(context, LocaleKeys.tts_word);
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const TwoStepWordProblemGame()));
             },
           ),
           _buildGameTile(
             context,
-            title: "Hard Equations",
+            titleKey: LocaleKeys.hard_equations,
             jsonPath: "images/new_images/equation.json",
             onTap: () {
-              _speak("Try solving hard equations.");
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => const HardEquationGame()));
+              _speak(context, LocaleKeys.tts_hard);
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const HardEquationGame()));
             },
           ),
           _buildGameTile(
             context,
-            title: "Level 2 Quiz",
+            titleKey: LocaleKeys.level2_quiz,
             jsonPath: "images/new_images/Quiz.json",
             onTap: () {
-              _speak("Let’s begin the quiz for level 2.");
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => const Level2QuizScreen()));
+              _speak(context, LocaleKeys.tts_quiz2);
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const Level2QuizScreen()));
             },
           ),
         ],
@@ -117,7 +107,7 @@ class MathLevel2Screen extends StatelessWidget {
 
   Widget _buildGameTile(
     BuildContext context, {
-    required String title,
+    required String titleKey,
     required String jsonPath,
     required VoidCallback onTap,
   }) {
@@ -136,7 +126,7 @@ class MathLevel2Screen extends StatelessWidget {
             Lottie.asset(jsonPath, height: 100),
             const SizedBox(height: 12),
             Text(
-              title,
+              tr(titleKey),
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 18,

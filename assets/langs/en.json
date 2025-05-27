@@ -1,5 +1,50 @@
 
- {
+ {"math": {
+    "level1": {
+      "title": "Math - Level 1",
+      "welcome": "Welcome to Level 1. Let's explore numbers in fun ways!",
+      "recognize_number": "Recognize Number",
+      "match_quantity": "Match to Quantity",
+      "trace_number": "Trace the Number",
+      "complete_equation": "Complete Equation",
+      "quiz": "Level 1 Quiz",
+      "tts": {
+        "recognize": "Let's recognize numbers.",
+        "match": "Match the number to the correct group.",
+        "trace": "Trace the number with your finger.",
+        "equation": "Let's complete the equation.",
+        "quiz": "Let's test what you learned."
+      }
+    }
+  },"math": {
+    "level2": {
+      "title": "Math - Level 2",
+      "welcome": "Welcome to Math Level 2. Let's compare, calculate, and solve word problems together!",
+      "compare_quantities": "Compare Quantities",
+      "choose_operation": "Choose Operation",
+      "word_problem": "Word Problem",
+      "hard_equations": "Hard Equations",
+      "quiz": "Level 2 Quiz",
+      "tts": {
+        "compare": "Let's compare quantities.",
+        "choose": "Choose the correct operation.",
+        "word": "Solve the story problem.",
+        "hard": "Try solving hard equations.",
+        "quiz": "Let’s begin the quiz for level 2."
+      }
+    }
+  },"math_level3_title": "Math - Level 3",
+  "math_level3_welcome": "Welcome to Math Level 3. Let's solve multi-step equations, reverse operations, and word story problems together.",
+  
+  "multi_step": "Multi-Step Equations",
+  "reverse_eq": "Reverse Equation",
+  "word_story": "Word Story Problem",
+  "level3_quiz": "Level 3 Quiz",
+
+  "tts_multi": "Let's solve some multi-step equations!",
+  "tts_reverse": "Now try to reverse the equation.",
+  "tts_story": "Time for a word story problem.",
+  "tts_quiz3": "Start the quiz for level 3.",
   
   "english": {
     "level3_title": "📖 English - Level 3",

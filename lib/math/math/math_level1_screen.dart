@@ -1,38 +1,39 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:lottie/lottie.dart';
-
+import 'package:easy_localization/easy_localization.dart';
 import '../games/number_recognition_game.dart';
 import '../games/number_quantity_matching_game.dart';
 import '../games/number_tracing_game.dart';
 import '../games/complete_equation_game.dart';
 import '../quiz/level1_quiz.dart';
+import '../translations/locale_keys.dart';
 
 class MathLevel1Screen extends StatelessWidget {
   final FlutterTts tts = FlutterTts();
 
   MathLevel1Screen({super.key});
 
-  void _speak(String text) async {
+  void _speak(BuildContext context, String textKey) async {
     await tts.setLanguage("en-US");
     await tts.setSpeechRate(0.4);
-    await tts.speak(text);
+    await tts.speak(tr(textKey));
   }
 
   @override
   Widget build(BuildContext context) {
-    _speak("Welcome to Level 1. Let's explore numbers in fun ways!");
+    _speak(context, LocaleKeys.math_level1_welcome);
 
     return Scaffold(
       backgroundColor: const Color(0xFFFFF6ED),
       appBar: AppBar(
         backgroundColor: const Color(0xFFFFA726),
         elevation: 0,
-        leading: BackButton(color: const Color.fromARGB(255, 0, 0, 0)),
-        title: const Text(
-          "Math - Level 1",
-          style: TextStyle(
-            color: Color.fromARGB(255, 0, 0, 0),
+        leading: const BackButton(color: Colors.black),
+        title: Text(
+          tr(LocaleKeys.math_level1_title),
+          style: const TextStyle(
+            color: Colors.black,
             fontSize: 24,
             fontWeight: FontWeight.bold,
             fontFamily: 'Arial',
@@ -48,58 +49,47 @@ class MathLevel1Screen extends StatelessWidget {
         children: [
           _buildGameTile(
             context,
-            title: "Recognize Number",
+            titleKey: LocaleKeys.recognize_number,
             jsonPath: "images/new_images/number_3.json",
             onTap: () {
-              _speak("Let's recognize numbers.");
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => const NumberRecognitionGame()));
+              _speak(context, LocaleKeys.tts_recognize);
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const NumberRecognitionGame()));
             },
           ),
           _buildGameTile(
             context,
-            title: "Match to Quantity",
+            titleKey: LocaleKeys.match_quantity,
             jsonPath: "images/new_images/apples.json",
             onTap: () {
-              _speak("Match the number to the correct group.");
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => const NumberQuantityMatchingGame()));
+              _speak(context, LocaleKeys.tts_match);
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const NumberQuantityMatchingGame()));
             },
           ),
           _buildGameTile(
             context,
-            title: "Trace the Number",
+            titleKey: LocaleKeys.trace_number,
             jsonPath: "images/new_images/tracing.json",
             onTap: () {
-              _speak("Trace the number with your finger.");
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => const NumberTracingGame()));
+              _speak(context, LocaleKeys.tts_trace);
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const NumberTracingGame()));
             },
           ),
           _buildGameTile(
             context,
-            title: "Complete Equation",
+            titleKey: LocaleKeys.complete_equation,
             jsonPath: "images/new_images/equation.json",
             onTap: () {
-              _speak("Let's complete the equation.");
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => const CompleteEquationGame()));
+              _speak(context, LocaleKeys.tts_equation);
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const CompleteEquationGame()));
             },
           ),
           _buildGameTile(
             context,
-            title: "Level 1 Quiz",
+            titleKey: LocaleKeys.level1_quiz,
             jsonPath: "images/new_images/Quiz.json",
             onTap: () {
-              _speak("Let's test what you learned.");
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => const Level1Quiz()));
+              _speak(context, LocaleKeys.tts_quiz);
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const Level1Quiz()));
             },
           ),
         ],
@@ -109,7 +99,7 @@ class MathLevel1Screen extends StatelessWidget {
 
   Widget _buildGameTile(
     BuildContext context, {
-    required String title,
+    required String titleKey,
     required String jsonPath,
     required VoidCallback onTap,
   }) {
@@ -128,7 +118,7 @@ class MathLevel1Screen extends StatelessWidget {
             Lottie.asset(jsonPath, height: 100),
             const SizedBox(height: 12),
             Text(
-              title,
+              tr(titleKey),
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 18,

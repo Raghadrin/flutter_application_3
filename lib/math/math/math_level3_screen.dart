@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:lottie/lottie.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import '../games/multi_step_equation_game.dart';
 import '../games/reverse_equation_game.dart';
 import '../games/word_story_math_game.dart';
 import '../quiz/level3_quiz.dart';
+import '../translations/locale_keys.dart';
 
 class MathLevel3Screen extends StatefulWidget {
   const MathLevel3Screen({super.key});
@@ -20,19 +22,19 @@ class _MathLevel3ScreenState extends State<MathLevel3Screen> {
   @override
   void initState() {
     super.initState();
-    _speak(
-        "Welcome to Math Level 3. Let's solve multi-step equations, reverse operations, and word story problems together.");
+    _speakIntro();
   }
 
-  Future<void> _speak(String text) async {
+  Future<void> _speak(String key) async {
     await tts.setLanguage("en-US");
-    await tts.setSpeechRate(0.45);
-    await tts.speak(text);
+    await tts.setSpeechRate(0.4);
+    await tts.speak(tr(key));
   }
 
-  void _onTileTap(String title, Widget screen) {
-    _speak(title);
-    Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
+  Future<void> _speakIntro() async {
+    await tts.setLanguage("en-US");
+    await tts.setSpeechRate(0.4);
+    await tts.speak(tr(LocaleKeys.math_level3_welcome));
   }
 
   @override
@@ -43,11 +45,11 @@ class _MathLevel3ScreenState extends State<MathLevel3Screen> {
         centerTitle: true,
         backgroundColor: const Color(0xFFFFA726),
         elevation: 0,
-        leading: BackButton(color: const Color.fromARGB(255, 0, 0, 0)),
-        title: const Text(
-          "Math - Level 3",
-          style: TextStyle(
-            color: Color.fromARGB(255, 0, 0, 0),
+        leading: const BackButton(color: Colors.black),
+        title: Text(
+          tr(LocaleKeys.math_level3_title),
+          style: const TextStyle(
+            color: Colors.black,
             fontSize: 24,
             fontWeight: FontWeight.bold,
             fontFamily: 'Arial',
@@ -62,26 +64,56 @@ class _MathLevel3ScreenState extends State<MathLevel3Screen> {
         childAspectRatio: 0.6,
         children: [
           _buildGameTile(
-              "Multi-Step Equations", "images/new_images/Multi-Step.json", () {
-            _onTileTap("Multi-Step Equations", const MultiStepEquationGame());
-          }),
-          _buildGameTile("Reverse Equation", "images/new_images/equation.json",
-              () {
-            _onTileTap("Reverse Equation", const ReverseEquationGame());
-          }),
-          _buildGameTile("Word Story Problem", "images/new_images/think.json",
-              () {
-            _onTileTap("Word Story Problem", const WordStoryMathGame());
-          }),
-          _buildGameTile("Level 3 Quiz", "images/new_images/Quiz.json", () {
-            _onTileTap("Level 3 Quiz", const Level3Quiz());
-          }),
+            context,
+            titleKey: LocaleKeys.multi_step,
+            jsonPath: "images/new_images/Multi-Step.json",
+            onTap: () {
+              _speak(LocaleKeys.tts_multi);
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const MultiStepEquationGame()));
+            },
+          ),
+          _buildGameTile(
+            context,
+            titleKey: LocaleKeys.reverse_eq,
+            jsonPath: "images/new_images/equation.json",
+            onTap: () {
+              _speak(LocaleKeys.tts_reverse);
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const ReverseEquationGame()));
+            },
+          ),
+          _buildGameTile(
+            context,
+            titleKey: LocaleKeys.word_story,
+            jsonPath: "images/new_images/think.json",
+            onTap: () {
+              _speak(LocaleKeys.tts_story);
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const WordStoryMathGame()));
+            },
+          ),
+          _buildGameTile(
+            context,
+            titleKey: LocaleKeys.level3_quiz,
+            jsonPath: "images/new_images/Quiz.json",
+            onTap: () {
+              _speak(LocaleKeys.tts_quiz3);
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const Level3Quiz()));
+            },
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildGameTile(String title, String jsonPath, VoidCallback onTap) {
+  Widget _buildGameTile(
+    BuildContext context, {
+    required String titleKey,
+    required String jsonPath,
+    required VoidCallback onTap,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -97,7 +129,7 @@ class _MathLevel3ScreenState extends State<MathLevel3Screen> {
             Lottie.asset(jsonPath, height: 100),
             const SizedBox(height: 12),
             Text(
-              title,
+              tr(titleKey),
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
