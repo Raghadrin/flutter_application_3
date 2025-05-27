@@ -1,16 +1,20 @@
 abstract class LocaleKeys {
-  static const math_level1_title = 'math.level1.title';
-  static const math_level1_welcome = 'math.level1.welcome';
-  static const recognize_number = 'math.level1.recognize_number';
-  static const match_quantity = 'math.level1.match_quantity';
-  static const trace_number = 'math.level1.trace_number';
-  static const complete_equation = 'math.level1.complete_equation';
-  static const level1_quiz = 'math.level1.quiz';
-  static const tts_recognize = 'math.level1.tts.recognize';
-  static const tts_match = 'math.level1.tts.match';
-  static const tts_trace = 'math.level1.tts.trace';
-  static const tts_equation = 'math.level1.tts.equation';
-  static const tts_quiz = 'math.level1.tts.quiz';
+ static const math_level1_title = 'math_level1_title';
+  static const math_level1_welcome = 'math_level1_welcome';
+
+  // عناوين الألعاب
+  static const recognize_number = 'recognize_number';
+  static const match_quantity = 'match_quantity';
+  static const trace_number = 'trace_number';
+  static const complete_equation = 'complete_equation';
+  static const level1_quiz = 'level1_quiz';
+
+  // مفاتيح النطق (TTS)
+  static const tts_recognize = 'tts_recognize';
+  static const tts_match = 'tts_match';
+  static const tts_trace = 'tts_trace';
+  static const tts_equation = 'tts_equation';
+  static const tts_quiz = 'tts_quiz';
   static const math_level2_title = 'math.level2.title';
   static const math_level2_welcome = 'math.level2.welcome';
   static const compare_quantities = 'math.level2.compare_quantities';
