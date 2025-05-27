@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
+
 import 'library_content_screen.dart';
 import 'MathVideosScreen.dart';
 import 'FeelingsScreen.dart';
 import 'ConfidenceMessagesScreen.dart';
+import 'locale_keys.dart';
 
 class LibraryScreen extends StatelessWidget {
   const LibraryScreen({super.key});
@@ -13,8 +16,10 @@ class LibraryScreen extends StatelessWidget {
       backgroundColor: const Color(0xFFFFF6ED),
       appBar: AppBar(
         backgroundColor: const Color(0xFFFFA726),
-        title: const Text("Math Library",
-            style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(
+          tr(LocaleKeys.library_title),
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
       ),
       body: Padding(
@@ -27,15 +32,15 @@ class LibraryScreen extends StatelessWidget {
           children: [
             _buildTile(
               context,
-              title: "Math Concepts",
-              description: "Explore visual and interactive math ideas.",
+              title: tr(LocaleKeys.math_concepts_title),
+              description: tr(LocaleKeys.math_concepts_description),
               imagePath: "images/concepts.png",
               onTap: () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => const LibraryContentScreen(
-                    title: "Math Concepts",
-                    text: "Explore visual and interactive math ideas.",
+                  builder: (_) => LibraryContentScreen(
+                    title: tr(LocaleKeys.math_concepts_title),
+                    text: tr(LocaleKeys.math_concepts_description),
                     imagePath: "images/concepts.png",
                     isMathConcepts: true,
                   ),
@@ -44,29 +49,33 @@ class LibraryScreen extends StatelessWidget {
             ),
             _buildTile(
               context,
-              title: "Skill Videos",
-              description: "Watch helpful math videos to learn better.",
+              title: tr(LocaleKeys.skill_videos_title),
+              description: tr(LocaleKeys.skill_videos_description),
               imagePath: "images/video_icon.png",
-              onTap: () => Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => const MathVideosScreen())),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const MathVideosScreen()),
+              ),
             ),
             _buildTile(
               context,
-              title: "How Are You Feeling?",
-              description: "Tell the fox how you feel today.",
+              title: tr(LocaleKeys.feelings_title),
+              description: tr(LocaleKeys.feelings_description),
               imagePath: "images/feelings_icon.png",
-              onTap: () => Navigator.push(context,
-                  MaterialPageRoute(builder: (_) => const FeelingsScreen())),
+              onTap: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const FeelingsScreen()),
+              ),
             ),
             _buildTile(
               context,
-              title: "Confidence Messages",
-              description: "Get positive messages from the fox.",
+              title: tr(LocaleKeys.confidence_title),
+              description: tr(LocaleKeys.confidence_description),
               imagePath: "images/confidence_icon.png",
               onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => const ConfidenceMessagesScreen())),
+                context,
+                MaterialPageRoute(builder: (_) => const ConfidenceMessagesScreen()),
+              ),
             ),
           ],
         ),

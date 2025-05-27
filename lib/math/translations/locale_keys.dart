@@ -37,4 +37,4 @@ abstract class LocaleKeys {
   static const tts_reverse = 'tts_reverse';
   static const tts_story = 'tts_story';
   static const tts_quiz3 = 'tts_quiz3';
-}
+  }

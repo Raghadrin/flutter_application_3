@@ -45,7 +45,19 @@
   "tts_reverse": "Now try to reverse the equation.",
   "tts_story": "Time for a word story problem.",
   "tts_quiz3": "Start the quiz for level 3.",
-  
+   "library_title": "Math Library",
+
+  "math_concepts_title": "Math Concepts",
+  "math_concepts_description": "Explore visual and interactive math ideas.",
+
+  "skill_videos_title": "Skill Videos",
+  "skill_videos_description": "Watch helpful math videos to learn better.",
+
+  "feelings_title": "How Are You Feeling?",
+  "feelings_description": "Tell the fox how you feel today.",
+
+  "confidence_title": "Confidence Messages",
+  "confidence_description": "Get positive messages from the fox.",
   "english": {
     "level3_title": "📖 English - Level 3",
     "level3_quiz": "Level 3 Quiz",

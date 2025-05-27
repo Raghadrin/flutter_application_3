@@ -506,5 +506,18 @@
   "tts_multi": "هيا نحل بعض المعادلات متعددة الخطوات!",
   "tts_reverse": "حاول الآن عكس المعادلة.",
   "tts_story": "حان وقت مسألة القصة اللفظية.",
-  "tts_quiz3": "ابدأ اختبار المستوى الثالث."
+  "tts_quiz3": "ابدأ اختبار المستوى الثالث.",
+  "library_title": "مكتبة الرياضيات",
+
+  "math_concepts_title": "مفاهيم الرياضيات",
+  "math_concepts_description": "استكشف أفكار الرياضيات التفاعلية والبصرية.",
+
+  "skill_videos_title": "فيديوهات المهارات",
+  "skill_videos_description": "شاهد فيديوهات رياضية مفيدة لتحسين التعلم.",
+
+  "feelings_title": "كيف تشعر اليوم؟",
+  "feelings_description": "أخبر الثعلب كيف تشعر اليوم.",
+
+  "confidence_title": "رسائل الثقة",
+  "confidence_description": "احصل على رسائل إيجابية من الثعلب."
 }
