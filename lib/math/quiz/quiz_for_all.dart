@@ -1,3 +1,5 @@
+// File: quiz_for_all.dart
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -11,7 +13,6 @@ class QuizForAll extends StatefulWidget {
 
 class _QuizForAllState extends State<QuizForAll> with TickerProviderStateMixin {
   final FlutterTts flutterTts = FlutterTts();
-  late AnimationController countdownAnimation;
   late Timer countdownTimer;
 
   int currentIndex = 0;
@@ -21,6 +22,7 @@ class _QuizForAllState extends State<QuizForAll> with TickerProviderStateMixin {
   int remainingSeconds = 180;
   String? selected;
   bool? isCorrectAnswer;
+  bool showNext = false;
 
   final List<Map<String, dynamic>> questions = [
     {
@@ -48,10 +50,8 @@ class _QuizForAllState extends State<QuizForAll> with TickerProviderStateMixin {
       "answer": "12"
     },
     {
-      "question":
-          "Sara had 8 pens, lost 3, bought 2 more, and then found one in her bag. How many pens does she have now?",
-      "display":
-          "Sara had 8 pens, lost 3, bought 2 more, and found 1 more. How many pens now?",
+      "question": "Sara had 8 pens, lost 3, bought 2 more, and then found one in her bag. How many pens does she have now?",
+      "display": "Sara had 8 pens, lost 3, bought 2 more, and found 1 more. How many pens now?",
       "options": ["7", "8", "9"],
       "answer": "8"
     },
@@ -72,8 +72,6 @@ class _QuizForAllState extends State<QuizForAll> with TickerProviderStateMixin {
   }
 
   void _startCountdown() {
-    countdownAnimation = AnimationController(vsync: this, duration: const Duration(seconds: 180));
-    countdownAnimation.forward();
     countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {
         remainingSeconds--;
@@ -104,40 +102,45 @@ class _QuizForAllState extends State<QuizForAll> with TickerProviderStateMixin {
 
   void _checkAnswer(String option) {
     if (finished) return;
+    final correct = questions[currentIndex]['answer'];
     setState(() {
       selected = option;
-      if (option == questions[currentIndex]['answer']) {
-        score++;
-        isCorrectAnswer = true;
+      isCorrectAnswer = (option == correct);
+      showNext = true;
+      if (isCorrectAnswer!) {
+        score += 10;
         _speak("Correct!");
-        Future.delayed(const Duration(milliseconds: 800), () {
-          setState(() {
-            currentIndex++;
-            selected = null;
-            isCorrectAnswer = null;
-          });
-          if (currentIndex >= questions.length) {
-            countdownTimer.cancel();
-            finished = true;
-          } else {
-            _readCurrentQuestion();
-          }
-        });
       } else {
-        isCorrectAnswer = false;
         _speak("Try again");
       }
     });
+  }
+
+  void _next() {
+    if (currentIndex < questions.length - 1) {
+      setState(() {
+        currentIndex++;
+        selected = null;
+        isCorrectAnswer = null;
+        showNext = false;
+      });
+      _readCurrentQuestion();
+    } else {
+      countdownTimer.cancel();
+      setState(() => finished = true);
+      _speak("Great job! You finished the quiz.");
+    }
   }
 
   void _restart() {
     setState(() {
       currentIndex = 0;
       score = 0;
-      finished = false;
-      remainingSeconds = 180;
       selected = null;
       isCorrectAnswer = null;
+      showNext = false;
+      finished = false;
+      remainingSeconds = 180;
       showWarning = false;
     });
     _startCountdown();
@@ -148,129 +151,142 @@ class _QuizForAllState extends State<QuizForAll> with TickerProviderStateMixin {
   @override
   void dispose() {
     countdownTimer.cancel();
-    countdownAnimation.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final question = currentIndex < questions.length ? questions[currentIndex] : null;
-    int stars = (score >= 6) ? 3 : (score >= 4) ? 2 : 1;
+    final stars = (score >= 60) ? 3 : (score >= 40) ? 2 : (score >= 20) ? 1 : 0;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF6ED),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFFA726),
-        title: const Text("Quiz For All"),
-        centerTitle: true,
+        backgroundColor: Colors.orange,
+        title: const Text("Math Final Quiz"),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                const Icon(Icons.timer, color: Colors.white),
+                const SizedBox(width: 6),
+                Text(
+                  "${remainingSeconds ~/ 60}:${(remainingSeconds % 60).toString().padLeft(2, '0')}",
+                  style: const TextStyle(fontSize: 20, color: Colors.white),
+                ),
+              ],
+            ),
+          )
+        ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
+      backgroundColor: const Color(0xFFFFF6ED),
+      body: Center(
         child: finished
             ? Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text("🎉 Quiz Complete!", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+                  const Text("🎉 Quiz Complete!",
+                      style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 20),
-                  Text("Your Score: $score / ${questions.length}", style: const TextStyle(fontSize: 24)),
+                  Text("Score: $score / ${questions.length * 10}",
+                      style: const TextStyle(fontSize: 22)),
                   const SizedBox(height: 12),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: List.generate(
-                      stars,
-                      (i) => const Icon(Icons.star, color: Colors.orange, size: 36),
+                      3,
+                      (i) => Icon(Icons.star,
+                          color: i < stars ? Colors.orange : Colors.grey, size: 36),
                     ),
                   ),
                   const SizedBox(height: 30),
                   ElevatedButton(
                     onPressed: _restart,
                     style: ElevatedButton.styleFrom(backgroundColor: Colors.deepOrange),
-                    child: const Text("🔁 Start Again", style: TextStyle(fontSize: 20, color: Colors.white)),
+                    child: const Text("🔁 Start Again",
+                        style: TextStyle(fontSize: 20, color: Colors.white)),
                   )
                 ],
               )
-            : Column(
-                children: [
-                  // Timer bar
-                  LinearProgressIndicator(
-                    value: countdownAnimation.value,
-                    minHeight: 10,
-                    backgroundColor: Colors.grey.shade300,
-                    color: Colors.redAccent,
-                  ),
-                  const SizedBox(height: 12),
-
-                  // Timer + question count
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text("Time Left: ${remainingSeconds ~/ 60}:${(remainingSeconds % 60).toString().padLeft(2, '0')}",
-                          style: const TextStyle(fontSize: 20, color: Colors.red)),
-                      Text("Question ${currentIndex + 1} of ${questions.length}",
-                          style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                    ],
-                  ),
-
-                  if (showWarning)
-                    const Padding(
-                      padding: EdgeInsets.only(top: 8),
-                      child: Text("⚠️ Hurry up!", style: TextStyle(fontSize: 20, color: Colors.orange)),
-                    ),
-                  const SizedBox(height: 24),
-
-                  // Question box
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    margin: const EdgeInsets.only(bottom: 20),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.3), blurRadius: 8)],
-                    ),
-                    child: Text(
-                      question!['display'],
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
-                    ),
-                  ),
-
-                  // Options
-                  ...List.generate(
-                    question['options'].length,
-                    (i) => Container(
-                      width: double.infinity,
-                      margin: const EdgeInsets.symmetric(vertical: 8),
-                      child: ElevatedButton(
-                        onPressed: () => _checkAnswer(question['options'][i]),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: selected == question['options'][i]
-                              ? Colors.orangeAccent
-                              : Colors.white,
-                          side: const BorderSide(color: Colors.deepOrange, width: 2),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                        ),
-                        child: Text(
-                          question['options'][i],
-                          style: const TextStyle(fontSize: 24, color: Colors.black),
-                        ),
+            : SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 16),
+                    Text(
+                      'Question ${currentIndex + 1} of ${questions.length}',
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.deepOrange,
                       ),
                     ),
-                  ),
-
-                  // Emoji feedback
-                  if (isCorrectAnswer != null)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    const SizedBox(height: 10),
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      margin: const EdgeInsets.only(bottom: 20),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(color: Colors.deepOrange, width: 2),
+                      ),
                       child: Text(
-                        isCorrectAnswer == true ? " Correct!" : " Try again",
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: isCorrectAnswer == true ? const Color.fromARGB(255, 12, 242, 20) : const Color.fromARGB(255, 250, 63, 50),
-                        ),
+                        question!['display'],
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black),
                       ),
                     ),
-                ],
+                    ...List.generate(question['options'].length, (i) {
+                      final option = question['options'][i];
+                      return Container(
+                        width: double.infinity,
+                        margin: const EdgeInsets.symmetric(vertical: 8),
+                        child: OutlinedButton(
+                          onPressed: showNext ? null : () => _checkAnswer(option),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 18),
+                            side: const BorderSide(color: Colors.deepOrange, width: 2),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            backgroundColor: Colors.white,
+                          ),
+                          child: Text(
+                            option,
+                            style: const TextStyle(fontSize: 24, color: Colors.black),
+                          ),
+                        ),
+                      );
+                    }),
+                    const SizedBox(height: 20),
+                    if (showWarning)
+                      Text("⚠️ Less than 30 seconds left!",
+                          style: TextStyle(color: Colors.red[700], fontSize: 18)),
+                    if (isCorrectAnswer != null)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: Text(
+                          isCorrectAnswer == true ? "✅ Correct!" : "❌ Try again",
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: isCorrectAnswer == true
+                                ? Colors.green
+                                : Colors.redAccent,
+                          ),
+                        ),
+                      ),
+                    if (showNext)
+                      ElevatedButton(
+                        onPressed: _next,
+                        style: ElevatedButton.styleFrom(backgroundColor: Colors.amber),
+                        child: const Text("Next", style: TextStyle(fontSize: 22)),
+                      )
+                  ],
+                ),
               ),
       ),
     );

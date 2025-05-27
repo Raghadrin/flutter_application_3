@@ -17,19 +17,51 @@ class _CompareQuantitiesGameState extends State<CompareQuantitiesGame> {
   int score = 0;
   bool isCorrect = false;
   bool showNext = false;
+  String feedbackMessage = '';
+  Color feedbackColor = Colors.transparent;
 
   final List<Map<String, dynamic>> _questions = [
+    {
+      "imageA": "images/new_images/group_1_ball.PNG",
+      "imageB": "images/new_images/group_4_ball.PNG",
+      "answer": "B",
+      "question": "Which group has more balls?"
+    },
+    {
+      "imageA": "images/new_images/group_2_balls.png",
+      "imageB": "images/new_images/group_4_balls.png",
+      "answer": "B",
+      "question": "Which group has more balls?"
+    },
+    {
+      "imageA": "images/new_images/group_2_birds.PNG",
+      "imageB": "images/new_images/group_4_birds.PNG",
+      "answer": "B",
+      "question": "Which group has more birds?"
+    },
+    {
+      "imageA": "images/new_images/group_3_birds.PNG",
+      "imageB": "images/new_images/group_5_birds.PNG",
+      "answer": "B",
+      "question": "Which group has more birds?"
+    },
+    {
+      "imageA": "images/new_images/group_2_ducks.PNG",
+      "imageB": "images/new_images/group_3_ducks.PNG",
+      "answer": "B",
+      "question": "Which group has more ducks?"
+    },
+    {
+      "imageA": "images/new_images/group_3_fish.PNG",
+      "imageB": "images/new_images/group_5_fish.PNG",
+      "answer": "B",
+      "question": "Which group has more fish?"
+    },
     {
       "imageA": "images/new_images/group_3_apples.png",
       "imageB": "images/new_images/group_5_apples.png",
       "answer": "B",
       "question": "Which group has more apples?"
-    },
-    {
-      "imageA": "images/new_images/group_4_balls.png",
-      "imageB": "images/new_images/group_2_balls.png",
-      "answer": "A",
-      "question": "Which group has more balls?"
     },
     {
       "imageA": "images/new_images/group_5_stars.json",
@@ -38,64 +70,19 @@ class _CompareQuantitiesGameState extends State<CompareQuantitiesGame> {
       "question": "Do both groups have the same number of stars?",
       "options": ["Yes", "No"]
     },
+    {
+      "imageA": "images/new_images/group_5_ducks.PNG",
+      "imageB": "images/new_images/group_3_ducks.PNG",
+      "answer": "No",
+      "question": "Do both groups have the same number of ducks?",
+      "options": ["Yes", "No"]
+    },
   ];
 
   @override
   void initState() {
     super.initState();
     _speakCurrent();
-  }
-
-  Future<void> _saveScore(int score) async {
-    try {
-      // Fetch parentId and childId, adapt this to your actual method:
-      String? parentId = ""; // fetch parentId from your auth or Firestore
-      String? childId = ""; // fetch childId from your app logic
-
-      // Example: fetch from Firestore assuming current user is parent
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        print("User not logged in");
-        return;
-      }
-      parentId = user.uid;
-
-      final childrenSnapshot = await FirebaseFirestore.instance
-          .collection('parents')
-          .doc(parentId)
-          .collection('children')
-          .get();
-      if (childrenSnapshot.docs.isNotEmpty) {
-        childId = childrenSnapshot.docs.first.id;
-      } else {
-        print("No children found for this parent.");
-        return null;
-      }
-
-      if (parentId.isEmpty || childId == null) {
-        print("Cannot save score: parentId or childId missing");
-        return;
-      }
-
-      // Save to Firestore: example path 'parents/{parentId}/children/{childId}/scores'
-      await FirebaseFirestore.instance
-          .collection('parents')
-          .doc(parentId)
-          .collection('children')
-          .doc(childId)
-          .collection('math')
-          .doc('math2')
-          .collection('game1')
-          .add({
-        'score': score,
-        //'total': _items.length,
-        'timestamp': FieldValue.serverTimestamp(),
-      });
-
-      print("Score saved successfully");
-    } catch (e) {
-      print("Error saving score: $e");
-    }
   }
 
   Future<void> _speak(String text) async {
@@ -113,10 +100,17 @@ class _CompareQuantitiesGameState extends State<CompareQuantitiesGame> {
     setState(() {
       isCorrect = selected == correct;
       showNext = true;
-      if (isCorrect) score++;
+      if (isCorrect) {
+        score += 10;
+        feedbackMessage = "✅ Correct!";
+        feedbackColor = Colors.green.shade200;
+      } else {
+        feedbackMessage = "❌ Wrong!";
+        feedbackColor = Colors.red.shade200;
+      }
     });
 
-    _speak(isCorrect ? "Correct!" : "Try again!");
+    _speak(isCorrect ? "Correct!" : "Wrong!");
   }
 
   void _next() {
@@ -125,6 +119,8 @@ class _CompareQuantitiesGameState extends State<CompareQuantitiesGame> {
         currentIndex++;
         isCorrect = false;
         showNext = false;
+        feedbackMessage = '';
+        feedbackColor = Colors.transparent;
       });
       _speakCurrent();
     } else {
@@ -133,19 +129,8 @@ class _CompareQuantitiesGameState extends State<CompareQuantitiesGame> {
     }
   }
 
-  void _resetGame() {
-    setState(() {
-      currentIndex = 0;
-      score = 0;
-      isCorrect = false;
-      showNext = false;
-    });
-    _speakCurrent();
-    Navigator.pop(context);
-  }
-
   String _getStars(int score, int total) {
-    double ratio = score / total;
+    double ratio = score / (total * 10);
     if (ratio == 1.0) return "🌟🌟🌟";
     if (ratio >= 0.66) return "🌟🌟";
     if (ratio >= 0.33) return "🌟";
@@ -153,7 +138,6 @@ class _CompareQuantitiesGameState extends State<CompareQuantitiesGame> {
   }
 
   Future<void> _showFinalDialog() async {
-    await _saveScore(score);
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -161,22 +145,27 @@ class _CompareQuantitiesGameState extends State<CompareQuantitiesGame> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text("Your Score: $score / ${_questions.length}",
+            Text("Score: $score / ${_questions.length * 10}",
                 style: const TextStyle(fontSize: 22)),
             const SizedBox(height: 10),
             Text(_getStars(score, _questions.length),
                 style: const TextStyle(fontSize: 40)),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: _resetGame,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              ),
-              child:
-                  const Text("🔁 Play Again", style: TextStyle(fontSize: 20)),
-            ),
+              onPressed: () {
+                Navigator.pop(context);
+                setState(() {
+                  currentIndex = 0;
+                  score = 0;
+                  showNext = false;
+                  isCorrect = false;
+                  feedbackMessage = '';
+                  feedbackColor = Colors.transparent;
+                });
+                _speakCurrent();
+              },
+              child: const Text("🔁 Play Again"),
+            )
           ],
         ),
       ),
@@ -185,31 +174,31 @@ class _CompareQuantitiesGameState extends State<CompareQuantitiesGame> {
 
   Widget _buildMedia(String path) {
     if (path.endsWith('.json')) {
-      return Lottie.asset(path, height: 120, width: 120, fit: BoxFit.contain);
+      return Lottie.asset(path, height: 120, width: 120);
     } else {
-      return Image.asset(path, height: 120, width: 120, fit: BoxFit.contain);
+      return Image.asset(path, height: 120, width: 120);
     }
   }
 
-  Widget _buildImage(String path,
-      {required String label, required VoidCallback onTap}) {
+  Widget _buildImage(String path, {required String label, required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: Column(
         children: [
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.9),
-              border: Border.all(color: Colors.deepOrange, width: 3),
-              borderRadius: BorderRadius.circular(16),
+          Hero(
+            tag: path,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(color: Colors.deepOrange, width: 3),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              padding: const EdgeInsets.all(8),
+              child: _buildMedia(path),
             ),
-            padding: const EdgeInsets.all(8),
-            child: _buildMedia(path),
           ),
           const SizedBox(height: 8),
-          Text(label,
-              style:
-                  const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          Text(label, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         ],
       ),
     );
@@ -218,85 +207,63 @@ class _CompareQuantitiesGameState extends State<CompareQuantitiesGame> {
   @override
   Widget build(BuildContext context) {
     final q = _questions[currentIndex];
-    final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Compare Quantities",
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.orange,
-        centerTitle: true,
-      ),
       backgroundColor: const Color(0xFFFFF3E0),
+      appBar: AppBar(
+        title: const Text("Compare Quantities"),
+        centerTitle: true,
+        backgroundColor: Colors.orange,
+      ),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: Colors.orange[100],
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text("🏆 Score: $score",
-                    style: const TextStyle(
-                        fontSize: 24, fontWeight: FontWeight.bold)),
-              ),
-              Container(
-                width: screenWidth * 0.85,
-                padding: const EdgeInsets.all(16),
-                margin: const EdgeInsets.only(bottom: 20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 4)],
-                ),
-                child: Text(
-                  q['question'],
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                      fontSize: 24, fontWeight: FontWeight.bold),
+              Text("Question ${currentIndex + 1} of ${_questions.length}",
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.deepOrange)),
+              const SizedBox(height: 16),
+              Hero(
+                tag: 'question-$currentIndex',
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 6,
+                        offset: const Offset(0, 3),
+                      )
+                    ],
+                  ),
+                  child: Text(
+                    q['question'],
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
-
-              // ✅ Conditional layout
+              const SizedBox(height: 20),
               if (q['options'] != null)
                 Column(
                   children: [
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _buildImage(q['imageA'],
-                              label: "A", onTap: () => _check("A")),
-                          const SizedBox(width: 16),
-                          _buildImage(q['imageB'],
-                              label: "B", onTap: () => _check("B")),
-                        ],
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _buildImage(q['imageA'], label: "Group A", onTap: () {}),
+                        const SizedBox(width: 16),
+                        _buildImage(q['imageB'], label: "Group B", onTap: () {}),
+                      ],
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 20),
                     Wrap(
                       spacing: 16,
                       children: (q['options'] as List<String>).map((opt) {
                         return ElevatedButton(
                           onPressed: showNext ? null : () => _check(opt),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: opt == "Yes"
-                                ? Colors.lightGreen.shade100
-                                : Colors.pink.shade100,
-                            foregroundColor: Colors.black,
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 32, vertical: 16),
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12)),
-                          ),
-                          child:
-                              Text(opt, style: const TextStyle(fontSize: 22)),
+                          child: Text(opt, style: const TextStyle(fontSize: 22)),
                         );
                       }).toList(),
                     ),
@@ -306,32 +273,30 @@ class _CompareQuantitiesGameState extends State<CompareQuantitiesGame> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    _buildImage(q['imageA'],
-                        label: "A", onTap: () => _check("A")),
-                    _buildImage(q['imageB'],
-                        label: "B", onTap: () => _check("B")),
+                    _buildImage(q['imageA'], label: "A", onTap: () => _check("A")),
+                    _buildImage(q['imageB'], label: "B", onTap: () => _check("B")),
                   ],
                 ),
-
-              const SizedBox(height: 30),
-              if (isCorrect)
-                const Text("✅ Correct!",
-                    style: TextStyle(fontSize: 24, color: Colors.green)),
-              if (showNext)
-                Padding(
-                  padding: const EdgeInsets.only(top: 16),
-                  child: ElevatedButton(
-                    onPressed: _next,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.amber,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 30, vertical: 14),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
-                    ),
-                    child: const Text("Next", style: TextStyle(fontSize: 22)),
+              const SizedBox(height: 24),
+              if (feedbackMessage.isNotEmpty)
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                    color: feedbackColor,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    feedbackMessage,
+                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 ),
+              if (showNext)
+                ElevatedButton(
+                  onPressed: _next,
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.amber),
+                  child: const Text("Next", style: TextStyle(fontSize: 22)),
+                )
             ],
           ),
         ),

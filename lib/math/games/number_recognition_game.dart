@@ -18,26 +18,20 @@ class _NumberRecognitionGameState extends State<NumberRecognitionGame> {
   bool isCorrect = false;
   String parentId = '';
   String? childId;
+  String? selectedAnswer;
+  bool answered = false;
 
   final List<Map<String, dynamic>> _numbers = [
-    {
-      "number": "3",
-      "image": "3_apples.png",
-      "options": ["2", "3", "4"],
-      "answer": "3",
-    },
-    {
-      "number": "5",
-      "image": "5_balls.png",
-      "options": ["4", "5", "6"],
-      "answer": "5",
-    },
-    {
-      "number": "2",
-      "image": "2_oranges.png",
-      "options": ["1", "2", "3"],
-      "answer": "2",
-    },
+    {"number": "1", "image": "1_lemon.png", "options": ["1", "2", "3"], "answer": "1"},
+    {"number": "2", "image": "2_oranges.png", "options": ["1", "2", "3"], "answer": "2"},
+    {"number": "3", "image": "3_apples.png", "options": ["2", "3", "4"], "answer": "3"},
+    {"number": "4", "image": "4_watermolns.png", "options": ["3", "4", "5"], "answer": "4"},
+    {"number": "5", "image": "5_balls.png", "options": ["4", "5", "6"], "answer": "5"},
+    {"number": "6", "image": "6_strawberries.png", "options": ["5", "6", "7"], "answer": "6"},
+    {"number": "7", "image": "7_peaches.png", "options": ["6", "7", "8"], "answer": "7"},
+    {"number": "8", "image": "8_pears.png", "options": ["7", "8", "9"], "answer": "8"},
+    {"number": "9", "image": "9_bananas.png", "options": ["8", "9", "10"], "answer": "9"},
+    {"number": "10", "image": "10_cherries.png", "options": ["9", "10", "11"], "answer": "10"},
   ];
 
   @override
@@ -50,57 +44,33 @@ class _NumberRecognitionGameState extends State<NumberRecognitionGame> {
     await fetchParentId();
     final fetchedChildId = await fetchChildId();
     if (fetchedChildId != null) {
-      setState(() {
-        childId = fetchedChildId;
-      });
-    } else {
-      print("No child ID found.");
+      setState(() => childId = fetchedChildId);
     }
+    _speakCurrentQuestion();
   }
 
   Future<void> fetchParentId() async {
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) return;
-
-      parentId = user.uid;
-
-      final parentRef =
-          FirebaseFirestore.instance.collection('parents').doc(parentId);
-      final parentDoc = await parentRef.get();
-
-      if (!parentDoc.exists) {
-        await parentRef.set({
-          'createdAt': FieldValue.serverTimestamp(),
-          'email': user.email,
-        });
-        print("Parent ID created successfully!");
-      }
-    } catch (e) {
-      print("Error creating parent ID: $e");
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    parentId = user.uid;
+    final parentRef = FirebaseFirestore.instance.collection('parents').doc(parentId);
+    final parentDoc = await parentRef.get();
+    if (!parentDoc.exists) {
+      await parentRef.set({
+        'createdAt': FieldValue.serverTimestamp(),
+        'email': user.email,
+      });
     }
   }
 
   Future<String?> fetchChildId() async {
-    try {
-      if (parentId.isEmpty) return null;
-
-      final childrenSnapshot = await FirebaseFirestore.instance
-          .collection('parents')
-          .doc(parentId)
-          .collection('children')
-          .get();
-
-      if (childrenSnapshot.docs.isNotEmpty) {
-        return childrenSnapshot.docs.first.id;
-      } else {
-        print("No children found for this parent.");
-        return null;
-      }
-    } catch (e) {
-      print("Error fetching child ID: $e");
-      return null;
-    }
+    if (parentId.isEmpty) return null;
+    final childrenSnapshot = await FirebaseFirestore.instance
+        .collection('parents')
+        .doc(parentId)
+        .collection('children')
+        .get();
+    return childrenSnapshot.docs.isNotEmpty ? childrenSnapshot.docs.first.id : null;
   }
 
   Future<void> _saveGameResult({
@@ -108,38 +78,23 @@ class _NumberRecognitionGameState extends State<NumberRecognitionGame> {
     required int totalQuestions,
     required DateTime playedAt,
   }) async {
-    // print('DEBUG: parentId="$parentId", childId="$childId"');
-
-    if (parentId.isEmpty || childId == null) {
-      print("Cannot save game result: parentId or childId missing");
-      return;
-    }
-
-    try {
-      final gameData = {
-        'score': score,
-        'totalQuestions': totalQuestions,
-        'playedAt': playedAt,
-      };
-
-      await FirebaseFirestore.instance
-          .collection('parents')
-          .doc(parentId)
-          .collection('children')
-          .doc(childId)
-          .collection('math')
-          .doc('math1')
-          .collection('game1') // or game2
-          .add({
-        'score': score,
-        //'total': _items.length,
-        'timestamp': FieldValue.serverTimestamp(),
-      });
-
-      print("Game result saved successfully!");
-    } catch (e) {
-      print("Error saving game result: $e");
-    }
+    if (parentId.isEmpty || childId == null) return;
+    await FirebaseFirestore.instance
+        .collection('parents')
+        .doc(parentId)
+        .collection('children')
+        .doc(childId)
+        .collection('math')
+        .doc('math1')
+        .collection('game1')
+        .add({
+      'score': score,
+      'total': totalQuestions * 10,
+      'percentage': score / (totalQuestions * 10),
+      'correct': score ~/ 10,
+      'wrong': totalQuestions - (score ~/ 10),
+      'timestamp': FieldValue.serverTimestamp(),
+    });
   }
 
   Future<void> _speak(String text) async {
@@ -150,35 +105,31 @@ class _NumberRecognitionGameState extends State<NumberRecognitionGame> {
 
   void _speakCurrentQuestion() {
     final item = _numbers[currentIndex];
-    _speak(
-        "How many items do you see? Choose the correct number. This is number ${item['number']}");
+    _speak("How many items do you see? Choose the correct number. This is number ${item['number']}");
   }
 
   void _checkAnswer(String selected) {
     final correct = _numbers[currentIndex]['answer'];
     setState(() {
+      answered = true;
+      selectedAnswer = selected;
       isCorrect = (selected == correct);
-      if (isCorrect) score++;
+      if (isCorrect) score += 10;
     });
-
-    if (isCorrect) {
-      _speak("Great! That is correct.");
-      Future.delayed(const Duration(seconds: 2), _next);
-    } else {
-      _speak("Try again!");
-    }
+    _speak(isCorrect ? "Great! That is correct." : "That was not correct. Try again.");
   }
 
-  Future<void> _next() async {
+  void _next() {
     if (currentIndex < _numbers.length - 1) {
       setState(() {
         currentIndex++;
+        selectedAnswer = null;
         isCorrect = false;
+        answered = false;
       });
       _speakCurrentQuestion();
     } else {
       _speak("You finished the game! Great job!");
-
       _showFinalDialog();
       _saveGameResult(
         score: score,
@@ -193,13 +144,15 @@ class _NumberRecognitionGameState extends State<NumberRecognitionGame> {
       currentIndex = 0;
       score = 0;
       isCorrect = false;
+      selectedAnswer = null;
+      answered = false;
     });
     _speakCurrentQuestion();
     Navigator.pop(context);
   }
 
   String _getStars(int score, int total) {
-    double ratio = score / total;
+    double ratio = score / (total * 10);
     if (ratio == 1.0) return "🌟🌟🌟";
     if (ratio >= 0.66) return "🌟🌟";
     if (ratio >= 0.33) return "🌟";
@@ -216,7 +169,7 @@ class _NumberRecognitionGameState extends State<NumberRecognitionGame> {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text("Your Score: $score / ${_numbers.length}",
+            Text("Your Score: $score / ${_numbers.length * 10}",
                 style: const TextStyle(fontSize: 22)),
             const SizedBox(height: 10),
             Text(_getStars(score, _numbers.length),
@@ -226,11 +179,9 @@ class _NumberRecognitionGameState extends State<NumberRecognitionGame> {
               onPressed: _resetGame,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               ),
-              child:
-                  const Text("🔁 Play Again", style: TextStyle(fontSize: 20)),
+              child: const Text("🔁 Play Again", style: TextStyle(fontSize: 20)),
             ),
           ],
         ),
@@ -256,20 +207,17 @@ class _NumberRecognitionGameState extends State<NumberRecognitionGame> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Score box
-              Container(
-                padding: const EdgeInsets.all(12),
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: Colors.orange[100],
-                  borderRadius: BorderRadius.circular(12),
+              // 🟠 Progress Indicator
+              Text(
+                "Question ${currentIndex + 1} of ${_numbers.length}",
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.deepOrange,
                 ),
-                child: Text("🏆 Score: $score",
-                    style: const TextStyle(
-                        fontSize: 24, fontWeight: FontWeight.bold)),
               ),
+              const SizedBox(height: 10),
 
-              // Question box
               Container(
                 padding: const EdgeInsets.all(16),
                 margin: const EdgeInsets.only(bottom: 20),
@@ -277,7 +225,7 @@ class _NumberRecognitionGameState extends State<NumberRecognitionGame> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 4)],
+                  boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4)],
                 ),
                 child: const Text(
                   "How many items do you see? Choose the correct number.",
@@ -286,7 +234,6 @@ class _NumberRecognitionGameState extends State<NumberRecognitionGame> {
                 ),
               ),
 
-              // Transparent number box
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
@@ -296,14 +243,14 @@ class _NumberRecognitionGameState extends State<NumberRecognitionGame> {
                 child: Text(
                   item["number"],
                   style: const TextStyle(
-                      fontSize: 80,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.deepOrange),
+                    fontSize: 80,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.deepOrange,
+                  ),
                 ),
               ),
               const SizedBox(height: 20),
 
-              // Image box
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.9),
@@ -316,26 +263,50 @@ class _NumberRecognitionGameState extends State<NumberRecognitionGame> {
               ),
               const SizedBox(height: 30),
 
-              // Answer options
               Wrap(
                 spacing: 16,
                 runSpacing: 16,
                 alignment: WrapAlignment.center,
                 children: item["options"].map<Widget>((option) {
-                  final isRight = isCorrect && option == item["answer"];
+                  Color buttonColor;
+
+                  if (selectedAnswer == null) {
+                    buttonColor = Colors.orangeAccent;
+                  } else if (option == item["answer"]) {
+                    buttonColor = isCorrect ? Colors.green : Colors.grey;
+                  } else if (option == selectedAnswer) {
+                    buttonColor = Colors.red;
+                  } else {
+                    buttonColor = Colors.grey[300]!;
+                  }
+
                   return ElevatedButton(
-                    onPressed: () => _checkAnswer(option),
+                    onPressed: isCorrect || selectedAnswer == null
+                        ? () => _checkAnswer(option)
+                        : null,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          isRight ? Colors.green : Colors.orangeAccent,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 24, vertical: 16),
+                      backgroundColor: buttonColor,
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12)),
                     ),
                     child: Text(option, style: const TextStyle(fontSize: 28)),
                   );
                 }).toList(),
+              ),
+
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: _next,
+                icon: const Icon(Icons.arrow_forward),
+                label: const Text("Next",
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orangeAccent.shade100,
+                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 14),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
+                ),
               ),
             ],
           ),

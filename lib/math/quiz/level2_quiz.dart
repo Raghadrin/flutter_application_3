@@ -44,8 +44,7 @@ class _Level2QuizScreenState extends State<Level2QuizScreen> {
     },
     {
       'type': 'word',
-      'question':
-          'Liam had 4 candies, then got 3 more and gave 2 away. How many now?',
+      'question': 'Liam had 4 candies, then got 3 more and gave 2 away. How many now?',
       'options': ['5', '4', '6'],
       'answer': '5'
     },
@@ -64,56 +63,10 @@ class _Level2QuizScreenState extends State<Level2QuizScreen> {
     startTimer();
   }
 
-  Future<void> _saveScore(int score) async {
-    try {
-      // Fetch parentId and childId, adapt this to your actual method:
-      String? parentId = ""; // fetch parentId from your auth or Firestore
-      String? childId = ""; // fetch childId from your app logic
-
-      // Example: fetch from Firestore assuming current user is parent
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        print("User not logged in");
-        return;
-      }
-      parentId = user.uid;
-
-      final childrenSnapshot = await FirebaseFirestore.instance
-          .collection('parents')
-          .doc(parentId)
-          .collection('children')
-          .get();
-      if (childrenSnapshot.docs.isNotEmpty) {
-        childId = childrenSnapshot.docs.first.id;
-      } else {
-        print("No children found for this parent.");
-        return null;
-      }
-
-      if (parentId.isEmpty || childId == null) {
-        print("Cannot save score: parentId or childId missing");
-        return;
-      }
-
-      // Save to Firestore: example path 'parents/{parentId}/children/{childId}/scores'
-      await FirebaseFirestore.instance
-          .collection('parents')
-          .doc(parentId)
-          .collection('children')
-          .doc(childId)
-          .collection('math')
-          .doc('math2')
-          .collection('quiz2')
-          .add({
-        'score': score,
-        //'total': _items.length,
-        'timestamp': FieldValue.serverTimestamp(),
-      });
-
-      print("Score saved successfully");
-    } catch (e) {
-      print("Error saving score: $e");
-    }
+  void _speak(String text) async {
+    await tts.setLanguage("en-US");
+    await tts.setSpeechRate(0.45);
+    await tts.speak(text);
   }
 
   void startTimer() {
@@ -134,24 +87,18 @@ class _Level2QuizScreenState extends State<Level2QuizScreen> {
     });
   }
 
-  void _speak(String text) async {
-    await tts.setLanguage("en-US");
-    await tts.setSpeechRate(0.45);
-    await tts.speak(text);
-  }
-
   void _checkAnswer(String selected) {
     final correct = questions[currentIndex]['answer'];
     setState(() {
       isCorrect = (selected == correct);
+      showNext = true;
+      if (isCorrect) {
+        score += 10;
+        _speak("Correct!");
+      } else {
+        _speak("Try again!");
+      }
     });
-    if (isCorrect) {
-      score++;
-      _speak("Correct!");
-      setState(() => showNext = true);
-    } else {
-      _speak("Try again!");
-    }
   }
 
   void _nextQuestion() {
@@ -169,6 +116,80 @@ class _Level2QuizScreenState extends State<Level2QuizScreen> {
     }
   }
 
+  Future<void> _saveScore(int score) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+      final parentId = user.uid;
+
+      final childrenSnapshot = await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(parentId)
+          .collection('children')
+          .get();
+      if (childrenSnapshot.docs.isEmpty) return;
+
+      final childId = childrenSnapshot.docs.first.id;
+
+      await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(parentId)
+          .collection('children')
+          .doc(childId)
+          .collection('math')
+          .doc('math2')
+          .collection('quiz2')
+          .add({
+        'score': score,
+        'total': questions.length * 10,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      print("Error saving score: $e");
+    }
+  }
+
+  String _getStars(int score, int total) {
+    double ratio = score / (total * 10);
+    if (ratio == 1.0) return "🌟🌟🌟";
+    if (ratio >= 0.66) return "🌟🌟";
+    if (ratio >= 0.33) return "🌟";
+    return "⭐";
+  }
+
+  Future<void> _showFinalDialog() async {
+    await _saveScore(score);
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        content: Container(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text("🎉 Quiz Complete!",
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 12),
+              Text("Your Score: $score / ${questions.length * 10}",
+                  style: const TextStyle(fontSize: 20)),
+              const SizedBox(height: 12),
+              Text(_getStars(score, questions.length),
+                  style: const TextStyle(fontSize: 36)),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: _resetQuiz,
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+                child: const Text("🔁 Play Again", style: TextStyle(fontSize: 20)),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   void _resetQuiz() {
     setState(() {
       currentIndex = 0;
@@ -181,41 +202,6 @@ class _Level2QuizScreenState extends State<Level2QuizScreen> {
     _speak(questions[0]['question']);
     startTimer();
     Navigator.pop(context);
-  }
-
-  String _getStars(int score, int total) {
-    double ratio = score / total;
-    if (ratio == 1.0) return "🌟🌟🌟";
-    if (ratio >= 0.66) return "🌟🌟";
-    if (ratio >= 0.33) return "🌟";
-    return "⭐";
-  }
-
-  Future<void> _showFinalDialog() async {
-    await _saveScore(score);
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text("🎉 Quiz Complete!", style: TextStyle(fontSize: 28)),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text("Your Score: $score / ${questions.length}",
-                style: const TextStyle(fontSize: 22)),
-            const SizedBox(height: 10),
-            Text(_getStars(score, questions.length),
-                style: const TextStyle(fontSize: 40)),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _resetQuiz,
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-              child:
-                  const Text("🔁 Play Again", style: TextStyle(fontSize: 20)),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   Widget _buildImage(String path,
@@ -235,8 +221,7 @@ class _Level2QuizScreenState extends State<Level2QuizScreen> {
           ),
           const SizedBox(height: 8),
           Text(label,
-              style:
-                  const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         ],
       ),
     );
@@ -279,6 +264,15 @@ class _Level2QuizScreenState extends State<Level2QuizScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              Text(
+                'Question ${currentIndex + 1} of ${questions.length}',
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepOrange,
+                ),
+              ),
+              const SizedBox(height: 10),
               Container(
                 padding: const EdgeInsets.all(16),
                 margin: const EdgeInsets.only(bottom: 20),
@@ -320,11 +314,10 @@ class _Level2QuizScreenState extends State<Level2QuizScreen> {
                   runSpacing: 16,
                   alignment: WrapAlignment.center,
                   children: (q['options'] as List<String>).map((option) {
-                    final isCorrectOption = isCorrect && option == q['answer'];
                     return ElevatedButton(
                       onPressed: showNext ? null : () => _checkAnswer(option),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: isCorrectOption
+                        backgroundColor: isCorrect && option == q['answer']
                             ? Colors.green
                             : Colors.orangeAccent,
                         padding: const EdgeInsets.symmetric(
@@ -332,7 +325,8 @@ class _Level2QuizScreenState extends State<Level2QuizScreen> {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12)),
                       ),
-                      child: Text(option, style: const TextStyle(fontSize: 26)),
+                      child: Text(option,
+                          style: const TextStyle(fontSize: 26)),
                     );
                   }).toList(),
                 ),

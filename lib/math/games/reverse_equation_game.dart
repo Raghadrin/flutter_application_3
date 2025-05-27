@@ -16,25 +16,26 @@ class _ReverseEquationGameState extends State<ReverseEquationGame> {
   int score = 0;
   bool isCorrect = false;
   bool showNext = false;
+  String? selected;
 
   final List<Map<String, dynamic>> _questions = [
     {
       "equation": "x × 3 + 3 = 18",
-      "question": "What is x?",
+      "question": "What is the value of x?",
       "options": ["5", "6", "4"],
       "answer": "5",
       "image": "reverse_eq_1.png"
     },
     {
       "equation": "x + 4 = 10",
-      "question": "What is x?",
+      "question": "What is the value of x?",
       "options": ["6", "7", "5"],
       "answer": "6",
       "image": "reverse_eq_2.png"
     },
     {
       "equation": "20 = x × 4",
-      "question": "What is x?",
+      "question": "What is the value of x?",
       "options": ["5", "4", "6"],
       "answer": "5",
       "image": "reverse_eq_3.png"
@@ -47,56 +48,6 @@ class _ReverseEquationGameState extends State<ReverseEquationGame> {
     _speakCurrent();
   }
 
-  Future<void> _saveScore(int score) async {
-    try {
-      // Fetch parentId and childId, adapt this to your actual method:
-      String? parentId = ""; // fetch parentId from your auth or Firestore
-      String? childId = ""; // fetch childId from your app logic
-
-      // Example: fetch from Firestore assuming current user is parent
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        print("User not logged in");
-        return;
-      }
-      parentId = user.uid;
-
-      final childrenSnapshot = await FirebaseFirestore.instance
-          .collection('parents')
-          .doc(parentId)
-          .collection('children')
-          .get();
-      if (childrenSnapshot.docs.isNotEmpty) {
-        childId = childrenSnapshot.docs.first.id;
-      } else {
-        print("No children found for this parent.");
-        return null;
-      }
-
-      if (parentId.isEmpty || childId == null) {
-        print("Cannot save score: parentId or childId missing");
-        return;
-      }
-      await FirebaseFirestore.instance
-          .collection('parents')
-          .doc(parentId)
-          .collection('children')
-          .doc(childId)
-          .collection('math')
-          .doc('math3')
-          .collection('game2')
-          .add({
-        'score': score,
-        //'total': _items.length,
-        'timestamp': FieldValue.serverTimestamp(),
-      });
-
-      print("Score saved successfully");
-    } catch (e) {
-      print("Error saving score: $e");
-    }
-  }
-
   Future<void> _speak(String text) async {
     await tts.setLanguage("en-US");
     await tts.setSpeechRate(0.45);
@@ -104,17 +55,17 @@ class _ReverseEquationGameState extends State<ReverseEquationGame> {
   }
 
   void _speakCurrent() {
-    _speak(_questions[currentIndex]['equation'] +
-        ". " +
-        _questions[currentIndex]['question']);
+    final q = _questions[currentIndex];
+    _speak("${q['equation']}. ${q['question']}");
   }
 
   void _check(String value) {
     final correct = _questions[currentIndex]['answer'];
     setState(() {
+      selected = value;
       isCorrect = (value == correct);
-      showNext = isCorrect;
-      if (isCorrect) score++;
+      showNext = true;
+      if (isCorrect) score += 10;
     });
     _speak(isCorrect ? "Correct!" : "Try again!");
   }
@@ -125,52 +76,68 @@ class _ReverseEquationGameState extends State<ReverseEquationGame> {
         currentIndex++;
         isCorrect = false;
         showNext = false;
+        selected = null;
       });
       _speakCurrent();
     } else {
-      _speak(
-          "Excellent! You finished the reverse equations. Your score is $score out of ${_questions.length}");
+      _speak("Great job! Your score is $score out of ${_questions.length * 10}.");
+      _saveScore();
       _showFinalDialog();
     }
   }
 
-  void _resetGame() {
-    setState(() {
-      currentIndex = 0;
-      score = 0;
-      isCorrect = false;
-      showNext = false;
-    });
-    Navigator.pop(context);
-    _speakCurrent();
+  Future<void> _saveScore() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+      final parentId = user.uid;
+
+      final childrenSnapshot = await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(parentId)
+          .collection('children')
+          .get();
+      final childId = childrenSnapshot.docs.isNotEmpty ? childrenSnapshot.docs.first.id : null;
+      if (childId == null) return;
+
+      await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(parentId)
+          .collection('children')
+          .doc(childId)
+          .collection('math')
+          .doc('math3')
+          .collection('game2')
+          .add({
+        'score': score,
+        'total': _questions.length * 10,
+        'percentage': score / (_questions.length * 10),
+        'correct': score ~/ 10,
+        'wrong': _questions.length - (score ~/ 10),
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      print("Error saving score: $e");
+    }
   }
 
-  Future<void> _showFinalDialog() async {
-    await _saveScore(score);
+  void _showFinalDialog() {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: Colors.white,
-        title: const Text("🎉 Well done!",
-            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+        title: const Text("🎉 Well done!", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text("Your Score: $score / ${_questions.length}",
-                style: const TextStyle(fontSize: 22)),
+            Text("Your Score: $score / ${_questions.length * 10}", style: const TextStyle(fontSize: 22)),
             const SizedBox(height: 10),
-            Text(_getStars(score, _questions.length),
-                style: const TextStyle(fontSize: 40)),
+            Text(_getStars(score, _questions.length), style: const TextStyle(fontSize: 40)),
             const SizedBox(height: 20),
             ElevatedButton(
-              onPressed: _resetGame,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              ),
-              child:
-                  const Text("🔁 Play Again", style: TextStyle(fontSize: 20)),
+              onPressed: () => Navigator.pop(context),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+              child: const Text("🔁 Replay", style: TextStyle(fontSize: 20)),
             ),
           ],
         ),
@@ -179,146 +146,118 @@ class _ReverseEquationGameState extends State<ReverseEquationGame> {
   }
 
   String _getStars(int score, int total) {
-    double ratio = score / total;
+    double ratio = score / (total * 10);
     if (ratio == 1.0) return "🌟🌟🌟";
     if (ratio >= 0.66) return "🌟🌟";
     if (ratio >= 0.33) return "🌟";
     return "⭐";
   }
 
-  Color _colorToken(String token) {
-    if (token == "x") return Colors.blue;
-    if (["+", "-", "=", "×", "*", "/"].contains(token))
-      return Colors.deepOrange;
-    return Colors.black;
-  }
-
   @override
   Widget build(BuildContext context) {
     final q = _questions[currentIndex];
-    final tokens = RegExp(r'x|\d+|[+=×*/-]')
-        .allMatches(q['equation'])
-        .map((e) => e.group(0)!)
-        .toList();
 
     return Scaffold(
       appBar: AppBar(
-          title: const Text("Reverse Equation Game"),
-          backgroundColor: Colors.orange),
+        title: const Text("Reverse Equation Game"),
+        backgroundColor: Colors.orange,
+      ),
       backgroundColor: const Color(0xFFFFF6ED),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Score display
-              Container(
-                padding: const EdgeInsets.all(12),
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: Colors.orange[100],
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text("🏆 Score: $score",
-                    style: const TextStyle(
-                        fontSize: 24, fontWeight: FontWeight.bold)),
-              ),
+              Text("Question ${currentIndex + 1} of ${_questions.length}",
+                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.deepOrange)),
+              const SizedBox(height: 16),
 
-              // Equation display
+              // Equation Box
               Container(
                 padding: const EdgeInsets.all(16),
-                margin: const EdgeInsets.only(bottom: 12),
+                margin: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
-                  color: Colors.orange.shade50,
+                  color: Colors.white,
+                  border: Border.all(color: Colors.deepOrange, width: 3),
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.deepOrange, width: 2),
                 ),
-                child: Wrap(
-                  alignment: WrapAlignment.center,
-                  spacing: 12,
-                  runSpacing: 12,
-                  children: tokens.map((token) {
-                    return Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: _colorToken(token), width: 2),
-                      ),
-                      child: Text(
-                        token,
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: _colorToken(token),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
+                child: Text(q['equation'],
+                    style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Colors.orange)),
               ),
 
-              // Question
-              Text(
-                q['question'],
-                style:
-                    const TextStyle(fontSize: 22, fontWeight: FontWeight.w500),
+              // Question Text in white box with subtle shadow
+              Container(
+                padding: const EdgeInsets.all(16),
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(color: Colors.black12, blurRadius: 6, offset: Offset(2, 2)),
+                  ],
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(q['question'],
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w600)),
               ),
-
-              const SizedBox(height: 20),
 
               if (q['image'] != null)
                 Container(
+                  padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: Colors.deepOrange.withOpacity(0.1),
-                    border: Border.all(color: Colors.deepOrange, width: 3),
+                    color: Colors.orange.withOpacity(0.08),
+                    border: Border.all(color: Colors.deepOrange, width: 2),
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  padding: const EdgeInsets.all(8),
-                  margin: const EdgeInsets.only(bottom: 20, top: 12),
-                  child: Image.asset("images/new_images/${q['image']}",
-                      height: 160),
+                  child: Image.asset("images/new_images/${q['image']}", height: 150),
                 ),
 
-              // Options
+              const SizedBox(height: 24),
+
               Wrap(
                 spacing: 20,
                 runSpacing: 16,
                 alignment: WrapAlignment.center,
-                children: q["options"].map<Widget>((opt) {
+                children: q['options'].map<Widget>((opt) {
+                  final isSelected = selected == opt;
                   final correct = opt == q["answer"];
-                  final bgColor = isCorrect && correct
-                      ? Colors.green
-                      : Colors.orangeAccent.shade100;
+                  Color color = Colors.orangeAccent.shade100;
+
+                  if (selected != null) {
+                    if (correct) {
+                      color = Colors.green;
+                    } else if (isSelected) {
+                      color = Colors.redAccent;
+                    } else {
+                      color = Colors.grey.shade300;
+                    }
+                  }
+
                   return ElevatedButton(
                     onPressed: showNext ? null : () => _check(opt),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: bgColor,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 32, vertical: 18),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12)),
+                      backgroundColor: color,
+                      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
-                    child: Text(opt, style: const TextStyle(fontSize: 24)),
+                    child: Text(opt, style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
                   );
                 }).toList(),
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 30),
 
-              if (isCorrect)
-                const Text("✅ Correct!",
-                    style: TextStyle(fontSize: 22, color: Colors.green)),
-
-              if (showNext)
-                ElevatedButton(
-                  onPressed: _next,
-                  style:
-                      ElevatedButton.styleFrom(backgroundColor: Colors.amber),
-                  child: const Text("Next", style: TextStyle(fontSize: 22)),
+              ElevatedButton.icon(
+                onPressed: _next,
+                icon: const Icon(Icons.arrow_forward),
+                label: const Text("Next", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orangeAccent.shade100,
+                  padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 ),
+              ),
             ],
           ),
         ),

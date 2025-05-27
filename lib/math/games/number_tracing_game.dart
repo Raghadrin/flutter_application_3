@@ -15,15 +15,15 @@ class _NumberTracingGameState extends State<NumberTracingGame> {
   bool showStars = false;
   int stars = 0;
 
-  List<double> accuracyHistory = [];
-  double averageAccuracy = 0;
-  int totalStars = 0;
+  List<double> drawingScoreHistory = [];
+  double averageDrawingScore = 0;
 
-  final List<Map<String, dynamic>> _items = [
-    {"number": "1", "image": "trace_1.png"},
-    {"number": "2", "image": "trace_2.png"},
-    {"number": "3", "image": "trace_3.png"},
-  ];
+  final List<Map<String, dynamic>> _items = List.generate(6, (index) {
+    return {
+      "number": "${index + 1}",
+      "image": "trace_${index + 1}.png",
+    };
+  });
 
   @override
   void initState() {
@@ -44,8 +44,8 @@ class _NumberTracingGameState extends State<NumberTracingGame> {
 
   void _evaluateDrawing() {
     int length = points.length;
-    double accuracy = (length.clamp(10, 100)) / 100.0;
-    accuracyHistory.add(accuracy);
+    double drawingScore = (length.clamp(10, 100)) / 100.0;
+    drawingScoreHistory.add(drawingScore);
 
     if (length > 60) {
       stars = 3;
@@ -55,11 +55,9 @@ class _NumberTracingGameState extends State<NumberTracingGame> {
       stars = 1;
     }
 
-    totalStars += stars;
-    averageAccuracy =
-        accuracyHistory.reduce((a, b) => a + b) / accuracyHistory.length;
+    averageDrawingScore = drawingScoreHistory.reduce((a, b) => a + b) / drawingScoreHistory.length;
 
-    _speak(_getAccuracyComment(averageAccuracy));
+    _speak(_getDrawingComment(averageDrawingScore));
 
     setState(() {
       showStars = true;
@@ -86,14 +84,13 @@ class _NumberTracingGameState extends State<NumberTracingGame> {
       points.clear();
       showStars = false;
       stars = 0;
-      accuracyHistory.clear();
-      averageAccuracy = 0;
-      totalStars = 0;
+      drawingScoreHistory.clear();
+      averageDrawingScore = 0;
     });
     _speakCurrent();
   }
 
-  String _getAccuracyComment(double avg) {
+  String _getDrawingComment(double avg) {
     double percent = avg * 100;
     if (percent >= 90) {
       return "Excellent tracing!";
@@ -106,9 +103,18 @@ class _NumberTracingGameState extends State<NumberTracingGame> {
     }
   }
 
+  int _getStarCountFromSkill(double score) {
+    if (score >= 0.9) return 3;
+    if (score >= 0.7) return 2;
+    if (score >= 0.5) return 1;
+    return 1;
+  }
+
   void _showFinalScoreScreen() {
-    String comment = _getAccuracyComment(averageAccuracy);
-    _speak("Well done! You earned $totalStars stars. $comment");
+    String comment = _getDrawingComment(averageDrawingScore);
+    int finalStars = _getStarCountFromSkill(averageDrawingScore);
+
+    _speak("Well done! You earned $finalStars stars. $comment");
 
     showDialog(
       context: context,
@@ -122,7 +128,7 @@ class _NumberTracingGameState extends State<NumberTracingGame> {
             const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(totalStars.clamp(1, 9), (index) {
+              children: List.generate(finalStars, (index) {
                 return TweenAnimationBuilder(
                   tween: Tween<double>(begin: 0, end: 1),
                   duration: Duration(milliseconds: 400 + index * 150),
@@ -135,6 +141,11 @@ class _NumberTracingGameState extends State<NumberTracingGame> {
               }),
             ),
             const SizedBox(height: 12),
+            Text(
+              "Average Tracing Skill: ${(averageDrawingScore * 100).toStringAsFixed(1)}%",
+              style: const TextStyle(fontSize: 16, color: Colors.deepOrange),
+            ),
+            const SizedBox(height: 6),
             Text(comment,
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontSize: 18)),
@@ -144,8 +155,7 @@ class _NumberTracingGameState extends State<NumberTracingGame> {
                 Navigator.pop(context);
                 _resetGame();
               },
-              style:
-                  ElevatedButton.styleFrom(backgroundColor: Colors.deepOrange),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.deepOrange),
               child: const Text("🔁 Start Again",
                   style: TextStyle(fontSize: 18, color: Colors.white)),
             )
@@ -196,13 +206,7 @@ class _NumberTracingGameState extends State<NumberTracingGame> {
                     ),
                     GestureDetector(
                       onPanUpdate: (details) {
-                        RenderBox? renderBox =
-                            context.findRenderObject() as RenderBox?;
-                        if (renderBox != null) {
-                          Offset localPosition =
-                              renderBox.globalToLocal(details.globalPosition);
-                          setState(() => points.add(localPosition));
-                        }
+                        setState(() => points.add(details.localPosition));
                       },
                       onPanEnd: (_) => _evaluateDrawing(),
                       child: CustomPaint(
@@ -245,18 +249,17 @@ class _NumberTracingGameState extends State<NumberTracingGame> {
             ),
             const SizedBox(height: 8),
             Text(
-              "Accuracy: ${(accuracyHistory.last * 100).toStringAsFixed(1)}%",
+              "Tracing Skill: ${(drawingScoreHistory.last * 100).toStringAsFixed(1)}%",
               style: const TextStyle(fontSize: 18, color: Colors.deepOrange),
             ),
             Text(
-              _getAccuracyComment(averageAccuracy),
+              _getDrawingComment(averageDrawingScore),
               style: const TextStyle(fontSize: 18, color: Colors.blueGrey),
             ),
             const SizedBox(height: 12),
             ElevatedButton(
               onPressed: _next,
-              style:
-                  ElevatedButton.styleFrom(backgroundColor: Colors.deepOrange),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.deepOrange),
               child: const Text("Next", style: TextStyle(color: Colors.white)),
             ),
             const SizedBox(height: 20),

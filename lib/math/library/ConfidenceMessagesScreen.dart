@@ -46,6 +46,7 @@ class _ConfidenceMessagesScreenState extends State<ConfidenceMessagesScreen>
   final AudioPlayer _effectPlayer = AudioPlayer();
   late AnimationController _bgController;
   late AnimationController _scaleController;
+  late AnimationController _foxFadeController;
 
   String? favoriteMessage;
   bool hasPlayedHeyBuddy = false;
@@ -58,6 +59,9 @@ class _ConfidenceMessagesScreenState extends State<ConfidenceMessagesScreen>
           ..repeat();
     _scaleController = AnimationController(
         vsync: this, duration: const Duration(milliseconds: 600));
+    _foxFadeController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 1000))
+      ..forward();
 
     selectedMessage = encouragements[0];
     WidgetsBinding.instance.addPostFrameCallback((_) => _selectRandomMessage());
@@ -108,6 +112,7 @@ class _ConfidenceMessagesScreenState extends State<ConfidenceMessagesScreen>
     _effectPlayer.dispose();
     _bgController.dispose();
     _scaleController.dispose();
+    _foxFadeController.dispose();
     super.dispose();
   }
 
@@ -121,113 +126,112 @@ class _ConfidenceMessagesScreenState extends State<ConfidenceMessagesScreen>
       ),
       body: Stack(
         children: [
-          // Background gradient
           Container(
             decoration: const BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Color(0xFFFFCCBC), // Soft orange
-                  Color(0xFFFAD6D6), // Champagne pink
+                  Color(0xFFFFCCBC),
+                  Color(0xFFFAD6D6),
                 ],
               ),
             ),
           ),
-
-          // Main content
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
               child: Center(
                 child: SingleChildScrollView(
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      // Fox with visible border
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          border:
-                              Border.all(color: Colors.deepOrange, width: 2),
-                          borderRadius: BorderRadius.circular(20),
+                      // Fox fade-in animation (no Hero)
+                      FadeTransition(
+                        opacity: _foxFadeController,
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            border:
+                                Border.all(color: Colors.deepOrange, width: 2),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Lottie.asset("images/happy_fox.json",
+                              width: 120, height: 120),
                         ),
-                        child: Lottie.asset("images/happy_fox.json",
-                            width: 120, height: 120),
                       ),
                       const SizedBox(height: 20),
 
-                      // Greeting text
                       const Text(
                         "Hey buddy,\nThis is just for you today:",
                         style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
                           height: 1.5,
-                          color: Color(0xFFD84315), // Stronger orange
+                          color: Color(0xFFD84315),
                         ),
                         textAlign: TextAlign.center,
                       ),
 
                       const SizedBox(height: 30),
 
-                      // Main message card
-                      ScaleTransition(
-                        scale: CurvedAnimation(
-                            parent: _scaleController,
-                            curve: Curves.easeOutBack),
-                        child: Card(
-                          color: Colors.white,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20)),
-                          elevation: 6,
-                          margin: const EdgeInsets.symmetric(vertical: 12),
-                          child: Padding(
-                            padding: const EdgeInsets.all(24),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Lottie.asset("images/Stars.json",
-                                    width: 80, height: 80),
-                                const SizedBox(height: 16),
-                                Text(
-                                  selectedMessage['title']!,
-                                  style: const TextStyle(
-                                    fontSize: 26,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.deepOrange,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  selectedMessage['message']!,
-                                  style: const TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.w500,
-                                    height: 1.6,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                                const SizedBox(height: 16),
-                                if (favoriteMessage != null)
+                      // Card Hero animation
+                      Hero(
+                        tag: 'encouragement-card-hero',
+                        child: ScaleTransition(
+                          scale: CurvedAnimation(
+                              parent: _scaleController,
+                              curve: Curves.easeOutBack),
+                          child: Card(
+                            color: Colors.white,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20)),
+                            elevation: 6,
+                            margin: const EdgeInsets.symmetric(vertical: 12),
+                            child: Padding(
+                              padding: const EdgeInsets.all(24),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Lottie.asset("images/Stars.json",
+                                      width: 80, height: 80),
+                                  const SizedBox(height: 16),
                                   Text(
-                                    "Your Favorite Message:\n$favoriteMessage",
-                                    style: TextStyle(
-                                        fontSize: 20,
-                                        color: Colors.green.shade700),
+                                    selectedMessage['title']!,
+                                    style: const TextStyle(
+                                      fontSize: 26,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.deepOrange,
+                                    ),
                                     textAlign: TextAlign.center,
                                   ),
-                              ],
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    selectedMessage['message']!,
+                                    style: const TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.w500,
+                                      height: 1.6,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  if (favoriteMessage != null)
+                                    Text(
+                                      "Your Favorite Message:\n$favoriteMessage",
+                                      style: TextStyle(
+                                          fontSize: 20,
+                                          color: Colors.green.shade700),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
                       ),
 
                       const SizedBox(height: 24),
-
-                      // Buttons
 
                       Padding(
                         padding: const EdgeInsets.all(8.0),

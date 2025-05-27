@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_3/math/theme.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:confetti/confetti.dart';
-import 'package:lottie/lottie.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:lottie/lottie.dart';
 
 class NumberQuantityMatchingGame extends StatefulWidget {
   const NumberQuantityMatchingGame({super.key});
@@ -17,13 +16,36 @@ class NumberQuantityMatchingGame extends StatefulWidget {
 class _NumberQuantityMatchingGameState
     extends State<NumberQuantityMatchingGame> {
   final FlutterTts tts = FlutterTts();
-  late ConfettiController _confettiController;
   int currentIndex = 0;
   int score = 0;
   String? selected;
   bool isCorrect = false;
 
   final List<Map<String, dynamic>> _items = [
+    {
+      "image": "1_doll.jpg",
+      "question": "How many dolls are there?",
+      "options": ["1", "2", "3"],
+      "answer": "1",
+    },
+    {
+      "image": "4_cars.jpg",
+      "question": "Count the cars!",
+      "options": ["3", "4", "5"],
+      "answer": "4",
+    },
+    {
+      "image": "6_butterflies.jpg",
+      "question": "How many butterflies do you see?",
+      "options": ["6", "7", "8"],
+      "answer": "6",
+    },
+    {
+      "image": "8_pencils.png",
+      "question": "Count the pencils.",
+      "options": ["7", "8", "9"],
+      "answer": "8",
+    },
     {
       "image": "4_apples.png",
       "question": "How many apples are there?",
@@ -47,59 +69,7 @@ class _NumberQuantityMatchingGameState
   @override
   void initState() {
     super.initState();
-    _confettiController =
-        ConfettiController(duration: const Duration(seconds: 3));
     _speakQuestion();
-  }
-
-  @override
-  void dispose() {
-    _confettiController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _saveScore(int score) async {
-    try {
-      // Fetch parentId and childId, adapt this to your actual method:
-      String? parentId = ""; // fetch parentId from your auth or Firestore
-      String? childId = ""; // fetch childId from your app logic
-
-      // Example: fetch from Firestore assuming current user is parent
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        print("User not logged in");
-        return;
-      }
-      parentId = user.uid;
-
-      // For childId, assuming you select or fetch it earlier, just set here for testing
-      childId =
-          "exampleChildId"; // replace with your actual logic to get childId
-
-      if (parentId.isEmpty || childId == null) {
-        print("Cannot save score: parentId or childId missing");
-        return;
-      }
-
-      // Save to Firestore: example path 'parents/{parentId}/children/{childId}/scores'
-      await FirebaseFirestore.instance
-          .collection('parents')
-          .doc(parentId)
-          .collection('children')
-          .doc(childId)
-          .collection('math')
-          .doc('math1')
-          .collection('game2') // or game2
-          .add({
-        'score': score,
-        'total': _items.length,
-        'timestamp': FieldValue.serverTimestamp(),
-      });
-
-      print("Score saved successfully");
-    } catch (e) {
-      print("Error saving score: $e");
-    }
   }
 
   Future<void> _speak(String text) async {
@@ -117,15 +87,12 @@ class _NumberQuantityMatchingGameState
     setState(() {
       selected = value;
       isCorrect = (value == correct);
-      if (isCorrect) score++;
+      if (isCorrect) score += 10;
     });
 
-    if (isCorrect) {
-      _speak("That's correct!");
-      Future.delayed(const Duration(seconds: 2), _next);
-    } else {
-      _speak("Try again!");
-    }
+    _speak(isCorrect
+        ? "That's correct!"
+        : "Oops! That is not correct. Try again.");
   }
 
   void _next() {
@@ -137,10 +104,47 @@ class _NumberQuantityMatchingGameState
       });
       _speakQuestion();
     } else {
-      _speak(
-          "Well done! You got $score out of ${_items.length}. Would you like to try again or go back?");
-      _confettiController.play();
+      _speak("Well done! You scored $score out of ${_items.length * 10}.");
+      _saveScore(score);
       _showFinalDialog();
+    }
+  }
+
+  Future<void> _saveScore(int score) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+
+      final parentId = user.uid;
+      final childSnapshot = await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(parentId)
+          .collection('children')
+          .get();
+
+      final childId =
+          childSnapshot.docs.isNotEmpty ? childSnapshot.docs.first.id : null;
+
+      if (childId == null) return;
+
+      await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(parentId)
+          .collection('children')
+          .doc(childId)
+          .collection('math')
+          .doc('math1')
+          .collection('game2')
+          .add({
+        'score': score,
+        'total': _items.length * 10,
+        'percentage': score / (_items.length * 10),
+        'correct': score ~/ 10,
+        'wrong': _items.length - (score ~/ 10),
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      print("Error saving score: $e");
     }
   }
 
@@ -150,69 +154,60 @@ class _NumberQuantityMatchingGameState
       score = 0;
       selected = null;
       isCorrect = false;
-      _items.shuffle(); // Optional: randomize questions
     });
     _speakQuestion();
   }
 
-  Future<void> _showFinalDialog() async {
-    await _saveScore(score);
-    showDialog(
-      context: context,
-      builder: (_) => Stack(
-        alignment: Alignment.topCenter,
-        children: [
-          AlertDialog(
-            backgroundColor: Colors.white,
-            title: const Text("🎉 Good Job!",
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text("You finished all the questions!",
-                    textAlign: TextAlign.center),
-                const SizedBox(height: 12),
-                Text("Your Score: $score / ${_items.length}",
-                    style: const TextStyle(fontSize: 22)),
-                Text(_getStars(score, _items.length),
-                    style: const TextStyle(fontSize: 36)),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  _resetGame();
-                },
-                child: const Text("🔄 Replay", style: TextStyle(fontSize: 20)),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("⬅️ Back", style: TextStyle(fontSize: 20)),
-              ),
-            ],
-          ),
-          ConfettiWidget(
-            confettiController: _confettiController,
-            blastDirectionality: BlastDirectionality.explosive,
-            shouldLoop: false,
-            numberOfParticles: 30,
-            maxBlastForce: 20,
-            minBlastForce: 5,
-            emissionFrequency: 0.05,
-            gravity: 0.3,
-          ),
-        ],
-      ),
-    );
-  }
-
   String _getStars(int score, int total) {
-    double ratio = score / total;
+    double ratio = score / (total * 10);
     if (ratio == 1.0) return "🌟🌟🌟";
     if (ratio >= 0.66) return "🌟🌟";
     if (ratio >= 0.33) return "🌟";
     return "⭐";
+  }
+
+  Future<void> _showFinalDialog() async {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text("🎉 Well done!",
+            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text("You completed all questions!",
+                style: const TextStyle(fontSize: 20)),
+            const SizedBox(height: 10),
+            Text("Your Score: $score / ${_items.length * 10}",
+                style: const TextStyle(fontSize: 22)),
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(color: Colors.orange, width: 2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(_getStars(score, _items.length),
+                  style: const TextStyle(fontSize: 36)),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _resetGame();
+            },
+            child: const Text("🔁 Replay", style: TextStyle(fontSize: 20)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("⬅️ Back", style: TextStyle(fontSize: 20)),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildVisual(String filename) {
@@ -230,6 +225,7 @@ class _NumberQuantityMatchingGameState
       appBar: AppBar(
         backgroundColor: AppTheme.appBarColor,
         title: const Text("Match Number to Quantity"),
+        centerTitle: true,
       ),
       body: Center(
         child: SingleChildScrollView(
@@ -237,24 +233,38 @@ class _NumberQuantityMatchingGameState
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              // 🟠 Progress Indicator
+              Text(
+                "Question ${currentIndex + 1} of ${_items.length}",
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.deepOrange,
+                ),
+              ),
+              const SizedBox(height: 10),
+
+              // Question text
               Container(
                 padding: const EdgeInsets.all(16),
                 margin: const EdgeInsets.only(bottom: 20),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
-                  boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 4)],
+                  boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 4)],
                 ),
                 child: Text(
                   item["question"],
                   style: const TextStyle(
-                      fontSize: 26, fontWeight: FontWeight.bold),
+                      fontSize: 24, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
               ),
+
+              // Image or animation
               Container(
                 decoration: BoxDecoration(
-                  color: Colors.deepOrange.withOpacity(0.1),
+                  color: Colors.white,
                   border: Border.all(color: Colors.deepOrange, width: 3),
                   borderRadius: BorderRadius.circular(16),
                 ),
@@ -262,21 +272,31 @@ class _NumberQuantityMatchingGameState
                 margin: const EdgeInsets.only(bottom: 24),
                 child: _buildVisual(item['image']),
               ),
+
+              // Answer buttons
               Wrap(
                 spacing: 20,
                 runSpacing: 20,
                 alignment: WrapAlignment.center,
                 children: item["options"].map<Widget>((opt) {
-                  final isRight = isCorrect && opt == item["answer"];
-                  final isWrong = selected == opt && opt != item["answer"];
+                  final isCorrectAnswer = opt == item["answer"];
+                  final isWrong = selected == opt && !isCorrectAnswer;
+
+                  Color color;
+                  if (selected == null) {
+                    color = Colors.orangeAccent;
+                  } else if (isCorrectAnswer) {
+                    color = isCorrect ? Colors.green : Colors.grey;
+                  } else if (isWrong) {
+                    color = Colors.red;
+                  } else {
+                    color = Colors.grey[300]!;
+                  }
+
                   return ElevatedButton(
-                    onPressed: () => _check(opt),
+                    onPressed: isCorrect || selected == null ? () => _check(opt) : null,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: isRight
-                          ? Colors.green
-                          : isWrong
-                              ? Colors.red
-                              : Colors.orangeAccent,
+                      backgroundColor: color,
                       padding: const EdgeInsets.symmetric(
                           horizontal: 32, vertical: 16),
                       shape: RoundedRectangleBorder(
@@ -285,6 +305,22 @@ class _NumberQuantityMatchingGameState
                     child: Text(opt, style: const TextStyle(fontSize: 28)),
                   );
                 }).toList(),
+              ),
+
+              const SizedBox(height: 24),
+
+              // Next button
+              ElevatedButton.icon(
+                onPressed: _next,
+                icon: const Icon(Icons.arrow_forward),
+                label: const Text("Next",
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orangeAccent.shade100,
+                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 14),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
+                ),
               ),
             ],
           ),
