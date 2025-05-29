@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_application_3/parents/child_performance_screen.dart';
 
 import 'awareness_videos_screen.dart';
 import 'parent_support_messages_screen.dart';
@@ -28,7 +29,7 @@ class ParentDashboardScreen extends StatelessWidget {
         titleKey: LocaleKeys.childProgress,
         imagePath: 'images/parent_image/progress-icon.png',
         heroTag: 'progress',
-        screen: const DummyProgressScreen(),
+        screen: const CombinedChildPerformanceScreen(),
       ),
       _DashboardItem(
         titleKey: LocaleKeys.supportTopics,
@@ -40,7 +41,8 @@ class ParentDashboardScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(LocaleKeys.dashboardTitle.tr(), style: const TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(LocaleKeys.dashboardTitle.tr(),
+            style: const TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
@@ -91,7 +93,8 @@ class ParentDashboardScreen extends StatelessWidget {
                         const SizedBox(height: 10),
                         Text(
                           item.titleKey.tr(),
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                          style: const TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.w600),
                           textAlign: TextAlign.center,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -121,16 +124,4 @@ class _DashboardItem {
     required this.heroTag,
     required this.screen,
   });
-}
-
-class DummyProgressScreen extends StatelessWidget {
-  const DummyProgressScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(LocaleKeys.childProgressTitle.tr())),
-      body: Center(child: Text(LocaleKeys.childProgressBody.tr())),
-    );
-  }
 }

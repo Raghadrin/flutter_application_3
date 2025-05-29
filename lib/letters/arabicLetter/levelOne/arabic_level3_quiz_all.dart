@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ArabicLevel3QuizAllScreen extends StatefulWidget {
   const ArabicLevel3QuizAllScreen({super.key});
 
   @override
-  State<ArabicLevel3QuizAllScreen> createState() => _ArabicLevel3QuizAllScreenState();
+  State<ArabicLevel3QuizAllScreen> createState() =>
+      _ArabicLevel3QuizAllScreenState();
 }
 
 class _ArabicLevel3QuizAllScreenState extends State<ArabicLevel3QuizAllScreen> {
@@ -19,7 +22,8 @@ class _ArabicLevel3QuizAllScreenState extends State<ArabicLevel3QuizAllScreen> {
   Color feedbackColor = Colors.transparent;
   IconData? feedbackIcon;
 
-  final String story = "في يوم ربيعي جميل، ذهب سامي مع والده إلى الحديقة القريبة. "
+  final String story =
+      "في يوم ربيعي جميل، ذهب سامي مع والده إلى الحديقة القريبة. "
       "أحضرا معهما سلة طعام مليئة بالفاكهة والعصائر. "
       "لعب سامي على الأرجوحة وضحك كثيرًا، ثم انضم إليه أصدقاؤه. "
       "جلسوا لاحقًا لتناول الطعام. "
@@ -75,6 +79,54 @@ class _ArabicLevel3QuizAllScreenState extends State<ArabicLevel3QuizAllScreen> {
     flutterTts.setLanguage("ar-SA");
   }
 
+  Future<void> _saveScore(int score) async {
+    try {
+      String? parentId = ""; // fetch parentId
+      String? childId = ""; // fetch childId
+
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        print("User not logged in");
+        return;
+      }
+      parentId = user.uid;
+
+      final childrenSnapshot = await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(parentId)
+          .collection('children')
+          .get();
+      if (childrenSnapshot.docs.isNotEmpty) {
+        childId = childrenSnapshot.docs.first.id;
+      } else {
+        print("No children found for this parent.");
+        return null;
+      }
+
+      if (parentId.isEmpty || childId == null) {
+        print("Cannot save score: parentId or childId missing");
+        return;
+      }
+
+      await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(parentId)
+          .collection('children')
+          .doc(childId)
+          .collection('arabic')
+          .doc('arabic3')
+          .collection('attempts') // optional: track multiple attempts
+          .add({
+        'score': score,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      print("Score saved successfully");
+    } catch (e) {
+      print("Error saving score: $e");
+    }
+  }
+
   Future<void> speak(String text) async {
     await flutterTts.stop();
     await flutterTts.speak(text);
@@ -86,6 +138,10 @@ class _ArabicLevel3QuizAllScreenState extends State<ArabicLevel3QuizAllScreen> {
       int scorePercent = ((correctAnswers / questions.length) * 100).round();
       String finalMessage;
       Color msgColor;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _saveScore(scorePercent);
+      });
 
       if (scorePercent >= 90) {
         finalMessage = "ممتاز جدًا 🎉";
@@ -104,21 +160,32 @@ class _ArabicLevel3QuizAllScreenState extends State<ArabicLevel3QuizAllScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text("النتيجة النهائية", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+              const Text("النتيجة النهائية",
+                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
               const SizedBox(height: 20),
               Text("$scorePercent%",
-                  style: const TextStyle(fontSize: 50, color: Colors.deepOrange, fontWeight: FontWeight.bold)),
+                  style: const TextStyle(
+                      fontSize: 50,
+                      color: Colors.deepOrange,
+                      fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
-              Text(finalMessage, style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: msgColor)),
+              Text(finalMessage,
+                  style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      color: msgColor)),
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 18),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 40, vertical: 18),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
                 ),
-                child: const Text("التالي ⏭️", style: TextStyle(fontSize: 24, color: Colors.white)),
+                child: const Text("التالي ⏭️",
+                    style: TextStyle(fontSize: 24, color: Colors.white)),
               )
             ],
           ),
@@ -133,7 +200,8 @@ class _ArabicLevel3QuizAllScreenState extends State<ArabicLevel3QuizAllScreen> {
       appBar: AppBar(
         backgroundColor: Colors.orange,
         centerTitle: true,
-        title: const Text("📖 كويز الفهم القرائي", style: TextStyle(fontSize: 20)),
+        title:
+            const Text("📖 كويز الفهم القرائي", style: TextStyle(fontSize: 20)),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
@@ -146,7 +214,11 @@ class _ArabicLevel3QuizAllScreenState extends State<ArabicLevel3QuizAllScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        const Text("القصة", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.deepOrange)),
+        const Text("القصة",
+            style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.deepOrange)),
         const SizedBox(height: 12),
         SizedBox(
           height: 250,
@@ -161,7 +233,8 @@ class _ArabicLevel3QuizAllScreenState extends State<ArabicLevel3QuizAllScreen> {
               child: Text(
                 story,
                 textAlign: TextAlign.right,
-                style: const TextStyle(fontSize: 22, height: 1.8, color: Colors.black87),
+                style: const TextStyle(
+                    fontSize: 22, height: 1.8, color: Colors.black87),
               ),
             ),
           ),
@@ -202,10 +275,14 @@ class _ArabicLevel3QuizAllScreenState extends State<ArabicLevel3QuizAllScreen> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text("السؤال $currentStep من ${questions.length}",
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.deepOrange)),
+              style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.deepOrange)),
           const SizedBox(height: 12),
           Card(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             elevation: 4,
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -215,7 +292,8 @@ class _ArabicLevel3QuizAllScreenState extends State<ArabicLevel3QuizAllScreen> {
                     child: Text(
                       current['question'],
                       textAlign: TextAlign.right,
-                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
+                      style: const TextStyle(
+                          fontSize: 22, fontWeight: FontWeight.w600),
                     ),
                   ),
                   IconButton(
@@ -256,7 +334,8 @@ class _ArabicLevel3QuizAllScreenState extends State<ArabicLevel3QuizAllScreen> {
                   backgroundColor: isSelected ? Colors.orange : Colors.white,
                   side: const BorderSide(color: Colors.orange, width: 2),
                   padding: const EdgeInsets.symmetric(vertical: 18),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14)),
                   elevation: 3,
                 ),
                 child: Center(
@@ -282,7 +361,10 @@ class _ArabicLevel3QuizAllScreenState extends State<ArabicLevel3QuizAllScreen> {
                   const SizedBox(width: 10),
                   Text(
                     feedbackMessage,
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: feedbackColor),
+                    style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: feedbackColor),
                   ),
                 ],
               ),
@@ -307,7 +389,8 @@ class _ArabicLevel3QuizAllScreenState extends State<ArabicLevel3QuizAllScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.green,
               padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16)),
             ),
           ),
         ],

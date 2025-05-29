@@ -171,7 +171,7 @@ class _LibraryContentScreenState extends State<LibraryContentScreen>
                 crossAxisCount: 2,
                 crossAxisSpacing: 16,
                 mainAxisSpacing: 16,
-                childAspectRatio: 0.5,
+                childAspectRatio: 0.7,
               ),
               itemCount: _concepts[levelIndex].length,
               itemBuilder: (context, index) {

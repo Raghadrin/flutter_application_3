@@ -25,7 +25,8 @@ class _Level3QuizState extends State<Level3Quiz> {
   final List<Map<String, dynamic>> _questions = [
     {
       'question': '(6 + 2) × 3 = ?',
-      'spoken': 'What is the answer to: open parentheses 6 plus 2 close parentheses times 3',
+      'spoken':
+          'What is the answer to: open parentheses 6 plus 2 close parentheses times 3',
       'options': ['24', '18', '30'],
       'answer': '24'
     },
@@ -36,14 +37,17 @@ class _Level3QuizState extends State<Level3Quiz> {
       'answer': '8'
     },
     {
-      'question': 'Lina had 5 apples, bought 3, gave away 2, and found 1 more. How many does she have now?',
-      'spoken': 'Lina had 5 apples, bought 3, gave away 2, and found 1 more. How many does she have now?',
+      'question':
+          'Lina had 5 apples, bought 3, gave away 2, and found 1 more. How many does she have now?',
+      'spoken':
+          'Lina had 5 apples, bought 3, gave away 2, and found 1 more. How many does she have now?',
       'options': ['6', '7', '8'],
       'answer': '7'
     },
     {
       'question': '(12 - 4) ÷ 2 = ?',
-      'spoken': 'What is the result of open parentheses 12 minus 4 close parentheses divided by 2?',
+      'spoken':
+          'What is the result of open parentheses 12 minus 4 close parentheses divided by 2?',
       'options': ['2', '4', '6'],
       'answer': '4'
     },
@@ -87,7 +91,8 @@ class _Level3QuizState extends State<Level3Quiz> {
   }
 
   void _speakCurrent() {
-    final spoken = _questions[currentIndex]['spoken'] ?? _questions[currentIndex]['question'];
+    final spoken = _questions[currentIndex]['spoken'] ??
+        _questions[currentIndex]['question'];
     _speak(spoken);
   }
 
@@ -124,18 +129,32 @@ class _Level3QuizState extends State<Level3Quiz> {
 
   Future<void> _saveScore(int score) async {
     try {
+      String? parentId = ""; // fetch parentId
+      String? childId = ""; // fetch childId
+
       final user = FirebaseAuth.instance.currentUser;
-      if (user == null) return;
-      final parentId = user.uid;
+      if (user == null) {
+        print("User not logged in");
+        return;
+      }
+      parentId = user.uid;
 
       final childrenSnapshot = await FirebaseFirestore.instance
           .collection('parents')
           .doc(parentId)
           .collection('children')
           .get();
-      if (childrenSnapshot.docs.isEmpty) return;
+      if (childrenSnapshot.docs.isNotEmpty) {
+        childId = childrenSnapshot.docs.first.id;
+      } else {
+        print("No children found for this parent.");
+        return null;
+      }
 
-      final childId = childrenSnapshot.docs.first.id;
+      if (parentId.isEmpty || childId == null) {
+        print("Cannot save score: parentId or childId missing");
+        return;
+      }
 
       await FirebaseFirestore.instance
           .collection('parents')
@@ -144,12 +163,13 @@ class _Level3QuizState extends State<Level3Quiz> {
           .doc(childId)
           .collection('math')
           .doc('math3')
-          .collection('quiz3')
+          .collection('attempts') // optional: track multiple attempts
           .add({
         'score': score,
-        'total': _questions.length * 10,
         'timestamp': FieldValue.serverTimestamp(),
       });
+
+      print("Score saved successfully");
     } catch (e) {
       print("Error saving score: $e");
     }
@@ -186,7 +206,8 @@ class _Level3QuizState extends State<Level3Quiz> {
 
   @override
   Widget build(BuildContext context) {
-    final question = currentIndex < _questions.length ? _questions[currentIndex] : null;
+    final question =
+        currentIndex < _questions.length ? _questions[currentIndex] : null;
 
     return Scaffold(
       backgroundColor: const Color(0xFFFFF6ED),
@@ -216,16 +237,22 @@ class _Level3QuizState extends State<Level3Quiz> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text("🎉 Quiz Finished!", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+                    const Text("🎉 Quiz Finished!",
+                        style: TextStyle(
+                            fontSize: 28, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 16),
-                    Text("Your Score: $score / ${_questions.length * 10}", style: const TextStyle(fontSize: 22)),
+                    Text("Your Score: $score / ${_questions.length * 10}",
+                        style: const TextStyle(fontSize: 22)),
                     const SizedBox(height: 10),
-                    Text(_getStars(score, _questions.length), style: const TextStyle(fontSize: 36)),
+                    Text(_getStars(score, _questions.length),
+                        style: const TextStyle(fontSize: 36)),
                     const SizedBox(height: 20),
                     ElevatedButton(
                       onPressed: _restartQuiz,
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-                      child: const Text("🔁 Restart", style: TextStyle(fontSize: 20)),
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orange),
+                      child: const Text("🔁 Restart",
+                          style: TextStyle(fontSize: 20)),
                     ),
                   ],
                 ),
@@ -235,7 +262,8 @@ class _Level3QuizState extends State<Level3Quiz> {
                   if (showWarning)
                     const Padding(
                       padding: EdgeInsets.only(top: 8),
-                      child: Text("⚠️ Hurry up!", style: TextStyle(fontSize: 20, color: Colors.red)),
+                      child: Text("⚠️ Hurry up!",
+                          style: TextStyle(fontSize: 20, color: Colors.red)),
                     ),
                   const SizedBox(height: 16),
                   Text(
@@ -256,13 +284,17 @@ class _Level3QuizState extends State<Level3Quiz> {
                       border: Border.all(color: Colors.deepOrange, width: 2),
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
-                        BoxShadow(color: Colors.black26, blurRadius: 5, offset: Offset(0, 3)),
+                        BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 5,
+                            offset: Offset(0, 3)),
                       ],
                     ),
                     child: Text(
                       question!['question'],
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 26, fontWeight: FontWeight.bold),
                     ),
                   ),
                   ...List.generate(
@@ -271,17 +303,21 @@ class _Level3QuizState extends State<Level3Quiz> {
                       width: double.infinity,
                       margin: const EdgeInsets.symmetric(vertical: 8),
                       child: ElevatedButton(
-                        onPressed: showNext ? null : () => _checkAnswer(question['options'][i]),
+                        onPressed: showNext
+                            ? null
+                            : () => _checkAnswer(question['options'][i]),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: selected == question['options'][i]
                               ? Colors.orangeAccent
                               : Colors.white,
-                          side: const BorderSide(color: Colors.deepOrange, width: 2),
+                          side: const BorderSide(
+                              color: Colors.deepOrange, width: 2),
                           padding: const EdgeInsets.symmetric(vertical: 16),
                         ),
                         child: Text(
                           question['options'][i],
-                          style: const TextStyle(fontSize: 22, color: Colors.black),
+                          style: const TextStyle(
+                              fontSize: 22, color: Colors.black),
                         ),
                       ),
                     ),
@@ -290,7 +326,8 @@ class _Level3QuizState extends State<Level3Quiz> {
                   if (showNext)
                     ElevatedButton(
                       onPressed: _nextQuestion,
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.amber),
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.amber),
                       child: const Text("Next", style: TextStyle(fontSize: 22)),
                     ),
                 ],

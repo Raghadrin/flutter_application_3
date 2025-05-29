@@ -44,7 +44,8 @@ class _Level2QuizScreenState extends State<Level2QuizScreen> {
     },
     {
       'type': 'word',
-      'question': 'Liam had 4 candies, then got 3 more and gave 2 away. How many now?',
+      'question':
+          'Liam had 4 candies, then got 3 more and gave 2 away. How many now?',
       'options': ['5', '4', '6'],
       'answer': '5'
     },
@@ -95,8 +96,6 @@ class _Level2QuizScreenState extends State<Level2QuizScreen> {
       if (isCorrect) {
         score += 10;
         _speak("Correct!");
-      } else {
-        _speak("Try again!");
       }
     });
   }
@@ -118,18 +117,32 @@ class _Level2QuizScreenState extends State<Level2QuizScreen> {
 
   Future<void> _saveScore(int score) async {
     try {
+      String? parentId = ""; // fetch parentId
+      String? childId = ""; // fetch childId
+
       final user = FirebaseAuth.instance.currentUser;
-      if (user == null) return;
-      final parentId = user.uid;
+      if (user == null) {
+        print("User not logged in");
+        return;
+      }
+      parentId = user.uid;
 
       final childrenSnapshot = await FirebaseFirestore.instance
           .collection('parents')
           .doc(parentId)
           .collection('children')
           .get();
-      if (childrenSnapshot.docs.isEmpty) return;
+      if (childrenSnapshot.docs.isNotEmpty) {
+        childId = childrenSnapshot.docs.first.id;
+      } else {
+        print("No children found for this parent.");
+        return null;
+      }
 
-      final childId = childrenSnapshot.docs.first.id;
+      if (parentId.isEmpty || childId == null) {
+        print("Cannot save score: parentId or childId missing");
+        return;
+      }
 
       await FirebaseFirestore.instance
           .collection('parents')
@@ -138,12 +151,13 @@ class _Level2QuizScreenState extends State<Level2QuizScreen> {
           .doc(childId)
           .collection('math')
           .doc('math2')
-          .collection('quiz2')
+          .collection('attempts') // optional: track multiple attempts
           .add({
         'score': score,
-        'total': questions.length * 10,
         'timestamp': FieldValue.serverTimestamp(),
       });
+
+      print("Score saved successfully");
     } catch (e) {
       print("Error saving score: $e");
     }
@@ -181,7 +195,8 @@ class _Level2QuizScreenState extends State<Level2QuizScreen> {
               ElevatedButton(
                 onPressed: _resetQuiz,
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
-                child: const Text("🔁 Play Again", style: TextStyle(fontSize: 20)),
+                child:
+                    const Text("🔁 Play Again", style: TextStyle(fontSize: 20)),
               ),
             ],
           ),
@@ -221,7 +236,8 @@ class _Level2QuizScreenState extends State<Level2QuizScreen> {
           ),
           const SizedBox(height: 8),
           Text(label,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              style:
+                  const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
         ],
       ),
     );
@@ -325,8 +341,7 @@ class _Level2QuizScreenState extends State<Level2QuizScreen> {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12)),
                       ),
-                      child: Text(option,
-                          style: const TextStyle(fontSize: 26)),
+                      child: Text(option, style: const TextStyle(fontSize: 26)),
                     );
                   }).toList(),
                 ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ArabicLetterQuizScreen extends StatefulWidget {
   const ArabicLetterQuizScreen({super.key});
@@ -17,21 +19,96 @@ class _ArabicLetterQuizScreenState extends State<ArabicLetterQuizScreen> {
   IconData? feedbackIcon;
 
   final List<Map<String, dynamic>> questions = [
-    {"type": "position", "word": "بنت", "letter": "ب", "correctPosition": "بداية"},
-    {"type": "position", "word": "كتاب", "letter": "ت", "correctPosition": "وسط"},
-    {"type": "position", "word": "قلب", "letter": "ب", "correctPosition": "نهاية"},
-    {"type": "letterChoice", "prompt": "اختر حرف الشين", "correctLetter": "ش", "options": ["س", "ش", "ص", "ث"]},
-    {"type": "letterChoice", "prompt": "اختر حرف العين", "correctLetter": "ع", "options": ["غ", "ق", "ع"]},
-    {"type": "letterChoice", "prompt": "اختر حرف الذال", "correctLetter": "ذ", "options": ["ز", "د", "ذ"]},
-    {"type": "missingLetter", "incompleteWord": "م رسة", "correctLetter": "د", "options": ["ب", "ر", "د", "س"]},
-    {"type": "missingLetter", "incompleteWord": " طار ", "correctLetter": "ق", "options": ["ف", "ك", "ق", "غ"]},
-    {"type": "missingLetter", "incompleteWord": "حقي ة", "correctLetter": "ب", "options": ["ب", "د", "ذ", "ز"]},
-    {"type": "audioMatch", "audioLetter": "ت", "correctLetter": "ت", "options": ["ت", "د", "س"]},
-    {"type": "audioMatch", "audioLetter": "ع", "correctLetter": "ع", "options": ["غ", "ق", "ع"]},
-    {"type": "audioMatch", "audioLetter": "ذ", "correctLetter": "ذ", "options": ["ز", "د", "ذ"]},
-    {"type": "wordWithLetter", "targetLetter": "ر", "correctWord": "قمر", "options": ["شمس", "قمر", "بيت"]},
-    {"type": "wordWithLetter", "targetLetter": "ف", "correctWord": "فيل", "options": ["فيل", "نمر", "كلب"]},
-    {"type": "wordWithLetter", "targetLetter": "ك", "correctWord": "كتاب", "options": ["قمر", "بيت", "كتاب"]},
+    {
+      "type": "position",
+      "word": "بنت",
+      "letter": "ب",
+      "correctPosition": "بداية"
+    },
+    {
+      "type": "position",
+      "word": "كتاب",
+      "letter": "ت",
+      "correctPosition": "وسط"
+    },
+    {
+      "type": "position",
+      "word": "قلب",
+      "letter": "ب",
+      "correctPosition": "نهاية"
+    },
+    {
+      "type": "letterChoice",
+      "prompt": "اختر حرف الشين",
+      "correctLetter": "ش",
+      "options": ["س", "ش", "ص", "ث"]
+    },
+    {
+      "type": "letterChoice",
+      "prompt": "اختر حرف العين",
+      "correctLetter": "ع",
+      "options": ["غ", "ق", "ع"]
+    },
+    {
+      "type": "letterChoice",
+      "prompt": "اختر حرف الذال",
+      "correctLetter": "ذ",
+      "options": ["ز", "د", "ذ"]
+    },
+    {
+      "type": "missingLetter",
+      "incompleteWord": "م رسة",
+      "correctLetter": "د",
+      "options": ["ب", "ر", "د", "س"]
+    },
+    {
+      "type": "missingLetter",
+      "incompleteWord": " طار ",
+      "correctLetter": "ق",
+      "options": ["ف", "ك", "ق", "غ"]
+    },
+    {
+      "type": "missingLetter",
+      "incompleteWord": "حقي ة",
+      "correctLetter": "ب",
+      "options": ["ب", "د", "ذ", "ز"]
+    },
+    {
+      "type": "audioMatch",
+      "audioLetter": "ت",
+      "correctLetter": "ت",
+      "options": ["ت", "د", "س"]
+    },
+    {
+      "type": "audioMatch",
+      "audioLetter": "ع",
+      "correctLetter": "ع",
+      "options": ["غ", "ق", "ع"]
+    },
+    {
+      "type": "audioMatch",
+      "audioLetter": "ذ",
+      "correctLetter": "ذ",
+      "options": ["ز", "د", "ذ"]
+    },
+    {
+      "type": "wordWithLetter",
+      "targetLetter": "ر",
+      "correctWord": "قمر",
+      "options": ["شمس", "قمر", "بيت"]
+    },
+    {
+      "type": "wordWithLetter",
+      "targetLetter": "ف",
+      "correctWord": "فيل",
+      "options": ["فيل", "نمر", "كلب"]
+    },
+    {
+      "type": "wordWithLetter",
+      "targetLetter": "ك",
+      "correctWord": "كتاب",
+      "options": ["قمر", "بيت", "كتاب"]
+    },
   ];
 
   @override
@@ -40,13 +117,62 @@ class _ArabicLetterQuizScreenState extends State<ArabicLetterQuizScreen> {
     _speakQuestion(questions[currentIndex]);
   }
 
+  Future<void> _saveScore(int score) async {
+    try {
+      String? parentId = ""; // fetch parentId
+      String? childId = ""; // fetch childId
+
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        print("User not logged in");
+        return;
+      }
+      parentId = user.uid;
+
+      final childrenSnapshot = await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(parentId)
+          .collection('children')
+          .get();
+      if (childrenSnapshot.docs.isNotEmpty) {
+        childId = childrenSnapshot.docs.first.id;
+      } else {
+        print("No children found for this parent.");
+        return null;
+      }
+
+      if (parentId.isEmpty || childId == null) {
+        print("Cannot save score: parentId or childId missing");
+        return;
+      }
+
+      await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(parentId)
+          .collection('children')
+          .doc(childId)
+          .collection('arabic')
+          .doc('arabic1')
+          .collection('attempts') // optional: track multiple attempts
+          .add({
+        'score': score,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      print("Score saved successfully");
+    } catch (e) {
+      print("Error saving score: $e");
+    }
+  }
+
   Future<void> _speakQuestion(Map<String, dynamic> question) async {
     await flutterTts.setLanguage("ar-SA");
     await flutterTts.setSpeechRate(0.4);
     String text = "";
     switch (question["type"]) {
       case "position":
-        text = "أين يقع الحرف ${question["letter"]} في كلمة ${question["word"]}";
+        text =
+            "أين يقع الحرف ${question["letter"]} في كلمة ${question["word"]}";
         break;
       case "letterChoice":
         text = question["prompt"];
@@ -70,7 +196,8 @@ class _ArabicLetterQuizScreenState extends State<ArabicLetterQuizScreen> {
 
     if (q["type"] == "position") {
       isCorrect = selected == q["correctPosition"];
-    } else if (["letterChoice", "audioMatch", "missingLetter"].contains(q["type"])) {
+    } else if (["letterChoice", "audioMatch", "missingLetter"]
+        .contains(q["type"])) {
       isCorrect = selected == q["correctLetter"];
     } else if (q["type"] == "wordWithLetter") {
       isCorrect = selected == q["correctWord"];
@@ -111,6 +238,12 @@ class _ArabicLetterQuizScreenState extends State<ArabicLetterQuizScreen> {
   Widget build(BuildContext context) {
     if (currentIndex >= questions.length) {
       int scorePercent = ((correctAnswers / questions.length) * 100).round();
+
+      // Save the score once when the quiz is complete
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _saveScore(scorePercent);
+      });
+
       String message;
       Color color;
 
@@ -131,20 +264,30 @@ class _ArabicLetterQuizScreenState extends State<ArabicLetterQuizScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text("النتيجة النهائية", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+              const Text("النتيجة النهائية",
+                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
               const SizedBox(height: 20),
-              Text("$scorePercent%", style: const TextStyle(fontSize: 60, color: Colors.deepOrange, fontWeight: FontWeight.bold)),
+              Text("$scorePercent%",
+                  style: const TextStyle(
+                      fontSize: 60,
+                      color: Colors.deepOrange,
+                      fontWeight: FontWeight.bold)),
               const SizedBox(height: 20),
-              Text(message, style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: color)),
+              Text(message,
+                  style: TextStyle(
+                      fontSize: 26, fontWeight: FontWeight.bold, color: color)),
               const SizedBox(height: 30),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 18),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 40, vertical: 18),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
                 ),
-                child: const Text("التالي ⏭️", style: TextStyle(fontSize: 24, color: Colors.white)),
+                child: const Text("التالي ⏭️",
+                    style: TextStyle(fontSize: 24, color: Colors.white)),
               ),
             ],
           ),
@@ -176,7 +319,10 @@ class _ArabicLetterQuizScreenState extends State<ArabicLetterQuizScreen> {
                       Icon(feedbackIcon, color: feedbackColor, size: 32),
                       const SizedBox(width: 10),
                       Text(feedbackMessage,
-                          style: TextStyle(fontSize: 24, color: feedbackColor, fontWeight: FontWeight.bold)),
+                          style: TextStyle(
+                              fontSize: 24,
+                              color: feedbackColor,
+                              fontWeight: FontWeight.bold)),
                     ],
                   ),
                 ),
@@ -190,11 +336,14 @@ class _ArabicLetterQuizScreenState extends State<ArabicLetterQuizScreen> {
   Widget _buildQuestionWidget(Map<String, dynamic> q) {
     switch (q["type"]) {
       case "position":
-        return _buildChoiceQuestion("أين يقع الحرف '${q['letter']}' في الكلمة '${q['word']}'؟", ["بداية", "وسط", "نهاية"]);
+        return _buildChoiceQuestion(
+            "أين يقع الحرف '${q['letter']}' في الكلمة '${q['word']}'؟",
+            ["بداية", "وسط", "نهاية"]);
       case "letterChoice":
         return _buildChoiceQuestion(q["prompt"], q["options"]);
       case "missingLetter":
-        return _buildChoiceQuestion("ما هو الحرف الناقص في: ${q["incompleteWord"]}", q["options"]);
+        return _buildChoiceQuestion(
+            "ما هو الحرف الناقص في: ${q["incompleteWord"]}", q["options"]);
       case "audioMatch":
         return Column(
           children: [
@@ -202,7 +351,9 @@ class _ArabicLetterQuizScreenState extends State<ArabicLetterQuizScreen> {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () => _playSound(q["audioLetter"]),
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.amberAccent, padding: const EdgeInsets.all(16)),
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.amberAccent,
+                  padding: const EdgeInsets.all(16)),
               child: const Icon(Icons.volume_up, size: 40),
             ),
             const SizedBox(height: 20),
@@ -210,7 +361,9 @@ class _ArabicLetterQuizScreenState extends State<ArabicLetterQuizScreen> {
           ],
         );
       case "wordWithLetter":
-        return _buildChoiceQuestion("اختر الكلمة التي تحتوي على الحرف '${q["targetLetter"]}'", q["options"]);
+        return _buildChoiceQuestion(
+            "اختر الكلمة التي تحتوي على الحرف '${q["targetLetter"]}'",
+            q["options"]);
       default:
         return const Text("سؤال غير معروف");
     }
@@ -229,9 +382,15 @@ class _ArabicLetterQuizScreenState extends State<ArabicLetterQuizScreen> {
           ),
           child: Column(
             children: [
-              Text("سؤال ${currentIndex + 1}", style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.deepOrange)),
+              Text("سؤال ${currentIndex + 1}",
+                  style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.deepOrange)),
               const SizedBox(height: 10),
-              Text(question, textAlign: TextAlign.center, style: const TextStyle(fontSize: 24)),
+              Text(question,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 24)),
             ],
           ),
         ),
@@ -251,9 +410,14 @@ class _ArabicLetterQuizScreenState extends State<ArabicLetterQuizScreen> {
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.orange,
             minimumSize: const Size(140, 60),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           ),
-          child: Text(opt, style: const TextStyle(fontSize: 28, color: Colors.white, fontWeight: FontWeight.bold)),
+          child: Text(opt,
+              style: const TextStyle(
+                  fontSize: 28,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold)),
         );
       }).toList(),
     );

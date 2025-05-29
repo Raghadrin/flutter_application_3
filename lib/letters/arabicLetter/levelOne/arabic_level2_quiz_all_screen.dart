@@ -1,15 +1,18 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ArabicLevel2WordQuizScreen extends StatefulWidget {
   const ArabicLevel2WordQuizScreen({super.key});
 
   @override
-  State<ArabicLevel2WordQuizScreen> createState() => _ArabicLevel2WordQuizScreenState();
+  State<ArabicLevel2WordQuizScreen> createState() =>
+      _ArabicLevel2WordQuizScreenState();
 }
 
-class _ArabicLevel2WordQuizScreenState extends State<ArabicLevel2WordQuizScreen> {
+class _ArabicLevel2WordQuizScreenState
+    extends State<ArabicLevel2WordQuizScreen> {
   final FlutterTts flutterTts = FlutterTts();
   int currentIndex = 0;
   int correctAnswers = 0;
@@ -70,6 +73,54 @@ class _ArabicLevel2WordQuizScreenState extends State<ArabicLevel2WordQuizScreen>
   void initState() {
     super.initState();
     _speakQuestion();
+  }
+
+  Future<void> _saveScore(int score) async {
+    try {
+      String? parentId = ""; // fetch parentId
+      String? childId = ""; // fetch childId
+
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        print("User not logged in");
+        return;
+      }
+      parentId = user.uid;
+
+      final childrenSnapshot = await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(parentId)
+          .collection('children')
+          .get();
+      if (childrenSnapshot.docs.isNotEmpty) {
+        childId = childrenSnapshot.docs.first.id;
+      } else {
+        print("No children found for this parent.");
+        return null;
+      }
+
+      if (parentId.isEmpty || childId == null) {
+        print("Cannot save score: parentId or childId missing");
+        return;
+      }
+
+      await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(parentId)
+          .collection('children')
+          .doc(childId)
+          .collection('arabic')
+          .doc('arabic2')
+          .collection('attempts') // optional: track multiple attempts
+          .add({
+        'score': score,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      print("Score saved successfully");
+    } catch (e) {
+      print("Error saving score: $e");
+    }
   }
 
   Future<void> _speakQuestion() async {
@@ -139,6 +190,10 @@ class _ArabicLevel2WordQuizScreenState extends State<ArabicLevel2WordQuizScreen>
       String finalMessage;
       Color msgColor;
 
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _saveScore(scorePercent);
+      });
+
       if (scorePercent >= 90) {
         finalMessage = "ممتاز جدًا 🎉";
         msgColor = Colors.green;
@@ -149,6 +204,7 @@ class _ArabicLevel2WordQuizScreenState extends State<ArabicLevel2WordQuizScreen>
         finalMessage = "أحسنت المحاولة 💪";
         msgColor = Colors.red;
       }
+      // Save the score once when the quiz is complete
 
       return Scaffold(
         backgroundColor: Colors.orange[50],
@@ -156,21 +212,32 @@ class _ArabicLevel2WordQuizScreenState extends State<ArabicLevel2WordQuizScreen>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text("النتيجة النهائية", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+              const Text("النتيجة النهائية",
+                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
               const SizedBox(height: 20),
               Text("$scorePercent%",
-                  style: const TextStyle(fontSize: 50, color: Colors.deepOrange, fontWeight: FontWeight.bold)),
+                  style: const TextStyle(
+                      fontSize: 50,
+                      color: Colors.deepOrange,
+                      fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
-              Text(finalMessage, style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: msgColor)),
+              Text(finalMessage,
+                  style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      color: msgColor)),
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 18),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 40, vertical: 18),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
                 ),
-                child: const Text("التالي ⏭️", style: TextStyle(fontSize: 24, color: Colors.white)),
+                child: const Text("التالي ⏭️",
+                    style: TextStyle(fontSize: 24, color: Colors.white)),
               )
             ],
           ),
@@ -182,7 +249,8 @@ class _ArabicLevel2WordQuizScreenState extends State<ArabicLevel2WordQuizScreen>
     return Scaffold(
       backgroundColor: Colors.orange[50],
       appBar: AppBar(
-        title: const Text('كويز الكلمات - مستوى 2', style: TextStyle(fontSize: 26)),
+        title: const Text('كويز الكلمات - مستوى 2',
+            style: TextStyle(fontSize: 26)),
         backgroundColor: Colors.deepOrange,
         centerTitle: true,
       ),
@@ -204,17 +272,22 @@ class _ArabicLevel2WordQuizScreenState extends State<ArabicLevel2WordQuizScreen>
                   children: [
                     Text(
                       "السؤال ${currentIndex + 1} من ${questions.length}",
-                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.deepOrange),
+                      style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.deepOrange),
                     ),
                     const SizedBox(height: 12),
                     if (q['type'] == 'missingWord')
                       Text(q['sentence'], style: const TextStyle(fontSize: 24))
                     else if (q['type'] == 'wordWithLetter')
-                      Text("🔠 اختر كلمة تحتوي ${q['letter']}", style: const TextStyle(fontSize: 24))
+                      Text(" اختر كلمة تحتوي ${q['letter']}",
+                          style: const TextStyle(fontSize: 24))
                     else if (q['type'] == 'audioWord')
                       Column(
                         children: [
-                          const Text("🎧 اضغط للاستماع", style: TextStyle(fontSize: 24)),
+                          const Text("🎧 اضغط للاستماع",
+                              style: TextStyle(fontSize: 24)),
                           IconButton(
                             icon: const Icon(Icons.volume_up, size: 40),
                             onPressed: () => flutterTts.speak(q['sound']),
@@ -249,7 +322,10 @@ class _ArabicLevel2WordQuizScreenState extends State<ArabicLevel2WordQuizScreen>
                       const SizedBox(width: 10),
                       Text(
                         feedbackMessage,
-                        style: TextStyle(fontSize: 24, color: feedbackColor, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 24,
+                            color: feedbackColor,
+                            fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -271,7 +347,8 @@ class _ArabicLevel2WordQuizScreenState extends State<ArabicLevel2WordQuizScreen>
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.deepOrange,
           foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         ),
       ),
@@ -286,7 +363,8 @@ class _ArabicLevel2WordQuizScreenState extends State<ArabicLevel2WordQuizScreen>
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.orange,
           padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 18),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
           elevation: 4,
         ),
         child: Container(
@@ -294,7 +372,8 @@ class _ArabicLevel2WordQuizScreenState extends State<ArabicLevel2WordQuizScreen>
           alignment: Alignment.center,
           child: Text(
             text,
-            style: const TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+                fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold),
           ),
         ),
       ),

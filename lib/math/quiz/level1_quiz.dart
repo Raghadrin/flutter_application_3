@@ -121,20 +121,34 @@ class _Level1QuizState extends State<Level1Quiz>
     }
   }
 
-  Future<void> _saveScore() async {
+  Future<void> _saveScore(int score) async {
     try {
+      String? parentId = ""; // fetch parentId
+      String? childId = ""; // fetch childId
+
       final user = FirebaseAuth.instance.currentUser;
-      if (user == null) return;
-      final parentId = user.uid;
+      if (user == null) {
+        print("User not logged in");
+        return;
+      }
+      parentId = user.uid;
 
       final childrenSnapshot = await FirebaseFirestore.instance
           .collection('parents')
           .doc(parentId)
           .collection('children')
           .get();
-      if (childrenSnapshot.docs.isEmpty) return;
+      if (childrenSnapshot.docs.isNotEmpty) {
+        childId = childrenSnapshot.docs.first.id;
+      } else {
+        print("No children found for this parent.");
+        return null;
+      }
 
-      final childId = childrenSnapshot.docs.first.id;
+      if (parentId.isEmpty || childId == null) {
+        print("Cannot save score: parentId or childId missing");
+        return;
+      }
 
       await FirebaseFirestore.instance
           .collection('parents')
@@ -143,19 +157,20 @@ class _Level1QuizState extends State<Level1Quiz>
           .doc(childId)
           .collection('math')
           .doc('math1')
-          .collection('quiz1')
+          .collection('attempts') // optional: track multiple attempts
           .add({
         'score': score,
-        'total': questions.length * 10,
         'timestamp': FieldValue.serverTimestamp(),
       });
+
+      print("Score saved successfully");
     } catch (e) {
       print("Error saving score: $e");
     }
   }
 
   Future<void> _showResult() async {
-    await _saveScore();
+    await _saveScore(score);
     setState(() {
       stars = (score == questions.length * 10)
           ? 3
@@ -187,8 +202,7 @@ class _Level1QuizState extends State<Level1Quiz>
                 children: List.generate(
                   3,
                   (i) => Icon(Icons.star,
-                      color: i < stars ? Colors.orange : Colors.grey,
-                      size: 36),
+                      color: i < stars ? Colors.orange : Colors.grey, size: 36),
                 ),
               ),
               const SizedBox(height: 16),
@@ -326,7 +340,8 @@ class _Level1QuizState extends State<Level1Quiz>
                           borderRadius: BorderRadius.circular(12)),
                     ),
                     child: Text(option,
-                        style: const TextStyle(fontSize: 26, color: Colors.black)),
+                        style:
+                            const TextStyle(fontSize: 26, color: Colors.black)),
                   );
                 }).toList(),
               ),

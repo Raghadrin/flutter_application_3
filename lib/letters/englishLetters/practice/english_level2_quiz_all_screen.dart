@@ -1,73 +1,125 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class EnglishLevel2WordQuizScreen extends StatefulWidget {
   const EnglishLevel2WordQuizScreen({super.key});
 
   @override
-  State<EnglishLevel2WordQuizScreen> createState() => _EnglishLevel2WordQuizScreenState();
+  State<EnglishLevel2WordQuizScreen> createState() =>
+      _EnglishLevel2WordQuizScreenState();
 }
 
-class _EnglishLevel2WordQuizScreenState extends State<EnglishLevel2WordQuizScreen> {
+class _EnglishLevel2WordQuizScreenState
+    extends State<EnglishLevel2WordQuizScreen> {
   final FlutterTts flutterTts = FlutterTts();
   int currentIndex = 0;
   int correctAnswers = 0;
   String feedbackMessage = '';
   Color feedbackColor = Colors.transparent;
   IconData? feedbackIcon;
-final List<Map<String, dynamic>> questions = [
-  {
-    "type": "sentenceChoice",
-    "question": "Choose the sentence that includes the word 'environment'.",
-    "correct": "We must protect the environment from pollution.",
-    "options": [
-      "He fixed his broken bicycle.",
-      "We must protect the environment from pollution.",
-      "My sister painted a beautiful picture."
-    ]
-  },
-  {
-    "type": "synonymChoice",
-    "question": "What is a synonym of 'intelligent'?",
-    "correct": "Smart",
-    "options": ["Tall", "Smart", "Loud"]
-  },
-  {
-    "type": "oppositeChoice",
-    "question": "What is the opposite of 'ancient'?",
-    "correct": "Modern",
-    "options": ["Old", "Modern", "Big"]
-  },
-  {
-    "type": "categoryChoice",
-    "question": "Which word belongs to the category 'instruments'?",
-    "correct": "Violin",
-    "options": ["Violin", "Window", "Jacket"]
-  },
-  {
-    "type": "audioWord",
-    "sound": "curiosity", // TTS or pre-recorded
-    "correct": "Curiosity",
-    "options": ["Curiosity", "Generosity", "Velocity"]
-  },
-  {
-    "type": "missingWord",
-    "sentence": "She delivered a       speech about climate change.",
-    "correct": "powerful",
-    "options": ["colorful", "powerful", "peaceful"]
-  },
-  {
-    "type": "wordWithLetter",
-    "letter": "q",
-    "correct": "Question",
-    "options": ["Answer", "Question", "Lesson"]
-  },
-];
+  final List<Map<String, dynamic>> questions = [
+    {
+      "type": "sentenceChoice",
+      "question": "Choose the sentence that includes the word 'environment'.",
+      "correct": "We must protect the environment from pollution.",
+      "options": [
+        "He fixed his broken bicycle.",
+        "We must protect the environment from pollution.",
+        "My sister painted a beautiful picture."
+      ]
+    },
+    {
+      "type": "synonymChoice",
+      "question": "What is a synonym of 'intelligent'?",
+      "correct": "Smart",
+      "options": ["Tall", "Smart", "Loud"]
+    },
+    {
+      "type": "oppositeChoice",
+      "question": "What is the opposite of 'ancient'?",
+      "correct": "Modern",
+      "options": ["Old", "Modern", "Big"]
+    },
+    {
+      "type": "categoryChoice",
+      "question": "Which word belongs to the category 'instruments'?",
+      "correct": "Violin",
+      "options": ["Violin", "Window", "Jacket"]
+    },
+    {
+      "type": "audioWord",
+      "sound": "curiosity", // TTS or pre-recorded
+      "correct": "Curiosity",
+      "options": ["Curiosity", "Generosity", "Velocity"]
+    },
+    {
+      "type": "missingWord",
+      "sentence": "She delivered a       speech about climate change.",
+      "correct": "powerful",
+      "options": ["colorful", "powerful", "peaceful"]
+    },
+    {
+      "type": "wordWithLetter",
+      "letter": "q",
+      "correct": "Question",
+      "options": ["Answer", "Question", "Lesson"]
+    },
+  ];
 
   @override
   void initState() {
     super.initState();
     _speakQuestion();
+  }
+
+  Future<void> _saveScore(int score) async {
+    try {
+      String? parentId = ""; // fetch parentId
+      String? childId = ""; // fetch childId
+
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        print("User not logged in");
+        return;
+      }
+      parentId = user.uid;
+
+      final childrenSnapshot = await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(parentId)
+          .collection('children')
+          .get();
+      if (childrenSnapshot.docs.isNotEmpty) {
+        childId = childrenSnapshot.docs.first.id;
+      } else {
+        print("No children found for this parent.");
+        return null;
+      }
+
+      if (parentId.isEmpty || childId == null) {
+        print("Cannot save score: parentId or childId missing");
+        return;
+      }
+
+      await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(parentId)
+          .collection('children')
+          .doc(childId)
+          .collection('english')
+          .doc('english2')
+          .collection('attempts') // optional: track multiple attempts
+          .add({
+        'score': score,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      print("Score saved successfully");
+    } catch (e) {
+      print("Error saving score: $e");
+    }
   }
 
   Future<void> _speakQuestion() async {
@@ -137,6 +189,10 @@ final List<Map<String, dynamic>> questions = [
       String finalMessage;
       Color msgColor;
 
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _saveScore(scorePercent);
+      });
+
       if (scorePercent >= 90) {
         finalMessage = "Excellent 🎉";
         msgColor = Colors.green;
@@ -154,21 +210,32 @@ final List<Map<String, dynamic>> questions = [
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Text("Final Score", style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+              const Text("Final Score",
+                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
               const SizedBox(height: 20),
               Text("$scorePercent%",
-                  style: const TextStyle(fontSize: 50, color: Colors.deepOrange, fontWeight: FontWeight.bold)),
+                  style: const TextStyle(
+                      fontSize: 50,
+                      color: Colors.deepOrange,
+                      fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
-              Text(finalMessage, style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: msgColor)),
+              Text(finalMessage,
+                  style: TextStyle(
+                      fontSize: 26,
+                      fontWeight: FontWeight.bold,
+                      color: msgColor)),
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 18),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 40, vertical: 18),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16)),
                 ),
-                child: const Text("Next ⏭️", style: TextStyle(fontSize: 24, color: Colors.white)),
+                child: const Text("Next ⏭️",
+                    style: TextStyle(fontSize: 24, color: Colors.white)),
               )
             ],
           ),
@@ -180,7 +247,8 @@ final List<Map<String, dynamic>> questions = [
     return Scaffold(
       backgroundColor: Colors.orange[50],
       appBar: AppBar(
-        title: const Text('Word Quiz - Level 2', style: TextStyle(fontSize: 26)),
+        title:
+            const Text('Word Quiz - Level 2', style: TextStyle(fontSize: 26)),
         backgroundColor: Colors.deepOrange,
         centerTitle: true,
       ),
@@ -202,17 +270,22 @@ final List<Map<String, dynamic>> questions = [
                   children: [
                     Text(
                       "Question ${currentIndex + 1} of ${questions.length}",
-                      style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.deepOrange),
+                      style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.deepOrange),
                     ),
                     const SizedBox(height: 12),
                     if (q['type'] == 'missingWord')
                       Text(q['sentence'], style: const TextStyle(fontSize: 24))
                     else if (q['type'] == 'wordWithLetter')
-                      Text("🔠 Choose a word with '${q['letter']}'", style: const TextStyle(fontSize: 24))
+                      Text("🔠 Choose a word with '${q['letter']}'",
+                          style: const TextStyle(fontSize: 24))
                     else if (q['type'] == 'audioWord')
                       Column(
                         children: [
-                          const Text("🎧 Tap to listen", style: TextStyle(fontSize: 24)),
+                          const Text("🎧 Tap to listen",
+                              style: TextStyle(fontSize: 24)),
                           IconButton(
                             icon: const Icon(Icons.volume_up, size: 40),
                             onPressed: () => flutterTts.speak(q['sound']),
@@ -237,7 +310,10 @@ final List<Map<String, dynamic>> questions = [
                       const SizedBox(width: 10),
                       Text(
                         feedbackMessage,
-                        style: TextStyle(fontSize: 24, color: feedbackColor, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 24,
+                            color: feedbackColor,
+                            fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -259,7 +335,8 @@ final List<Map<String, dynamic>> questions = [
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.deepOrange,
           foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         ),
       ),
@@ -274,7 +351,8 @@ final List<Map<String, dynamic>> questions = [
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.orange,
           padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 18),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
           elevation: 4,
         ),
         child: Container(
@@ -282,7 +360,8 @@ final List<Map<String, dynamic>> questions = [
           alignment: Alignment.center,
           child: Text(
             text,
-            style: const TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+                fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold),
           ),
         ),
       ),

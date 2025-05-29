@@ -161,7 +161,7 @@ class _MathVideosScreenState extends State<MathVideosScreen>
       crossAxisCount: 2,
       crossAxisSpacing: 16,
       mainAxisSpacing: 16,
-      childAspectRatio: 0.5,
+      childAspectRatio: 0.7,
       children: videos.map((video) => _buildVideoTile(video, context)).toList(),
     );
   }
@@ -173,6 +173,7 @@ class _MathVideosScreenState extends State<MathVideosScreen>
       child: Scaffold(
         backgroundColor: const Color(0xFFFFF6ED),
         appBar: AppBar(
+          centerTitle: true,
           title: const Text("Skill Videos"),
           backgroundColor: const Color(0xFFFFA726),
           bottom: const TabBar(
