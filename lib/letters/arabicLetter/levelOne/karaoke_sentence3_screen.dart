@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
-import 'evaluation_screen.dart';
+import 'evaluation_screen.dart'; // تأكد من مسار الملف
 
 class KaraokeSentenceLevel3Screen extends StatefulWidget {
   const KaraokeSentenceLevel3Screen({super.key});
@@ -20,8 +20,7 @@ class _KaraokeSentenceLevel3ScreenState
   double score = 0.0;
   int stars = 0;
   int currentSentenceIndex = 0;
-  List<String> matchedWords = [];
-  int currentWordIndex = 0;
+  Map<String, bool> wordMatchResults = {};
 
   List<Map<String, String>> sentences = [
     {
@@ -60,7 +59,6 @@ class _KaraokeSentenceLevel3ScreenState
       onStatus: (val) {
         if (val == 'done') {
           setState(() => isListening = false);
-          showEvaluation();
         }
       },
       onError: (val) {
@@ -71,12 +69,14 @@ class _KaraokeSentenceLevel3ScreenState
       setState(() {
         isListening = true;
         recognizedText = "";
-        matchedWords = [];
-        currentWordIndex = 0;
+        wordMatchResults.clear();
       });
       speech.listen(
         localeId: 'ar_SA',
+        listenMode: stt.ListenMode.dictation,
         partialResults: true,
+        pauseFor: const Duration(seconds: 5),
+        listenFor: const Duration(minutes: 1),
         onResult: (val) {
           setState(() {
             recognizedText = val.recognizedWords;
@@ -92,19 +92,17 @@ class _KaraokeSentenceLevel3ScreenState
     List<String> expectedWords = expected.split(RegExp(r'\s+'));
     List<String> spokenWords = recognizedText.split(RegExp(r'\s+'));
 
-    if (currentWordIndex < expectedWords.length) {
-      if (spokenWords.contains(expectedWords[currentWordIndex])) {
-        matchedWords.add(expectedWords[currentWordIndex]);
-        currentWordIndex++;
-      }
+    wordMatchResults.clear();
+    for (var word in expectedWords) {
+      bool matched = spokenWords.contains(word);
+      wordMatchResults[word] = matched;
     }
   }
 
   void evaluateResult() {
-    String expected = currentSentence["text"] ?? "";
-    List<String> expectedWords = expected.split(RegExp(r'\s+'));
-
-    score = (matchedWords.length / expectedWords.length) * 100;
+    int correct = wordMatchResults.values.where((v) => v == true).length;
+    int total = wordMatchResults.length;
+    score = total > 0 ? (correct / total) * 100 : 0.0;
 
     if (score >= 90) {
       stars = 3;
@@ -115,6 +113,8 @@ class _KaraokeSentenceLevel3ScreenState
     } else {
       stars = 0;
     }
+
+    setState(() {});
   }
 
   void nextSentence() {
@@ -127,8 +127,7 @@ class _KaraokeSentenceLevel3ScreenState
       recognizedText = "";
       score = 0.0;
       stars = 0;
-      matchedWords = [];
-      currentWordIndex = 0;
+      wordMatchResults.clear();
     });
   }
 
@@ -136,12 +135,21 @@ class _KaraokeSentenceLevel3ScreenState
     String fullSentence = currentSentence["text"]!;
     List<String> words = fullSentence.split(RegExp(r'\s+'));
     return words.map((word) {
-      bool isCurrent = words.indexOf(word) == currentWordIndex;
+      bool? matched = wordMatchResults[word];
+      Color color;
+      if (matched == true) {
+        color = Colors.green;
+      } else if (matched == false) {
+        color = Colors.red;
+      } else {
+        color = Colors.black;
+      }
+
       return TextSpan(
         text: '$word ',
         style: TextStyle(
-          color: isCurrent ? Colors.blue : Colors.black,
-          fontSize: 24,
+          color: color,
+          fontSize: 28,
           fontWeight: FontWeight.bold,
         ),
       );
@@ -157,10 +165,7 @@ class _KaraokeSentenceLevel3ScreenState
           recognizedText: recognizedText,
           score: score,
           stars: stars,
-          wordMatchResults: {
-            for (var word in currentSentence["text"]!.split(' '))
-              word: matchedWords.contains(word)
-          },
+          wordMatchResults: wordMatchResults,
           onNext: () {
             Navigator.pop(context);
             nextSentence();
@@ -173,8 +178,11 @@ class _KaraokeSentenceLevel3ScreenState
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('🎤 كاريوكي الجمل - المستوى ٣')),
+      appBar: AppBar(
+        title: const Text('🎤 كاريوكي الجمل - المستوى ٣'),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
