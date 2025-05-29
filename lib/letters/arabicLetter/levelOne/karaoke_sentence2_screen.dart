@@ -22,7 +22,7 @@ class _KaraokeSentenceLevel2ScreenState extends State<KaraokeSentenceLevel2Scree
 
   List<Map<String, String>> sentences = [
     {
-      "text": "ذهبت العائله الى البحر وقضت وقتا ممتعا في السباحه وبناء القلاع الرمليه",
+      "text": "ذهبت العائلة الى البحر وقضت وقتا ممتعا في السباحة وبناء القلاع الرملية",
       "audio": "audio/family.mp3",
     },
     {
