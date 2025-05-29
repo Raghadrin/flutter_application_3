@@ -6,27 +6,27 @@ import 'package:easy_localization/easy_localization.dart';
 import 'arabic_level2_screen.dart';
 import 'arabic_level2_quiz_all_screen.dart';
 import 'locale_keys.dart';
+import 'karaoke_sentence2_screen.dart';
 
-class ArabicLevel2HomeScreen extends StatelessWidget {
+class ArabicLevel2HomeScreen extends StatefulWidget {
+  const ArabicLevel2HomeScreen({super.key});
+
+  @override
+  State<ArabicLevel2HomeScreen> createState() => _ArabicLevel2HomeScreenState();
+}
+
+class _ArabicLevel2HomeScreenState extends State<ArabicLevel2HomeScreen> {
   final FlutterTts tts = FlutterTts();
-
-  ArabicLevel2HomeScreen({super.key});
 
   Future<void> configureTts(BuildContext context) async {
     final langCode = context.locale.languageCode;
 
     if (langCode == 'ar') {
       await tts.setLanguage("ar-SA");
-      await tts.setVoice({
-        'name': 'ar-xa-x-arm-local',
-        'locale': 'ar-SA',
-      });
+      await tts.setVoice({'name': 'ar-xa-x-arm-local', 'locale': 'ar-SA'});
     } else {
       await tts.setLanguage("en-US");
-      await tts.setVoice({
-        'name': 'en-gb-x-rjs-local',
-        'locale': 'en-US',
-      });
+      await tts.setVoice({'name': 'en-gb-x-rjs-local', 'locale': 'en-US'});
     }
 
     await tts.setSpeechRate(0.45);
@@ -54,89 +54,106 @@ class ArabicLevel2HomeScreen extends StatelessWidget {
       "text": LocaleKeys.trafficText,
       "animation": "images/traffic.json"
     },
-   {
-  "title": LocaleKeys.libraryTitle,
-  "text": LocaleKeys.libraryText,
-  "animation": "images/read.json"
-},
-{
-  "title": LocaleKeys.deliciousFoodTitle,
-  "text": LocaleKeys.deliciousFoodText,
-  "animation": "images/cook.json"
-},
-
+    {
+      "title": LocaleKeys.libraryTitle,
+      "text": LocaleKeys.libraryText,
+      "animation": "images/read.json"
+    },
+    {
+      "title": LocaleKeys.deliciousFoodTitle,
+      "text": LocaleKeys.deliciousFoodText,
+      "animation": "images/cook.json"
+    },
   ];
 
   @override
   Widget build(BuildContext context) {
     _speak(context, tr(LocaleKeys.level2WelcomeMessage));
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFFFF8E1),
-      appBar: AppBar(
-        backgroundColor: Colors.orange,
-        elevation: 0,
-        title: Text(
-          tr(LocaleKeys.arabicLevel2Title),
-          style: const TextStyle(
-            color: Colors.black,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        backgroundColor: const Color(0xFFFFF8E1),
+        appBar: AppBar(
+          backgroundColor: Colors.orange,
+          elevation: 0,
+          title: Text(
+            tr(LocaleKeys.arabicLevel2Title),
+            style: const TextStyle(
+              color: Colors.black,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.language, color: Colors.black),
-            onPressed: () {
-              final newLocale = context.locale.languageCode == 'ar'
-                  ? const Locale('en')
-                  : const Locale('ar');
-              context.setLocale(newLocale);
-            },
-          )
-        ],
-      ),
-      body: GridView.count(
-        crossAxisCount: 2,
-        padding: const EdgeInsets.all(16),
-        mainAxisSpacing: 16,
-        crossAxisSpacing: 16,
-        childAspectRatio: 0.75,
-        children: [
-          _buildTile(
-            context,
-            title: tr(LocaleKeys.quizButton2),
-            jsonPath: "images/new_images/Quiz.json",
-            onTap: () {
-              _speak(context, tr(LocaleKeys.startQuiz2));
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const ArabicLevel2WordQuizScreen(),
-                ),
-              );
-            },
+          centerTitle: true,
+          bottom: const TabBar(
+            labelStyle: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            indicatorWeight: 3,
+            tabs: [
+              Tab(text: 'التمارين'),
+              Tab(text: 'كاريوكي'),
+            ],
           ),
-          ...sentenceKeys.map((s) {
-            return _buildTile(
-              context,
-              title: tr(s["title"]!),
-              jsonPath: s["animation"]!,
-              onTap: () {
-                _speak(context, "${tr(LocaleKeys.selectedPrefix)} ${tr(s["title"]!)}");
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => ArabicLevel2Screen(
-                      sentence: tr(s["text"]!),
-                    ),
-                  ),
-                );
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.language, color: Colors.black),
+              onPressed: () {
+                final newLocale = context.locale.languageCode == 'ar'
+                    ? const Locale('en')
+                    : const Locale('ar');
+                context.setLocale(newLocale);
               },
-            );
-          }).toList(),
-        ],
+            )
+          ],
+        ),
+        body: TabBarView(
+          children: [
+            GridView.count(
+              crossAxisCount: 2,
+              padding: const EdgeInsets.all(16),
+              mainAxisSpacing: 16,
+              crossAxisSpacing: 16,
+              childAspectRatio: 0.75,
+              children: [
+                _buildTile(
+                  context,
+                  title: tr(LocaleKeys.quizButton2),
+                  jsonPath: "images/new_images/Quiz.json",
+                  onTap: () {
+                    _speak(context, tr(LocaleKeys.startQuiz2));
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const ArabicLevel2WordQuizScreen(),
+                      ),
+                    );
+                  },
+                ),
+                ...sentenceKeys.map((s) {
+                  return _buildTile(
+                    context,
+                    title: tr(s["title"]!),
+                    jsonPath: s["animation"]!,
+                    onTap: () {
+                      _speak(context, "${tr(LocaleKeys.selectedPrefix)} ${tr(s["title"]!)}");
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => ArabicLevel2Screen(
+                            sentence: tr(s["text"]!),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                }).toList(),
+              ],
+            ),
+
+            // ✅ التبويب الثاني: كاريوكي الجمل
+            const KaraokeSentenceLevel2Screen(),
+          ],
+        ),
       ),
     );
   }

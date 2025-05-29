@@ -76,9 +76,9 @@ class _ArabicLevel1HomeScreenState extends State<ArabicLevel1HomeScreen> {
             ),
           ),
           centerTitle: true,
-          bottom: const TabBar(
-            labelColor: Colors.black,
-            indicatorColor: Colors.white,
+           bottom: const TabBar(
+              labelStyle: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              indicatorWeight: 3,
             tabs: [
               Tab(text: 'التمارين'),
               Tab(text: 'كاريوكي'),
