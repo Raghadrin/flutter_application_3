@@ -75,7 +75,10 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
       });
       speech.listen(
         localeId: 'ar_SA',
+        listenMode: stt.ListenMode.dictation,
         partialResults: true,
+        pauseFor: Duration(seconds: 5),
+        listenFor: Duration(minutes: 1),
         onResult: (val) {
           setState(() {
             recognizedText = val.recognizedWords;
