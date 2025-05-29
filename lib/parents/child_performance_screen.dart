@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class CombinedChildPerformanceScreen extends StatefulWidget {
   final bool isDarkMode;
@@ -107,14 +108,15 @@ class _CombinedChildPerformanceScreenState
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
-        title: const Text('Child Performance'),
+        title: Text('child_performance'.tr()),
+        centerTitle: true,
         backgroundColor: isDark ? Colors.deepPurple : Colors.white,
         foregroundColor: isDark ? Colors.white : Colors.deepOrange,
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : childData == null
-              ? const Center(child: Text("No child selected."))
+              ? Center(child: Text("no_child_selected".tr()))
               : Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
@@ -125,12 +127,12 @@ class _CombinedChildPerformanceScreenState
                             borderRadius: BorderRadius.circular(16)),
                         color: isDark ? Colors.deepPurple[400] : Colors.white,
                         child: ListTile(
-                          title: Text(' Child: ${childData!['name']}',
-                              style: GoogleFonts.poppins(
+                          title: Text('${'child'.tr()}: ${childData!['name']}',
+                              style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
                                   color: textColor)),
-                          subtitle: Text('Performance Overview',
+                          subtitle: Text('performance_overview'.tr(),
                               style: GoogleFonts.poppins(
                                   color: textColor.withOpacity(0.7))),
                         ),
@@ -145,8 +147,8 @@ class _CombinedChildPerformanceScreenState
                           });
                         },
                         items: [
-                          const DropdownMenuItem(
-                              value: 'All', child: Text('All Subjects')),
+                          DropdownMenuItem(
+                              value: 'All', child: Text('all_subjects'.tr())),
                           ...['arabic', 'math', 'english']
                               .map((subj) => DropdownMenuItem(
                                     value: subj,
@@ -159,8 +161,8 @@ class _CombinedChildPerformanceScreenState
                       ),
                       const SizedBox(height: 16),
                       if (quizAttempts.isNotEmpty) ...[
-                        Text('📈 Score Progression:',
-                            style: GoogleFonts.poppins(
+                        Text('score_progression'.tr(),
+                            style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w600,
                                 color: textColor)),
@@ -256,7 +258,7 @@ class _CombinedChildPerformanceScreenState
                                       final score =
                                           touchedSpot.y.toStringAsFixed(1);
                                       return LineTooltipItem(
-                                        'Score: $score%',
+                                        '${'score'.tr()}: $score%',
                                         TextStyle(color: Colors.white),
                                       );
                                     }).toList();
@@ -270,8 +272,9 @@ class _CombinedChildPerformanceScreenState
                         ),
                       ],
                       const SizedBox(height: 16),
-                      Text('📋 Attempts:',
-                          style: GoogleFonts.poppins(
+                      //Text('📋 Attempts:'.tr(),
+                      Text('attempts'.tr(),
+                          style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: textColor)),
@@ -335,22 +338,21 @@ class _CombinedChildPerformanceScreenState
                                             CrossAxisAlignment.start,
                                         children: [
                                           Text(
-                                            'Subject: ${subject[0].toUpperCase()}${subject.substring(1)}',
-                                            style: GoogleFonts.poppins(
+                                            '${'subject'.tr()}: ${subject[0].toUpperCase()}${subject.substring(1)}',
+                                            style: TextStyle(
                                               fontWeight: FontWeight.w600,
                                               fontSize: 16,
                                             ),
                                           ),
                                           const SizedBox(height: 4),
                                           Text(
-                                            'Level: $level',
-                                            style: GoogleFonts.poppins(
-                                                fontSize: 14),
+                                            '${'level'.tr()}: $level',
+                                            style: TextStyle(fontSize: 14),
                                           ),
                                           const SizedBox(height: 4),
                                           Text(
-                                            'Date: $formattedDate',
-                                            style: GoogleFonts.poppins(
+                                            '${'date'.tr()}: $formattedDate',
+                                            style: TextStyle(
                                               fontSize: 13,
                                               color: Colors.grey[600],
                                             ),

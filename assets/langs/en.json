@@ -487,8 +487,17 @@
     "close": "Close",
     "correct": "Correct answer!",
     "wrong": "Wrong!"
-  }
-
+  },
+  "child_performance": "Child Performance",
+  "no_child_selected": "No child selected.",
+  "child": "Child",
+  "performance_overview": "Performance Overview",
+  "all_subjects": "All Subjects",
+  "score_progression": "📈 Score Progression:",
+  "attempts": "📋 Attempts:",
+  "subject": "Subject",
+  "level": "Level",
+  "score": "Score"
 
   }
   
