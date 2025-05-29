@@ -53,7 +53,10 @@ class MathLevel1Screen extends StatelessWidget {
             jsonPath: "images/new_images/number_3.json",
             onTap: () {
               _speak(context, LocaleKeys.tts_recognize);
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const NumberRecognitionGame()));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const NumberRecognitionGame()));
             },
           ),
           _buildGameTile(
@@ -62,7 +65,10 @@ class MathLevel1Screen extends StatelessWidget {
             jsonPath: "images/new_images/apples.json",
             onTap: () {
               _speak(context, LocaleKeys.tts_match);
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const NumberQuantityMatchingGame()));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const NumberQuantityMatchingGame()));
             },
           ),
           _buildGameTile(
@@ -71,7 +77,8 @@ class MathLevel1Screen extends StatelessWidget {
             jsonPath: "images/new_images/tracing.json",
             onTap: () {
               _speak(context, LocaleKeys.tts_trace);
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const NumberTracingGame()));
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const NumberTracingGame()));
             },
           ),
           _buildGameTile(
@@ -80,7 +87,10 @@ class MathLevel1Screen extends StatelessWidget {
             jsonPath: "images/new_images/equation.json",
             onTap: () {
               _speak(context, LocaleKeys.tts_equation);
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const CompleteEquationGame()));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (_) => const CompleteEquationGame()));
             },
           ),
           _buildGameTile(
@@ -89,7 +99,8 @@ class MathLevel1Screen extends StatelessWidget {
             jsonPath: "images/new_images/Quiz.json",
             onTap: () {
               _speak(context, LocaleKeys.tts_quiz);
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const Level1Quiz()));
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => const Level1Quiz()));
             },
           ),
         ],

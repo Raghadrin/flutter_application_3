@@ -29,17 +29,33 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
+  @override
+  @override
   Widget build(BuildContext context) {
+    final locale = context.locale.languageCode;
+
+    final baseTextTheme = (locale == 'ar')
+        ? GoogleFonts.cairoTextTheme(Theme.of(context).textTheme)
+        : GoogleFonts.poppinsTextTheme(Theme.of(context).textTheme);
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.orange,
-        fontFamily: GoogleFonts.amiri().fontFamily,
+        textTheme: baseTextTheme,
       ),
-      localizationsDelegates: context.localizationDelegates, // Required
-      supportedLocales: context.supportedLocales, // Required
-      locale: context.locale, // Required
+      localizationsDelegates: context.localizationDelegates,
+      supportedLocales: context.supportedLocales,
+      locale: context.locale,
       home: const SplashScreen(),
+
+      // Force the font everywhere:
+      builder: (context, child) {
+        return DefaultTextStyle.merge(
+          style: TextStyle(fontFamily: baseTextTheme.bodyLarge!.fontFamily),
+          child: child!,
+        );
+      },
     );
   }
 }
