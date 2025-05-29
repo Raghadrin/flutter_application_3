@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:awesome_notifications/awesome_notifications.dart';
 
 class NotificationsScreen extends StatefulWidget {
   final bool isDarkMode;
@@ -23,9 +24,54 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     _initializeNotifications();
   }
 
-  void _initializeNotifications() {
-    // Placeholder for initializing notification logic
-    // Will be updated once a new notification library is chosen
+  void _initializeNotifications() async {
+    bool isAllowed = await AwesomeNotifications().isNotificationAllowed();
+    if (!isAllowed) {
+      await AwesomeNotifications().requestPermissionToSendNotifications();
+    }
+  }
+
+  //
+
+  void _scheduleNotificationAt(DateTime dateTime) {
+    AwesomeNotifications().createNotification(
+      content: NotificationContent(
+        id: 2,
+        channelKey: 'basic_channel',
+        title: '🕒 Scheduled Reminder',
+        body: 'This notification was scheduled for ${dateTime.toLocal()}',
+        notificationLayout: NotificationLayout.Default,
+      ),
+      schedule: NotificationCalendar(
+        year: dateTime.year,
+        month: dateTime.month,
+        day: dateTime.day,
+        hour: dateTime.hour,
+        minute: dateTime.minute,
+        second: 0,
+        millisecond: 0,
+        repeats: false,
+      ),
+    );
+  }
+
+  void _scheduleDailyReminder() {
+    AwesomeNotifications().createNotification(
+      content: NotificationContent(
+        id: 3,
+        channelKey: 'basic_channel',
+        title: '📆 Daily Practice Reminder',
+        body: 'Time to practice today!',
+        notificationLayout: NotificationLayout.Default,
+      ),
+      schedule: NotificationCalendar(
+        hour: 8,
+        minute: 0,
+        second: 0,
+        millisecond: 0,
+        repeats: true,
+      ),
+    );
   }
 
   @override
@@ -77,6 +123,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 setState(() {
                   practiceReminder = value;
                 });
+                if (value) {
+                  _scheduleDailyReminder();
+                }
               },
               isDarkMode: isDarkMode,
             ),
@@ -89,6 +138,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 setState(() {
                   smartScheduling = value;
                 });
+                if (value) {
+                  DateTime scheduledTime = DateTime.now()
+                      .add(Duration(minutes: 1)); // or use a DatePicker
+                  _scheduleNotificationAt(scheduledTime);
+                }
               },
               isDarkMode: isDarkMode,
             ),

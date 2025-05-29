@@ -1,3 +1,4 @@
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -5,7 +6,6 @@ import 'package:flutter_application_3/auth/signup.dart';
 import 'package:flutter_application_3/database/firebase_options.dart';
 import 'package:flutter_application_3/pages/main_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:easy_localization/easy_localization.dart'; // Add this
 
 void main() async {
@@ -13,6 +13,19 @@ void main() async {
   await EasyLocalization.ensureInitialized(); // Make sure localization is ready
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
+  AwesomeNotifications().initialize(
+    null,
+    [
+      NotificationChannel(
+        channelKey: 'basic_channel',
+        channelName: 'Basic Notifications',
+        channelDescription: 'Notification channel for basic tests',
+        defaultColor: Color(0xFF9D50DD),
+        ledColor: Colors.white,
+      )
+    ],
+    debug: true,
+  );
   runApp(
     // or CupertinoInAppWebView for iOS
 
