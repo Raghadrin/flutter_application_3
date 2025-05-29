@@ -33,7 +33,7 @@ class SubjectLevelsScreen extends StatelessWidget {
             color: Colors.black,
             fontSize: 32,
             fontWeight: FontWeight.bold,
-            fontFamily: 'Arial',
+            //fontFamily: 'Arial',
           ),
         ),
       ),
@@ -118,7 +118,7 @@ class SubjectLevelsScreen extends StatelessWidget {
               style: TextStyle(
                 fontSize: screenWidth * 0.06,
                 fontWeight: FontWeight.bold,
-                fontFamily: 'Arial',
+                //fontFamily: 'Arial',
               ),
             ),
           ),

@@ -39,7 +39,7 @@ class PracticeLevelsScreen extends StatelessWidget {
               color: Colors.black,
               fontSize: screenWidth * 0.075, // Dynamic font size
               fontWeight: FontWeight.bold,
-              fontFamily: 'Arial',
+              //fontFamily: 'Arial',
             ),
           ),
         ),
@@ -55,7 +55,7 @@ class PracticeLevelsScreen extends StatelessWidget {
             style: TextStyle(
               color: const Color.fromARGB(255, 48, 47, 47),
               fontSize: screenWidth * 0.06,
-              fontFamily: 'Arial',
+              //fontFamily: 'Arial',
             ),
           ),
           SizedBox(height: screenHeight * 0.02),
@@ -111,8 +111,7 @@ class PracticeLevelsScreen extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) =>
-                        EnglishLevel2HomeScreen()),
+                    builder: (context) => EnglishLevel2HomeScreen()),
               );
             } else if (isMath) {
               Navigator.push(
@@ -131,8 +130,7 @@ class PracticeLevelsScreen extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) =>
-                        EnglishLevel3HomeScreen()),
+                    builder: (context) => EnglishLevel3HomeScreen()),
               );
             } else if (isMath) {
               Navigator.push(
@@ -154,7 +152,7 @@ class PracticeLevelsScreen extends StatelessWidget {
               style: TextStyle(
                 fontSize: screenWidth * 0.06,
                 fontWeight: FontWeight.bold,
-                fontFamily: 'Arial',
+                //fontFamily: 'Arial',
               ),
             ),
           ),
