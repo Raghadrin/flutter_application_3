@@ -1,64 +1,73 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:lottie/lottie.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 import 'arabic_level1_screen.dart';
 import 'arabic_level1_quiz_all.dart';
 import 'karaoke_sentence_screen.dart';
+import 'locale_keys.dart';
 
 class ArabicLevel1HomeScreen extends StatefulWidget {
   const ArabicLevel1HomeScreen({super.key});
 
   @override
-  State<ArabicLevel1HomeScreen> createState() => _ArabicLevel1HomeScreenState();
+  State<ArabicLevel1HomeScreen> createState() =>
+      _ArabicLevel1HomeScreenState();
 }
 
 class _ArabicLevel1HomeScreenState extends State<ArabicLevel1HomeScreen> {
   final FlutterTts tts = FlutterTts();
 
-  Future<void> configureTts() async {
-    await tts.setLanguage("ar-SA");
-    await tts.setVoice({'name': 'ar-xa-x-arm-local', 'locale': 'ar-SA'});
+  Future<void> configureTts(BuildContext context) async {
+    final langCode = context.locale.languageCode;
+    if (langCode == 'ar') {
+      await tts.setLanguage("ar-SA");
+      await tts.setVoice({'name': 'ar-xa-x-arm-local', 'locale': 'ar-SA'});
+    } else {
+      await tts.setLanguage("en-US");
+      await tts.setVoice({'name': 'en-gb-x-rjs-local', 'locale': 'en-US'});
+    }
     await tts.setSpeechRate(0.45);
     await tts.setPitch(1.0);
   }
 
-  Future<void> _speak(String text) async {
-    await configureTts();
+  Future<void> _speak(BuildContext context, String text) async {
+    await configureTts(context);
     await tts.speak(text);
   }
 
   final List<Map<String, String>> sentenceKeys = [
     {
-      "title": "الشمس تشرق",
-      "text": "الشمس تشرق كل صباح وتنير السماء بالضوء الذهبي",
+      "title": LocaleKeys.sunriseTitle,
+      "text": LocaleKeys.sunriseText,
       "animation": "images/sun.json"
     },
     {
-      "title": "أكتب في الدفتر",
-      "text": "أنا أكتب الواجب في دفتري",
+      "title": LocaleKeys.writeTitle,
+      "text": LocaleKeys.writeText,
       "animation": "images/write.json"
     },
     {
-      "title": "أطهو الطعام",
-      "text": "أمي تطهو الطعام اللذيذ",
+      "title": LocaleKeys.cookTitle,
+      "text": LocaleKeys.cookText,
       "animation": "images/cook.json"
     },
     {
-      "title": "السيارة تتحرك",
-      "text": "السيارة تسير بسرعة في الشارع",
+      "title": LocaleKeys.carTitle,
+      "text": LocaleKeys.carText,
       "animation": "images/car.json"
     },
     {
-      "title": "أقرأ كتابي",
-      "text": "أنا أقرأ كتابي المفضل في المساء",
+      "title": LocaleKeys.readTitle,
+      "text": LocaleKeys.readText,
       "animation": "images/read.json"
     },
   ];
 
   @override
   Widget build(BuildContext context) {
-    _speak("مرحباً بك في تمارين المستوى الأول");
+    _speak(context, tr(LocaleKeys.welcomeMessage));
 
     return DefaultTabController(
       length: 2,
@@ -67,18 +76,30 @@ class _ArabicLevel1HomeScreenState extends State<ArabicLevel1HomeScreen> {
         appBar: AppBar(
           backgroundColor: Colors.orange,
           elevation: 0,
-          title: const Text(
-            "المستوى الأول - عربي",
-            style: TextStyle(
+          title: Text(
+            tr(LocaleKeys.arabicLevel1Title),
+            style: const TextStyle(
               color: Colors.black,
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
           ),
           centerTitle: true,
-           bottom: const TabBar(
-              labelStyle: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              indicatorWeight: 3,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.language, color: Colors.black),
+              tooltip: 'Change Language',
+              onPressed: () {
+                final newLocale = context.locale.languageCode == 'ar'
+                    ? const Locale('en')
+                    : const Locale('ar');
+                context.setLocale(newLocale);
+              },
+            )
+          ],
+          bottom: const TabBar(
+            labelStyle: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            indicatorWeight: 3,
             tabs: [
               Tab(text: 'التمارين'),
               Tab(text: 'كاريوكي'),
@@ -87,7 +108,6 @@ class _ArabicLevel1HomeScreenState extends State<ArabicLevel1HomeScreen> {
         ),
         body: TabBarView(
           children: [
-            // ✅ التبويب الأول: التمارين
             GridView.count(
               crossAxisCount: 2,
               padding: const EdgeInsets.all(16),
@@ -97,10 +117,10 @@ class _ArabicLevel1HomeScreenState extends State<ArabicLevel1HomeScreen> {
               children: [
                 _buildTile(
                   context,
-                  title: "اختبار",
+                  title: tr(LocaleKeys.quizButton),
                   jsonPath: "images/new_images/Quiz.json",
                   onTap: () {
-                    _speak("هيا نبدأ الاختبار");
+                    _speak(context, tr(LocaleKeys.startQuiz));
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -112,15 +132,19 @@ class _ArabicLevel1HomeScreenState extends State<ArabicLevel1HomeScreen> {
                 ...sentenceKeys.map((s) {
                   return _buildTile(
                     context,
-                    title: s["title"]!,
+                    title: tr(s["title"]!),
                     jsonPath: s["animation"]!,
                     onTap: () {
-                      _speak("اخترت: ${s["title"]!}");
+                      _speak(
+                        context,
+                        "${tr(LocaleKeys.selectedPrefix)} ${tr(s["title"]!)}",
+                      );
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (_) =>
-                              ArabicLevel1Screen(sentence: s["text"]!),
+                          builder: (_) => ArabicLevel1Screen(
+                            sentence: tr(s["text"]!),
+                          ),
                         ),
                       );
                     },
@@ -128,8 +152,6 @@ class _ArabicLevel1HomeScreenState extends State<ArabicLevel1HomeScreen> {
                 }).toList(),
               ],
             ),
-
-            // ✅ التبويب الثاني: الكاريوكي
             const KaraokeSentenceScreen(),
           ],
         ),
