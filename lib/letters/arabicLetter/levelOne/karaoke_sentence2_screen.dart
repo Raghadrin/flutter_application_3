@@ -193,27 +193,28 @@ class _KaraokeSentenceLevel2ScreenState extends State<KaraokeSentenceLevel2Scree
               ),
               onPressed: () {
                 if (isListening) {
-                  speech.stop();
-                  setState(() => isListening = false);
-                  evaluateResult();
-                  Future.delayed(Duration(milliseconds: 300), () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => EvaluationScreen(
-                          recognizedText: recognizedText,
-                          score: score,
-                          stars: stars,
-                          wordMatchResults: wordMatchResults,
-                          onNext: () {
-                            Navigator.pop(context); // ارجع
-                            nextSentence(); // ثم جملة جديدة
-                          },
-                        ),
-                      ),
-                    );
-                  });
-                } else {
+  speech.stop();
+  setState(() => isListening = false);
+  Future.delayed(Duration(seconds: 1), () {
+    evaluateResult();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => EvaluationScreen(
+          recognizedText: recognizedText,
+          score: score,
+          stars: stars,
+          wordMatchResults: wordMatchResults,
+          onNext: () {
+            Navigator.pop(context);
+            nextSentence();
+          },
+        ),
+      ),
+    );
+  });
+}
+else {
                   startListening();
                 }
               },
