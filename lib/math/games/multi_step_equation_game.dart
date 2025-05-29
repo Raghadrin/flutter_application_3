@@ -22,20 +22,58 @@ class _MultiStepEquationGameState extends State<MultiStepEquationGame>
   late Animation<double> _shakeAnimation;
 
   final List<Map<String, dynamic>> _questions = [
-    {"question": "First: 2 + 3 = 5, then × 2 = ?", "image": "2_plus_3_times_2.png", "options": ["8", "10", "12"], "answer": "10"},
-    {"question": "First: 10 - 4 = 6, then × 3 = ?", "image": "10_minus_4_then_times_3.png", "options": ["18", "16", "12"], "answer": "18"},
-    {"question": "First: 5 × 2 = 10, then - 1 = ?", "image": "5_times_2_then_minus_1.png", "options": ["9", "10", "8"], "answer": "9"},
-    {"question": "First: 4 + 4 = 8, then ÷ 2 = ?", "image": "4_plus_4_then_div_2.PNG", "options": ["4", "6", "2"], "answer": "4"},
-    {"question": "First: 6 × 2 = 12, then - 5 = ?", "image": "6_times_2_then_minus_5.PNG", "options": ["7", "6", "8"], "answer": "7"},
-    {"question": "First: 9 - 3 = 6, then + 4 = ?", "image": "9_minus_3_then_plus_4.PNG", "options": ["10", "11", "12"], "answer": "10"},
-    {"question": "First: 8 ÷ 2 = 4, then × 3 = ?", "image": "8_div_2_then_times_3.PNG", "options": ["10", "12", "14"], "answer": "12"}
+    {
+      "question": "First: 2 + 3 = 5, then × 2 = ?",
+      "image": "2_plus_3_times_2.png",
+      "options": ["8", "10", "12"],
+      "answer": "10"
+    },
+    {
+      "question": "First: 10 - 4 = 6, then × 3 = ?",
+      "image": "10_minus_4_then_times_3.png",
+      "options": ["18", "16", "12"],
+      "answer": "18"
+    },
+    {
+      "question": "First: 5 × 2 = 10, then - 1 = ?",
+      "image": "5_times_2_then_minus_1.png",
+      "options": ["9", "10", "8"],
+      "answer": "9"
+    },
+    {
+      "question": "First: 4 + 4 = 8, then ÷ 2 = ?",
+      "image": "4_plus_4_then_div_2.PNG",
+      "options": ["4", "6", "2"],
+      "answer": "4"
+    },
+    {
+      "question": "First: 6 × 2 = 12, then - 5 = ?",
+      "image": "6_times_2_then_minus_5.PNG",
+      "options": ["7", "6", "8"],
+      "answer": "7"
+    },
+    {
+      "question": "First: 9 - 3 = 6, then + 4 = ?",
+      "image": "9_minus_3_then_plus_4.PNG",
+      "options": ["10", "11", "12"],
+      "answer": "10"
+    },
+    {
+      "question": "First: 8 ÷ 2 = 4, then × 3 = ?",
+      "image": "8_div_2_then_times_3.PNG",
+      "options": ["10", "12", "14"],
+      "answer": "12"
+    }
   ];
 
   @override
   void initState() {
     super.initState();
-    _shakeController = AnimationController(vsync: this, duration: const Duration(milliseconds: 500));
-    _shakeAnimation = Tween<double>(begin: 0, end: 10).chain(CurveTween(curve: Curves.elasticIn)).animate(_shakeController);
+    _shakeController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 500));
+    _shakeAnimation = Tween<double>(begin: 0, end: 10)
+        .chain(CurveTween(curve: Curves.elasticIn))
+        .animate(_shakeController);
     _speakCurrent();
   }
 
@@ -55,7 +93,9 @@ class _MultiStepEquationGameState extends State<MultiStepEquationGame>
           .doc(parentId)
           .collection('children')
           .get();
-      final childId = childrenSnapshot.docs.isNotEmpty ? childrenSnapshot.docs.first.id : null;
+      final childId = childrenSnapshot.docs.isNotEmpty
+          ? childrenSnapshot.docs.first.id
+          : null;
       if (childId == null) return;
       await FirebaseFirestore.instance
           .collection('parents')
@@ -184,11 +224,13 @@ class _MultiStepEquationGameState extends State<MultiStepEquationGame>
                       Container(
                         decoration: BoxDecoration(
                           color: Colors.deepOrange.withOpacity(0.1),
-                          border: Border.all(color: Colors.deepOrange, width: 3),
+                          border:
+                              Border.all(color: Colors.deepOrange, width: 3),
                           borderRadius: BorderRadius.circular(16),
                         ),
                         padding: const EdgeInsets.all(8),
-                        child: Image.asset("images/new_images/${q['image']}", height: 160),
+                        child: Image.asset("images/new_images/${q['image']}",
+                            height: 160),
                       ),
                     const SizedBox(height: 20),
                     AnimatedBuilder(
@@ -207,7 +249,8 @@ class _MultiStepEquationGameState extends State<MultiStepEquationGame>
                           decoration: BoxDecoration(
                             color: Colors.white,
                             border: Border.all(
-                                color: wrongDrop ? Colors.red : Colors.deepOrange,
+                                color:
+                                    wrongDrop ? Colors.red : Colors.deepOrange,
                                 width: 3),
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -244,9 +287,11 @@ class _MultiStepEquationGameState extends State<MultiStepEquationGame>
                           onPressed: _next,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.amber,
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 12),
                           ),
-                          child: const Text("Next", style: TextStyle(fontSize: 22)),
+                          child: const Text("Next",
+                              style: TextStyle(fontSize: 22)),
                         ),
                       ),
                   ],
@@ -297,8 +342,7 @@ class _MultiStepEquationGameState extends State<MultiStepEquationGame>
             onPressed: _resetGame,
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.orange,
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             ),
             child: const Text("🔁 Play Again", style: TextStyle(fontSize: 20)),
           ),

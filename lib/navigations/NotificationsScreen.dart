@@ -39,7 +39,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         id: 2,
         channelKey: 'basic_channel',
         title: '🕒 Scheduled Reminder',
-        body: 'This notification was scheduled for ${dateTime.toLocal()}',
+        body: 'Lets Have Fun !',
         notificationLayout: NotificationLayout.Default,
       ),
       schedule: NotificationCalendar(
