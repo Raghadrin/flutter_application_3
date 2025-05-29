@@ -8,7 +8,7 @@ class ArabicLevel1Screen extends StatefulWidget {
 
   @override
   State<ArabicLevel1Screen> createState() => _ArabicLevel1ScreenState();
-}
+} 
 
 class _ArabicLevel1ScreenState extends State<ArabicLevel1Screen> {
   late FlutterTts flutterTts;
