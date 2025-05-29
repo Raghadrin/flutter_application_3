@@ -59,7 +59,7 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
       onStatus: (val) {
         if (val == 'done') {
           setState(() => isListening = false);
-          evaluateResult();
+          // لا تقييم تلقائي هنا
         }
       },
       onError: (val) {
@@ -250,7 +250,7 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
                   if (isListening) {
                     speech.stop();
                     setState(() => isListening = false);
-                    evaluateResult();
+                    evaluateResult(); // ✅ فقط عند الضغط على زر الإيقاف
                   } else {
                     startListening();
                   }
