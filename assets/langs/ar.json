@@ -520,4 +520,17 @@
 
   "confidence_title": "رسائل الثقة",
   "confidence_description": "احصل على رسائل إيجابية من الثعلب."
-}
+ ,"math_level1_title": "الرياضيات - المستوى الأول",
+  "math_level1_welcome": "مرحبًا بك في المستوى الأول من الرياضيات. لنبدأ بالأرقام!",
+
+  "recognize_number": "تمييز الرقم",
+  "match_quantity": "مطابقة الكمية",
+  "trace_number": "تتبع الرقم",
+  "complete_equation": "أكمل المعادلة",
+  "level1_quiz": "اختبار المستوى الأول",
+
+  "tts_recognize": "هيا نتعرف على الأرقام.",
+  "tts_match": "طابق الرقم مع الكمية المناسبة.",
+  "tts_trace": "هيا نرسم الرقم.",
+  "tts_equation": "هل يمكنك إكمال المعادلة؟",
+  "tts_quiz": "لنبدأ اختبار المستوى الأول!"}

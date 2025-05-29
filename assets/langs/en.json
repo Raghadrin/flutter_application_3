@@ -33,7 +33,21 @@
         "quiz": "Let’s begin the quiz for level 2."
       }
     }
-  },"math_level3_title": "Math - Level 3",
+  },"math_level1_title": "Math - Level 1",
+  "math_level1_welcome": "Welcome to Math Level 1. Let's start with numbers!",
+
+  "recognize_number": "Recognize Number",
+  "match_quantity": "Match Quantity",
+  "trace_number": "Trace Number",
+  "complete_equation": "Complete the Equation",
+  "level1_quiz": "Level 1 Quiz",
+
+  "tts_recognize": "Let’s recognize some numbers.",
+  "tts_match": "Match the numbers with the correct quantity.",
+  "tts_trace": "Let’s trace the number.",
+  "tts_equation": "Can you complete this simple equation?",
+  "tts_quiz": "Let’s begin the quiz for level one!",
+  "math_level3_title": "Math - Level 3",
   "math_level3_welcome": "Welcome to Math Level 3. Let's solve multi-step equations, reverse operations, and word story problems together.",
   
   "multi_step": "Multi-Step Equations",
