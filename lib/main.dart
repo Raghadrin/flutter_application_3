@@ -6,7 +6,6 @@ import 'package:flutter_application_3/auth/signup.dart';
 import 'package:flutter_application_3/database/firebase_options.dart';
 import 'package:flutter_application_3/pages/main_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:easy_localization/easy_localization.dart'; // Add this
 
 void main() async {
