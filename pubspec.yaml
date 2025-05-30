@@ -95,6 +95,7 @@ flutter:
     - images/
     - assets/
     - assets/sounds/
+    - assets/sounds/voices-parent/
     - assets/audio/
     - assets/langs/
     - images/new_images/
