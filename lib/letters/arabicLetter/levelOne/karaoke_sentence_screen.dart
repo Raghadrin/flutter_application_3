@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
-import 'evaluation_screen.dart'; // تأكد أن هذا الملف موجود
+import 'evaluation2_screen.dart'; // تأكد أن هذا الملف موجود
 
 class KaraokeSentenceScreen extends StatefulWidget {
   const KaraokeSentenceScreen({super.key});
@@ -301,7 +301,7 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => EvaluationScreen(
+                        builder: (_) => Evaluation2Screen(
                           recognizedText: recognizedText,
                           score: score,
                           stars: stars,
