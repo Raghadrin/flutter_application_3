@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
-import 'evaluation_screen.dart'; // تأكد من مسار الاستيراد
+import 'evaluation2_screen.dart'; // تأكد من مسار الاستيراد
 
 class KaraokeSentenceLevel2Screen extends StatefulWidget {
   const KaraokeSentenceLevel2Screen({super.key});
@@ -22,16 +22,16 @@ class _KaraokeSentenceLevel2ScreenState extends State<KaraokeSentenceLevel2Scree
 
   List<Map<String, String>> sentences = [
     {
-      "text": "ذهبت العائلة الى البحر وقضت وقتا ممتعا في السباحة وبناء القلاع الرملية",
+      "text": "كان يوم مشمس، فقرر أفراد الأسرة الذهاب إلى بحر بعيد، جلسوا قرب الماء، لعبوا مع الأمواج، وبدأوا في صنع قلاع من رمل ناعم، وشارك الجميع في المرح دون كلل أو توقف",
       "audio": "audio/family.mp3",
     },
     {
-      "text": "استيقظ سامي مبكرا وحمل حقيبته الجديده وذهب الى المدرسه بحماس كبير",
+      "text": "نهض سامي عند الشروق، غسل يدَيه، لبس قميص من قطن، حمل كيس فيه كتب، وذهب إلى صف فيه أصدقاء ",
       "audio": "audio/school.mp3",
     },
     {
-      "text": "اشتريت كتابا جديدا عن الفضاء وقرات عن الكواكب والنجوم والمجرات البعيده",
-      "audio": "audio/book.mp3",
+      "text": "قرأت في كتاب قديم عن عالم كبير، فيه كوكب يدور، نجم يضيء، ومكان واسع لا نهاية له",
+      "audio": "audio/old.mp3",
     },
   ];
 
@@ -200,7 +200,7 @@ class _KaraokeSentenceLevel2ScreenState extends State<KaraokeSentenceLevel2Scree
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => EvaluationScreen(
+        builder: (_) => Evaluation2Screen(
           recognizedText: recognizedText,
           score: score,
           stars: stars,
