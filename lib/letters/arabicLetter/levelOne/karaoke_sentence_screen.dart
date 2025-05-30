@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
@@ -23,15 +25,18 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
 
   List<Map<String, String>> sentences = [
     {
-      "text": "في كل صباح تشرق الشمس من الأفق البعيد، وتنثر أشعتها الذهبية على السماء فتملأ الكون نورًا ودفئًا وتوقظ الطبيعة من نومها لتبدأ يوماً جديداً مفعماً بالحياة.",
+      "text":
+          "في كل صباح تشرق الشمس من الأفق البعيد، وتنثر أشعتها الذهبية على السماء فتملأ الكون نورًا ودفئًا وتوقظ الطبيعة من نومها لتبدأ يوماً جديداً مفعماً بالحياة.",
       "audio": "audio/shams.mp3",
     },
     {
-      "text": "يحلق الطائر عالياً في السماء الزرقاء، ناشرًا جناحيه في رحاب الفضاء، ويسافر بخفة عبر الرياح، كأنّه يعانق الغيوم ويغني للحرية في كل نسمة تمر من حوله.",
+      "text":
+          "يحلق الطائر عالياً في السماء الزرقاء، ناشرًا جناحيه في رحاب الفضاء، ويسافر بخفة عبر الرياح، كأنّه يعانق الغيوم ويغني للحرية في كل نسمة تمر من حوله.",
       "audio": "audio/taer.mp3",
     },
     {
-      "text": "في كل زاوية صدى مرتفع، وزحام لا ينتهي، أصوات مركبات تتقاطع، وناس تمشي بين المباني والطرقات، كل شيء يتحرك بسرعة دون توقف أو سكون",
+      "text":
+          "في كل زاوية صدى مرتفع، وزحام لا ينتهي، أصوات مركبات تتقاطع، وناس تمشي بين المباني والطرقات، كل شيء يتحرك بسرعة دون توقف أو سكون",
       "audio": "audio/madina.mp3",
     },
   ];
@@ -48,6 +53,65 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
   Future<void> playAudio(String path) async {
     await audioPlayer.stop();
     await audioPlayer.play(AssetSource(path));
+  }
+
+  Future<void> saveKaraokeEvaluation({
+    required String sentence,
+    required String recognizedText,
+    required List<String> correctWords,
+    required List<String> wrongWords,
+    required double score,
+    required int stars,
+  }) async {
+    try {
+      String? parentId = "";
+      String? childId = "";
+
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        print("User not logged in");
+        return;
+      }
+      parentId = user.uid;
+
+      final childrenSnapshot = await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(parentId)
+          .collection('children')
+          .get();
+
+      if (childrenSnapshot.docs.isNotEmpty) {
+        childId = childrenSnapshot.docs.first.id;
+      } else {
+        print("No children found for this parent.");
+        return;
+      }
+
+      if (parentId.isEmpty || childId == null) {
+        print("Cannot save evaluation: parentId or childId missing");
+        return;
+      }
+
+      await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(parentId)
+          .collection('children')
+          .doc(childId)
+          .collection('karaoke_evaluations')
+          .add({
+        'sentence': sentence,
+        'recognizedText': recognizedText,
+        'correctWords': correctWords,
+        'wrongWords': wrongWords,
+        'score': score,
+        'stars': stars,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      print("Karaoke evaluation saved successfully");
+    } catch (e) {
+      print("Error saving karaoke evaluation: $e");
+    }
   }
 
   Future<void> startListening() async {
@@ -94,7 +158,7 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
     }
   }
 
-  void evaluateResult() {
+  Future<void> evaluateResult() async {
     int correct = wordMatchResults.values.where((v) => v).length;
     int total = wordMatchResults.length;
     score = total > 0 ? (correct / total) * 100 : 0.0;
@@ -108,7 +172,25 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
     } else {
       stars = 0;
     }
+    // Extract correct and wrong words
+    List<String> correctWords = wordMatchResults.entries
+        .where((entry) => entry.value)
+        .map((entry) => entry.key)
+        .toList();
 
+    List<String> wrongWords = wordMatchResults.entries
+        .where((entry) => !entry.value)
+        .map((entry) => entry.key)
+        .toList();
+
+    await saveKaraokeEvaluation(
+      sentence: currentSentence["text"]!,
+      recognizedText: recognizedText,
+      correctWords: correctWords,
+      wrongWords: wrongWords,
+      score: score,
+      stars: stars,
+    );
     setState(() {});
   }
 
