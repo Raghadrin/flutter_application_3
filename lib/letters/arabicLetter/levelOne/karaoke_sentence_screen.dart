@@ -163,7 +163,20 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
         padding: const EdgeInsets.all(24.0),
         child: Column(
           children: [
-            Expanded(
+            Container(
+              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.only(bottom: 20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 8,
+                    offset: Offset(0, 4),
+                  )
+                ],
+              ),
               child: SingleChildScrollView(
                 child: RichText(
                   textAlign: TextAlign.center,
@@ -171,12 +184,20 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
                 ),
               ),
             ),
+            LinearProgressIndicator(
+              value: (currentSentenceIndex + 1) / sentences.length,
+              backgroundColor: Colors.grey[300],
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.blueAccent),
+            ),
             const SizedBox(height: 20),
             ElevatedButton.icon(
               icon: const Icon(Icons.play_arrow),
               label: const Text('استمع للجملة'),
               onPressed: () => playAudio(currentSentence["audio"]!),
               style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30)),
+                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                 backgroundColor: Colors.blueAccent,
                 minimumSize: Size(screenWidth * 0.8, 44),
               ),

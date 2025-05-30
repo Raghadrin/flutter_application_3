@@ -11,19 +11,53 @@ class ParentTopicChatScreenDyscalculia extends StatefulWidget {
   const ParentTopicChatScreenDyscalculia({super.key});
 
   @override
-  State<ParentTopicChatScreenDyscalculia> createState() => _ParentTopicChatScreenDyscalculiaState();
+  State<ParentTopicChatScreenDyscalculia> createState() =>
+      _ParentTopicChatScreenDyscalculiaState();
 }
 
-class _ParentTopicChatScreenDyscalculiaState extends State<ParentTopicChatScreenDyscalculia> {
+class _ParentTopicChatScreenDyscalculiaState
+    extends State<ParentTopicChatScreenDyscalculia> {
   final List<Map<String, dynamic>> messages = [
-    {'sender': 'parent', 'textKey': LocaleKeys.dyscalculiaMessages['q1'], 'animation': 'images/parent_image/parent_ask.json'},
-    {'sender': 'expert', 'textKey': LocaleKeys.dyscalculiaMessages['a1'], 'animation': 'images/parent_image/expert_reply.json'},
-    {'sender': 'parent', 'textKey': LocaleKeys.dyscalculiaMessages['q2'], 'animation': 'images/parent_image/parent_ask.json'},
-    {'sender': 'expert', 'textKey': LocaleKeys.dyscalculiaMessages['a2'], 'animation': 'images/parent_image/expert_reply.json'},
-    {'sender': 'parent', 'textKey': LocaleKeys.dyscalculiaMessages['q3'], 'animation': 'images/parent_image/parent_ask.json'},
-    {'sender': 'expert', 'textKey': LocaleKeys.dyscalculiaMessages['a3'], 'animation': 'images/parent_image/expert_reply.json'},
-    {'sender': 'parent', 'textKey': LocaleKeys.dyscalculiaMessages['q4'], 'animation': 'images/parent_image/parent_ask.json'},
-    {'sender': 'expert', 'textKey': LocaleKeys.dyscalculiaMessages['a4'], 'animation': 'images/parent_image/expert_reply.json'},
+    {
+      'sender': 'parent',
+      'textKey': LocaleKeys.dyscalculiaMessages['q1'],
+      'animation': 'images/parent_image/parent_ask.json'
+    },
+    {
+      'sender': 'expert',
+      'textKey': LocaleKeys.dyscalculiaMessages['a1'],
+      'animation': 'images/parent_image/expert_reply.json'
+    },
+    {
+      'sender': 'parent',
+      'textKey': LocaleKeys.dyscalculiaMessages['q2'],
+      'animation': 'images/parent_image/parent_ask.json'
+    },
+    {
+      'sender': 'expert',
+      'textKey': LocaleKeys.dyscalculiaMessages['a2'],
+      'animation': 'images/parent_image/expert_reply.json'
+    },
+    {
+      'sender': 'parent',
+      'textKey': LocaleKeys.dyscalculiaMessages['q3'],
+      'animation': 'images/parent_image/parent_ask.json'
+    },
+    {
+      'sender': 'expert',
+      'textKey': LocaleKeys.dyscalculiaMessages['a3'],
+      'animation': 'images/parent_image/expert_reply.json'
+    },
+    {
+      'sender': 'parent',
+      'textKey': LocaleKeys.dyscalculiaMessages['q4'],
+      'animation': 'images/parent_image/parent_ask.json'
+    },
+    {
+      'sender': 'expert',
+      'textKey': LocaleKeys.dyscalculiaMessages['a4'],
+      'animation': 'images/parent_image/expert_reply.json'
+    },
   ];
 
   int visibleCount = 1;
@@ -33,17 +67,23 @@ class _ParentTopicChatScreenDyscalculiaState extends State<ParentTopicChatScreen
   @override
   void initState() {
     super.initState();
-    _confettiController = ConfettiController(duration: const Duration(seconds: 2));
+    _confettiController =
+        ConfettiController(duration: const Duration(seconds: 2));
   }
 
   void _handleNext() async {
     HapticFeedback.lightImpact();
     await _tapPlayer.play(AssetSource('sounds/voices-parent/screen_tap.mp3'));
-    if (visibleCount + 1 == messages.length) {
-      _confettiController.play();
-    }
+
     if (visibleCount < messages.length) {
-      setState(() => visibleCount++);
+      setState(() {
+        visibleCount++;
+      });
+
+      // Check AFTER increment
+      if (visibleCount == messages.length) {
+        _confettiController.play();
+      }
     }
   }
 
@@ -83,18 +123,25 @@ class _ParentTopicChatScreenDyscalculiaState extends State<ParentTopicChatScreen
                 final isParent = msg['sender'] == 'parent';
 
                 return Align(
-                  alignment: isParent ? Alignment.centerRight : Alignment.centerLeft,
+                  alignment:
+                      isParent ? Alignment.centerRight : Alignment.centerLeft,
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: isParent ? MainAxisAlignment.end : MainAxisAlignment.start,
+                    mainAxisAlignment: isParent
+                        ? MainAxisAlignment.end
+                        : MainAxisAlignment.start,
                     children: [
-                      if (!isParent) Lottie.asset(msg['animation'], width: 50, height: 50),
+                      if (!isParent)
+                        Lottie.asset(msg['animation'], width: 50, height: 50),
                       Flexible(
                         child: Container(
-                          margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+                          margin: const EdgeInsets.symmetric(
+                              vertical: 8, horizontal: 8),
                           padding: const EdgeInsets.all(14),
                           decoration: BoxDecoration(
-                            color: isParent ? Colors.orange.shade100 : const Color(0xFFEAF8F0),
+                            color: isParent
+                                ? Colors.orange.shade100
+                                : const Color(0xFFEAF8F0),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
@@ -104,7 +151,8 @@ class _ParentTopicChatScreenDyscalculiaState extends State<ParentTopicChatScreen
                           ),
                         ),
                       ),
-                      if (isParent) Lottie.asset(msg['animation'], width: 50, height: 50),
+                      if (isParent)
+                        Lottie.asset(msg['animation'], width: 50, height: 50),
                     ],
                   ),
                 );
@@ -117,17 +165,27 @@ class _ParentTopicChatScreenDyscalculiaState extends State<ParentTopicChatScreen
               child: ElevatedButton(
                 onPressed: _handleNext,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: visibleCount + 1 == messages.length ? Colors.green : Colors.deepOrange,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                  backgroundColor: visibleCount + 1 == messages.length
+                      ? Colors.green
+                      : Colors.deepOrange,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(visibleCount + 1 == messages.length ? Icons.check : Icons.arrow_forward, color: Colors.white),
+                    Icon(
+                        visibleCount + 1 == messages.length
+                            ? Icons.check
+                            : Icons.arrow_forward,
+                        color: Colors.white),
                     const SizedBox(width: 8),
-                    Text('${LocaleKeys.nextButton.tr()} ($visibleCount / ${messages.length})',
-                        style: const TextStyle(fontSize: 18, color: Colors.white)),
+                    Text(
+                        '${LocaleKeys.nextButton.tr()} ($visibleCount / ${messages.length})',
+                        style:
+                            const TextStyle(fontSize: 18, color: Colors.white)),
                   ],
                 ),
               ),
@@ -139,7 +197,8 @@ class _ParentTopicChatScreenDyscalculiaState extends State<ParentTopicChatScreen
                   padding: const EdgeInsets.all(16),
                   child: Text(
                     LocaleKeys.dyscalculiaEndMessage.tr(),
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.w600),
                     textAlign: TextAlign.center,
                   ),
                 ),
@@ -150,8 +209,10 @@ class _ParentTopicChatScreenDyscalculiaState extends State<ParentTopicChatScreen
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.deepOrange,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30)),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -162,8 +223,10 @@ class _ParentTopicChatScreenDyscalculiaState extends State<ParentTopicChatScreen
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30)),
                   ),
                 ),
                 const SizedBox(height: 20),
