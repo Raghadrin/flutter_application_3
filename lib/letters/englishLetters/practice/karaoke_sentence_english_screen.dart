@@ -15,7 +15,7 @@ class KaraokeSentenceEnglishScreen extends StatefulWidget {
 }
 
 class _KaraokeSentenceEnglishScreenState
-    extends State<KaraokeSentenceEnglishScreen> {
+    extends State<KaraokeSentenceEnglishScreen> with TickerProviderStateMixin {
   final FlutterTts flutterTts = FlutterTts();
   late stt.SpeechToText speech;
   bool isListening = false;
@@ -25,7 +25,10 @@ class _KaraokeSentenceEnglishScreenState
   double score = 0.0;
   int stars = 0;
   int currentSentenceIndex = 0;
+  int currentSpokenWordIndex = -1;
+
   Map<String, bool> wordMatchResults = {};
+  List<String> spokenWordSequence = [];
 
   List<Map<String, String>> sentences = [
     {
@@ -86,13 +89,15 @@ class _KaraokeSentenceEnglishScreenState
         isListening = true;
         recognizedText = "";
         wordMatchResults.clear();
+        currentSpokenWordIndex = -1;
+        spokenWordSequence.clear();
       });
       speech.listen(
         localeId: 'en_US',
         listenMode: stt.ListenMode.dictation,
         partialResults: true,
-        pauseFor: const Duration(seconds: 5),
-        listenFor: const Duration(minutes: 1),
+        listenFor: const Duration(seconds: 60),
+        pauseFor: const Duration(seconds: 60),
         onResult: (val) {
           setState(() {
             recognizedText = val.recognizedWords;
@@ -105,12 +110,27 @@ class _KaraokeSentenceEnglishScreenState
 
   void updateMatchedWords() {
     String expected = currentSentence["text"] ?? "";
-    List<String> expectedWords = expected.split(RegExp(r'\s+'));
-    List<String> spokenWords = recognizedText.split(RegExp(r'\s+'));
+    List<String> expectedWords = expected
+        .split(RegExp(r'\s+'))
+        .map((w) => w.replaceAll(RegExp(r'[^\w]'), '').toLowerCase())
+        .toList();
+
+    List<String> spokenWords = recognizedText
+        .split(RegExp(r'\s+'))
+        .map((w) => w.replaceAll(RegExp(r'[^\w]'), '').toLowerCase())
+        .toList();
 
     wordMatchResults.clear();
+    spokenWordSequence = spokenWords;
+
     for (var word in expectedWords) {
       wordMatchResults[word] = spokenWords.contains(word);
+    }
+
+    if (spokenWords.isNotEmpty) {
+      String lastSpoken = spokenWords.last;
+      int index = expectedWords.indexOf(lastSpoken);
+      if (index != -1) currentSpokenWordIndex = index;
     }
   }
 
@@ -184,7 +204,7 @@ class _KaraokeSentenceEnglishScreenState
         'timestamp': FieldValue.serverTimestamp(),
       });
     } catch (e) {
-      print("Error saving evaluation: $e");
+      print("Error saving evaluation: \$e");
     }
   }
 
@@ -199,32 +219,63 @@ class _KaraokeSentenceEnglishScreenState
       score = 0.0;
       stars = 0;
       wordMatchResults.clear();
+      spokenWordSequence.clear();
+      currentSpokenWordIndex = -1;
     });
   }
 
-  List<TextSpan> buildHighlightedSentence() {
+  List<InlineSpan> buildHighlightedSentence() {
     String sentence = currentSentence["text"]!;
     List<String> words = sentence.split(RegExp(r'\s+'));
-    return words.map((word) {
-      bool? matched = wordMatchResults[word];
-      Color color;
-      if (matched == true) {
-        color = Colors.green;
-      } else if (matched == false) {
-        color = Colors.red;
-      } else {
-        color = Colors.black;
-      }
 
-      return TextSpan(
-        text: '$word ',
-        style: TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-          color: color,
-        ),
-      );
-    }).toList();
+    return List.generate(words.length, (i) {
+      String originalWord = words[i];
+      String cleanWord = originalWord.replaceAll(RegExp(r'[^\w]'), '').toLowerCase();
+
+      if (!isListening && recognizedText.isNotEmpty) {
+        if (wordMatchResults[cleanWord] == true) {
+          return TextSpan(
+            text: '$originalWord ',
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.green),
+          );
+        } else {
+          return TextSpan(
+            text: '$originalWord ',
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.red),
+          );
+        }
+      } else if (i == currentSpokenWordIndex) {
+        return WidgetSpan(
+          child: TweenAnimationBuilder(
+            tween: Tween<double>(begin: 1.0, end: 1.1),
+            duration: const Duration(milliseconds: 800),
+            curve: Curves.easeInOut,
+            builder: (context, scale, child) {
+              return Transform.scale(
+                scale: scale,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 2),
+                  decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(color: Colors.blueAccent.withOpacity(0.6), blurRadius: 10, spreadRadius: 1),
+                    ],
+                  ),
+                  child: Text(
+                    '$originalWord ',
+                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.blue),
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      } else {
+        return TextSpan(
+          text: '$originalWord ',
+          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black54),
+        );
+      }
+    });
   }
 
   @override
@@ -243,10 +294,7 @@ class _KaraokeSentenceEnglishScreenState
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                      color: Colors.black12, blurRadius: 8, offset: Offset(0, 4))
-                ],
+                boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4))],
               ),
               child: SingleChildScrollView(
                 child: RichText(
@@ -258,8 +306,7 @@ class _KaraokeSentenceEnglishScreenState
             LinearProgressIndicator(
               value: (currentSentenceIndex + 1) / sentences.length,
               backgroundColor: Colors.grey[300],
-              valueColor: const AlwaysStoppedAnimation<Color>(
-                  Color.fromARGB(255, 109, 175, 252)),
+              valueColor: const AlwaysStoppedAnimation<Color>(Color.fromARGB(255, 109, 175, 252)),
             ),
             const SizedBox(height: 20),
             ElevatedButton.icon(
@@ -267,9 +314,7 @@ class _KaraokeSentenceEnglishScreenState
               label: Text(isPlaying ? 'Stop Reading' : 'Read Sentence'),
               onPressed: speakSentence,
               style: ElevatedButton.styleFrom(
-                backgroundColor: isPlaying
-                    ? const Color.fromARGB(255, 255, 170, 170)
-                    : const Color.fromARGB(255, 255, 231, 176),
+                backgroundColor: isPlaying ? const Color.fromARGB(255, 255, 170, 170) : const Color.fromARGB(255, 255, 231, 176),
                 foregroundColor: Colors.black,
                 minimumSize: Size(screenWidth * 0.8, 44),
               ),
@@ -279,9 +324,7 @@ class _KaraokeSentenceEnglishScreenState
               icon: Icon(isListening ? Icons.stop : Icons.mic),
               label: Text(isListening ? 'Stop' : 'Start Speaking'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: isListening
-                    ? const Color.fromARGB(255, 255, 204, 204)
-                    : const Color.fromARGB(255, 204, 255, 204),
+                backgroundColor: isListening ? const Color.fromARGB(255, 255, 204, 204) : const Color.fromARGB(255, 204, 255, 204),
                 foregroundColor: Colors.black,
                 minimumSize: Size(screenWidth * 0.8, 44),
               ),
@@ -289,30 +332,41 @@ class _KaraokeSentenceEnglishScreenState
                 if (isListening) {
                   speech.stop();
                   setState(() => isListening = false);
-                  Future.delayed(const Duration(seconds: 1), () {
-                    evaluateResult();
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => EvaluationEnglishScreen(
-                          recognizedText: recognizedText,
-                          score: score,
-                          stars: stars,
-                          level: 'level1',
-                          wordMatchResults: wordMatchResults,
-                          onNext: () {
-                            Navigator.pop(context);
-                            nextSentence();
-                          },
-                        ),
-                      ),
-                    );
-                  });
                 } else {
                   startListening();
                 }
               },
             ),
+            const SizedBox(height: 16),
+            if (!isListening && recognizedText.isNotEmpty)
+              ElevatedButton.icon(
+                icon: const Icon(Icons.check_circle_outline),
+                label: const Text('Finish and Check'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orangeAccent,
+                  foregroundColor: Colors.black,
+                  minimumSize: Size(screenWidth * 0.8, 44),
+                ),
+                onPressed: () {
+                  evaluateResult();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => EvaluationEnglishScreen(
+                        recognizedText: recognizedText,
+                        score: score,
+                        stars: stars,
+                        level: 'level1',
+                        wordMatchResults: wordMatchResults,
+                        onNext: () {
+                          Navigator.pop(context);
+                          nextSentence();
+                        },
+                      ),
+                    ),
+                  );
+                },
+              ),
           ],
         ),
       ),
