@@ -18,6 +18,8 @@ class _KaraokeSentenceLevel2ScreenState
   late AudioPlayer audioPlayer;
   late stt.SpeechToText speech;
   bool isListening = false;
+  bool isPlaying = false;
+
   String recognizedText = "";
   double score = 0.0;
   int stars = 0;
@@ -49,6 +51,20 @@ class _KaraokeSentenceLevel2ScreenState
     super.initState();
     audioPlayer = AudioPlayer();
     speech = stt.SpeechToText();
+
+    audioPlayer.onPlayerComplete.listen((event) {
+      setState(() => isPlaying = false);
+    });
+  }
+
+  Future<void> toggleAudio(String path) async {
+    if (isPlaying) {
+      await audioPlayer.stop();
+      setState(() => isPlaying = false);
+    } else {
+      setState(() => isPlaying = true);
+      await audioPlayer.play(AssetSource(path));
+    }
   }
 
   Future<void> saveKaraokeEvaluation({
@@ -60,33 +76,19 @@ class _KaraokeSentenceLevel2ScreenState
     required int stars,
   }) async {
     try {
-      String? parentId = "";
-      String? childId = "";
-
       final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        print("User not logged in");
-        return;
-      }
-      parentId = user.uid;
+      if (user == null) return;
 
+      final parentId = user.uid;
       final childrenSnapshot = await FirebaseFirestore.instance
           .collection('parents')
           .doc(parentId)
           .collection('children')
           .get();
 
-      if (childrenSnapshot.docs.isNotEmpty) {
-        childId = childrenSnapshot.docs.first.id;
-      } else {
-        print("No children found for this parent.");
-        return;
-      }
+      if (childrenSnapshot.docs.isEmpty) return;
 
-      if (parentId.isEmpty || childId == null) {
-        print("Cannot save evaluation: parentId or childId missing");
-        return;
-      }
+      final childId = childrenSnapshot.docs.first.id;
 
       await FirebaseFirestore.instance
           .collection('parents')
@@ -105,16 +107,9 @@ class _KaraokeSentenceLevel2ScreenState
         'stars': stars,
         'timestamp': FieldValue.serverTimestamp(),
       });
-
-      print("Karaoke evaluation saved successfully");
     } catch (e) {
       print("Error saving karaoke evaluation: $e");
     }
-  }
-
-  Future<void> playAudio(String path) async {
-    await audioPlayer.stop();
-    await audioPlayer.play(AssetSource(path));
   }
 
   Future<void> startListening() async {
@@ -122,7 +117,6 @@ class _KaraokeSentenceLevel2ScreenState
       onStatus: (val) {
         if (val == 'done') {
           setState(() => isListening = false);
-          // لا نقيم تلقائياً هنا
         }
       },
       onError: (val) {
@@ -139,8 +133,8 @@ class _KaraokeSentenceLevel2ScreenState
         localeId: 'ar_SA',
         listenMode: stt.ListenMode.dictation,
         partialResults: true,
-        pauseFor: Duration(seconds: 5),
-        listenFor: Duration(minutes: 1),
+        pauseFor: const Duration(seconds: 5),
+        listenFor: const Duration(minutes: 1),
         onResult: (val) {
           setState(() {
             recognizedText = val.recognizedWords;
@@ -158,13 +152,12 @@ class _KaraokeSentenceLevel2ScreenState
 
     wordMatchResults.clear();
     for (var word in expectedWords) {
-      bool matched = spokenWords.contains(word);
-      wordMatchResults[word] = matched;
+      wordMatchResults[word] = spokenWords.contains(word);
     }
   }
 
   Future<void> evaluateResult() async {
-    int correct = wordMatchResults.values.where((v) => v == true).length;
+    int correct = wordMatchResults.values.where((v) => v).length;
     int total = wordMatchResults.length;
     score = total > 0 ? (correct / total) * 100 : 0.0;
 
@@ -177,6 +170,7 @@ class _KaraokeSentenceLevel2ScreenState
     } else {
       stars = 0;
     }
+
     List<String> correctWords = wordMatchResults.entries
         .where((entry) => entry.value)
         .map((entry) => entry.key)
@@ -195,6 +189,7 @@ class _KaraokeSentenceLevel2ScreenState
       score: score,
       stars: stars,
     );
+
     setState(() {});
   }
 
@@ -209,6 +204,7 @@ class _KaraokeSentenceLevel2ScreenState
       score = 0.0;
       stars = 0;
       wordMatchResults.clear();
+      isPlaying = false;
     });
   }
 
@@ -277,20 +273,26 @@ class _KaraokeSentenceLevel2ScreenState
             ),
             SizedBox(height: 20),
             ElevatedButton.icon(
-              icon: Icon(Icons.play_arrow),
-              label: Text('استمع للجملة'),
+              icon: Icon(isPlaying ? Icons.stop : Icons.play_arrow),
+              label: Text(isPlaying ? 'إيقاف الصوت' : 'استمع للجملة'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blueAccent,
+                backgroundColor: isPlaying
+                    ? const Color.fromARGB(255, 255, 220, 220)
+                    : const Color.fromARGB(255, 255, 238, 180),
+                foregroundColor: Colors.black,
                 minimumSize: Size(screenWidth * 0.8, 44),
               ),
-              onPressed: () => playAudio(currentSentence["audio"]!),
+              onPressed: () => toggleAudio(currentSentence["audio"]!),
             ),
             SizedBox(height: 12),
             ElevatedButton.icon(
               icon: Icon(isListening ? Icons.stop : Icons.mic),
               label: Text(isListening ? 'إيقاف' : 'ابدأ التحدث'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: isListening ? Colors.red : Colors.green,
+                backgroundColor: isListening
+                    ? const Color.fromARGB(255, 246, 110, 101)
+                    : const Color.fromARGB(255, 111, 242, 115),
+                foregroundColor: Colors.black,
                 minimumSize: Size(screenWidth * 0.8, 44),
               ),
               onPressed: () {

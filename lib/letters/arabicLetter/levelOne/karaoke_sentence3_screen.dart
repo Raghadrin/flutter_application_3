@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_application_3/letters/arabicLetter/levelOne/evaluation2_screen.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
-import 'evaluation2_screen.dart'; // تأكد من مسار الملف
 
 class KaraokeSentenceLevel3Screen extends StatefulWidget {
   const KaraokeSentenceLevel3Screen({super.key});
@@ -19,11 +18,13 @@ class _KaraokeSentenceLevel3ScreenState
   late AudioPlayer audioPlayer;
   late stt.SpeechToText speech;
   bool isListening = false;
+  bool isPlaying = false;
   String recognizedText = "";
   double score = 0.0;
   int stars = 0;
   int currentSentenceIndex = 0;
   Map<String, bool> wordMatchResults = {};
+
   List<Map<String, String>> sentences = [
     {
       "text":
@@ -37,7 +38,7 @@ class _KaraokeSentenceLevel3ScreenState
     },
     {
       "text":
-          "في اليوم التالي، أخبر سامر المعلمة بما رأى. شكرته وقالت إنها ستتصرف بالشكل المناسب. تحدثت مع الطالب وشرحَت له أهمية الأمانة. ثم أخبرت سامر أن تصرفه كان شجاعًا، وأثنت عليه أمام زملائه. شعر سامر بالفخر، لأنه اختار الصدق ونال احترام الجميع.",
+          "في اليوم التالي، أخبر سامر المعلمة بما رأى. شكرته وقالت إنها ستتصرف بالشكل المناسب. تحدثت مع الطالب وشرحَت له أهمية الأمانة. ثم أخبرت سامرًا أن تصرفه كان شجاعًا، وأثنت عليه أمام زملائه. شعر سامر بالفخر، لأنه اختار الصدق ونال احترام الجميع.",
       "audio": "audio/samer3.mp3",
     },
   ];
@@ -49,6 +50,20 @@ class _KaraokeSentenceLevel3ScreenState
     super.initState();
     audioPlayer = AudioPlayer();
     speech = stt.SpeechToText();
+
+    audioPlayer.onPlayerComplete.listen((event) {
+      setState(() => isPlaying = false);
+    });
+  }
+
+  Future<void> toggleAudio(String path) async {
+    if (isPlaying) {
+      await audioPlayer.stop();
+      setState(() => isPlaying = false);
+    } else {
+      setState(() => isPlaying = true);
+      await audioPlayer.play(AssetSource(path));
+    }
   }
 
   Future<void> saveKaraokeEvaluation({
@@ -60,33 +75,19 @@ class _KaraokeSentenceLevel3ScreenState
     required int stars,
   }) async {
     try {
-      String? parentId = "";
-      String? childId = "";
-
       final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        print("User not logged in");
-        return;
-      }
-      parentId = user.uid;
+      if (user == null) return;
 
+      final parentId = user.uid;
       final childrenSnapshot = await FirebaseFirestore.instance
           .collection('parents')
           .doc(parentId)
           .collection('children')
           .get();
 
-      if (childrenSnapshot.docs.isNotEmpty) {
-        childId = childrenSnapshot.docs.first.id;
-      } else {
-        print("No children found for this parent.");
-        return;
-      }
+      if (childrenSnapshot.docs.isEmpty) return;
 
-      if (parentId.isEmpty || childId == null) {
-        print("Cannot save evaluation: parentId or childId missing");
-        return;
-      }
+      final childId = childrenSnapshot.docs.first.id;
 
       await FirebaseFirestore.instance
           .collection('parents')
@@ -105,16 +106,9 @@ class _KaraokeSentenceLevel3ScreenState
         'stars': stars,
         'timestamp': FieldValue.serverTimestamp(),
       });
-
-      print("Karaoke evaluation saved successfully");
     } catch (e) {
       print("Error saving karaoke evaluation: $e");
     }
-  }
-
-  Future<void> playAudio(String path) async {
-    await audioPlayer.stop();
-    await audioPlayer.play(AssetSource(path));
   }
 
   Future<void> startListening() async {
@@ -157,8 +151,7 @@ class _KaraokeSentenceLevel3ScreenState
 
     wordMatchResults.clear();
     for (var word in expectedWords) {
-      bool matched = spokenWords.contains(word);
-      wordMatchResults[word] = matched;
+      wordMatchResults[word] = spokenWords.contains(word);
     }
   }
 
@@ -176,6 +169,7 @@ class _KaraokeSentenceLevel3ScreenState
     } else {
       stars = 0;
     }
+
     List<String> correctWords = wordMatchResults.entries
         .where((entry) => entry.value)
         .map((entry) => entry.key)
@@ -194,6 +188,7 @@ class _KaraokeSentenceLevel3ScreenState
       score: score,
       stars: stars,
     );
+
     setState(() {});
   }
 
@@ -208,6 +203,7 @@ class _KaraokeSentenceLevel3ScreenState
       score = 0.0;
       stars = 0;
       wordMatchResults.clear();
+      isPlaying = false;
     });
   }
 
@@ -261,74 +257,82 @@ class _KaraokeSentenceLevel3ScreenState
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('🎤 كاريوكي الجمل - المستوى ٣'),
-        ),
-        body: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  margin: const EdgeInsets.only(bottom: 20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 8,
-                        offset: Offset(0, 4),
-                      )
-                    ],
-                  ),
-                  child: SingleChildScrollView(
-                    child: RichText(
-                      textAlign: TextAlign.center,
-                      text: TextSpan(children: buildHighlightedSentence()),
-                    ),
+      appBar: AppBar(
+        title: const Text('🎤 كاريوكي الجمل - المستوى ٣'),
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 8,
+                      offset: Offset(0, 4),
+                    )
+                  ],
+                ),
+                child: SingleChildScrollView(
+                  child: RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(children: buildHighlightedSentence()),
                   ),
                 ),
-                LinearProgressIndicator(
-                  value: (currentSentenceIndex + 1) / sentences.length,
-                  backgroundColor: Colors.grey[300],
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.blueAccent),
+              ),
+              LinearProgressIndicator(
+                value: (currentSentenceIndex + 1) / sentences.length,
+                backgroundColor: Colors.grey[300],
+                valueColor:
+                    const AlwaysStoppedAnimation<Color>(Colors.blueAccent),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton.icon(
+                icon: Icon(isPlaying ? Icons.stop : Icons.play_arrow),
+                label: Text(isPlaying ? 'إيقاف الصوت' : 'استمع للجملة'),
+                onPressed: () => toggleAudio(currentSentence["audio"]!),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isPlaying
+                      ? const Color.fromARGB(255, 255, 220, 220)
+                      : const Color.fromARGB(255, 255, 238, 180),
+                  foregroundColor: Colors.black,
+                  minimumSize: Size(screenWidth * 0.8, 44),
                 ),
-                const SizedBox(height: 20),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.play_arrow),
-                  label: const Text('استمع للجملة'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueAccent,
-                    minimumSize: Size(screenWidth * 0.8, 44),
-                  ),
-                  onPressed: () => playAudio(currentSentence["audio"]!),
+              ),
+              const SizedBox(height: 12),
+              ElevatedButton.icon(
+                icon: Icon(isListening ? Icons.stop : Icons.mic),
+                label: Text(isListening ? 'إيقاف' : 'ابدأ التحدث'),
+                onPressed: () {
+                  if (isListening) {
+                    speech.stop();
+                    setState(() => isListening = false);
+                    Future.delayed(const Duration(seconds: 1), () {
+                      showEvaluation();
+                    });
+                  } else {
+                    startListening();
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isListening
+                      ? const Color.fromARGB(255, 255, 123, 114)
+                      : const Color.fromARGB(255, 113, 247, 117),
+                  foregroundColor: Colors.black,
+                  minimumSize: Size(screenWidth * 0.8, 44),
                 ),
-                const SizedBox(height: 12),
-                ElevatedButton.icon(
-                  icon: Icon(isListening ? Icons.stop : Icons.mic),
-                  label: Text(isListening ? 'إيقاف' : 'ابدأ التحدث'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: isListening ? Colors.red : Colors.green,
-                    minimumSize: Size(screenWidth * 0.8, 44),
-                  ),
-                  onPressed: () {
-                    if (isListening) {
-                      speech.stop();
-                      setState(() => isListening = false);
-                      Future.delayed(const Duration(seconds: 1), () {
-                        showEvaluation();
-                      });
-                    } else {
-                      startListening();
-                    }
-                  },
-                ),
-                const SizedBox(height: 30),
-              ],
-            ),
+              ),
+              const SizedBox(height: 30),
+            ],
           ),
-        ));
+        ),
+      ),
+    );
   }
 }

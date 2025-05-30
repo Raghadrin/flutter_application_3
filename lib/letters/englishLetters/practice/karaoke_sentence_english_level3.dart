@@ -2,24 +2,26 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
-import 'evaluation2_screen.dart'; // تأكد أن هذا الملف موجود
+import 'evaluation_english_screen.dart';
 
-class KaraokeSentenceScreen extends StatefulWidget {
-  const KaraokeSentenceScreen({super.key});
+class KaraokeSentenceEnglishLevel3Screen extends StatefulWidget {
+  const KaraokeSentenceEnglishLevel3Screen({super.key});
 
   @override
-  State<KaraokeSentenceScreen> createState() => _KaraokeSentenceScreenState();
+  State<KaraokeSentenceEnglishLevel3Screen> createState() =>
+      _KaraokeSentenceEnglishLevel3ScreenState();
 }
 
-class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
-  late AudioPlayer audioPlayer;
+class _KaraokeSentenceEnglishLevel3ScreenState
+    extends State<KaraokeSentenceEnglishLevel3Screen> {
+  final FlutterTts flutterTts = FlutterTts();
   late stt.SpeechToText speech;
   bool isListening = false;
   bool isPlaying = false;
 
-  String recognizedText = "";
+  String recognizedText = '';
   double score = 0.0;
   int stars = 0;
   int currentSentenceIndex = 0;
@@ -28,19 +30,20 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
   List<Map<String, String>> sentences = [
     {
       "text":
-          "في غابة جميلة، كانت تعيش سلحفاة. كانت تمشي ببطء، لكنها تفكر بهدوء. كلما اختلفت الحيوانات، نادت السلحفاة. الكل يسمع كلامها لأنها حكيمة وطيبة.",
-      "audio": "audio/turtle1.mp3",
+          "Sami opened a big book about space exploration. He saw rockets flying to distant planets and astronauts floating in zero gravity inside the space station."
     },
     {
       "text":
-          "في يوم من الأيام، ضاع أرنب صغير. ركض كثيرًا ولم يعرف طريق البيت. كان خائفًا ويبكي تحت الشجرة. جاءت السلحفاة وسألته: \"هل تحتاج مساعدة؟\"",
-      "audio": "audio/turtle2.mp3",
+          "One picture showed the rocky surface of the moon. Another showed Earth looking small and blue from far away. Sami was amazed and wanted to learn more."
     },
     {
       "text":
-          "سارت معه حتى وصل إلى بيته. قال الأرنب: \"كنت أظن السلحفاة فقط بطيئة!\" \"لكنك ذكية وتعرفين ما تفعلين.\" ابتسمت السلحفاة وقالت: \"لا تحكم من الشكل!\" ومن يومها، أصبح الأرنب صديقها.",
-      "audio": "audio/turtle3.mp3",
+          "Back in class, Sami shared what he learned with his friends. He explained how astronauts trained for space and how their suits protected them."
     },
+    {
+      "text":
+          "That night, Sami dreamed of becoming an astronaut. The stars twinkled above as if they were cheering him on. He knew one day, he would reach them."
+    }
   ];
 
   Map<String, String> get currentSentence => sentences[currentSentenceIndex];
@@ -48,65 +51,21 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
   @override
   void initState() {
     super.initState();
-    audioPlayer = AudioPlayer();
     speech = stt.SpeechToText();
-    audioPlayer.onPlayerComplete.listen((event) {
-      setState(() => isPlaying = false);
-    });
   }
 
-  Future<void> toggleAudio(String path) async {
+  Future<void> speakSentence() async {
     if (isPlaying) {
-      await audioPlayer.stop();
+      await flutterTts.stop();
       setState(() => isPlaying = false);
     } else {
+      await flutterTts.setLanguage("en-US");
+      await flutterTts.setSpeechRate(0.45);
       setState(() => isPlaying = true);
-      await audioPlayer.play(AssetSource(path));
-    }
-  }
-
-  Future<void> saveKaraokeEvaluation({
-    required String sentence,
-    required String recognizedText,
-    required List<String> correctWords,
-    required List<String> wrongWords,
-    required double score,
-    required int stars,
-  }) async {
-    try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) return;
-
-      final parentId = user.uid;
-      final childrenSnapshot = await FirebaseFirestore.instance
-          .collection('parents')
-          .doc(parentId)
-          .collection('children')
-          .get();
-
-      if (childrenSnapshot.docs.isEmpty) return;
-
-      final childId = childrenSnapshot.docs.first.id;
-
-      await FirebaseFirestore.instance
-          .collection('parents')
-          .doc(parentId)
-          .collection('children')
-          .doc(childId)
-          .collection('karaoke')
-          .doc('arKaraoke')
-          .collection('level1')
-          .add({
-        'sentence': sentence,
-        'recognizedText': recognizedText,
-        'correctWords': correctWords,
-        'wrongWords': wrongWords,
-        'score': score,
-        'stars': stars,
-        'timestamp': FieldValue.serverTimestamp(),
+      await flutterTts.speak(currentSentence["text"]!);
+      flutterTts.setCompletionHandler(() {
+        setState(() => isPlaying = false);
       });
-    } catch (e) {
-      print("Error saving karaoke evaluation: $e");
     }
   }
 
@@ -128,7 +87,7 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
         wordMatchResults.clear();
       });
       speech.listen(
-        localeId: 'ar_SA',
+        localeId: 'en_US',
         listenMode: stt.ListenMode.dictation,
         partialResults: true,
         pauseFor: const Duration(seconds: 5),
@@ -169,17 +128,12 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
       stars = 0;
     }
 
-    List<String> correctWords = wordMatchResults.entries
-        .where((e) => e.value)
-        .map((e) => e.key)
-        .toList();
+    List<String> correctWords =
+        wordMatchResults.entries.where((e) => e.value).map((e) => e.key).toList();
+    List<String> wrongWords =
+        wordMatchResults.entries.where((e) => !e.value).map((e) => e.key).toList();
 
-    List<String> wrongWords = wordMatchResults.entries
-        .where((e) => !e.value)
-        .map((e) => e.key)
-        .toList();
-
-    await saveKaraokeEvaluation(
+    await saveEvaluation(
       sentence: currentSentence["text"]!,
       recognizedText: recognizedText,
       correctWords: correctWords,
@@ -187,8 +141,50 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
       score: score,
       stars: stars,
     );
+  }
 
-    setState(() {});
+  Future<void> saveEvaluation({
+    required String sentence,
+    required String recognizedText,
+    required List<String> correctWords,
+    required List<String> wrongWords,
+    required double score,
+    required int stars,
+  }) async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+
+      final parentId = user.uid;
+      final childrenSnapshot = await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(parentId)
+          .collection('children')
+          .get();
+      if (childrenSnapshot.docs.isEmpty) return;
+
+      final childId = childrenSnapshot.docs.first.id;
+
+      await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(parentId)
+          .collection('children')
+          .doc(childId)
+          .collection('karaoke')
+          .doc('enKaraoke')
+          .collection('level3')
+          .add({
+        'sentence': sentence,
+        'recognizedText': recognizedText,
+        'correctWords': correctWords,
+        'wrongWords': wrongWords,
+        'score': score,
+        'stars': stars,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      print("Error saving evaluation: $e");
+    }
   }
 
   void nextSentence() {
@@ -198,11 +194,10 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
       } else {
         currentSentenceIndex = 0;
       }
-      recognizedText = "";
+      recognizedText = '';
       score = 0.0;
       stars = 0;
       wordMatchResults.clear();
-      isPlaying = false;
     });
   }
 
@@ -222,11 +217,11 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
 
       return TextSpan(
         text: '$word ',
-        style: const TextStyle(
-          fontSize: 28,
+        style: TextStyle(
+          fontSize: 24,
           fontWeight: FontWeight.bold,
-          color: Colors.black,
-        ).copyWith(color: color),
+          color: color,
+        ),
       );
     }).toList();
   }
@@ -236,9 +231,7 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('🎤 كاريوكي الجمل - المستوى ١'),
-      ),
+      appBar: AppBar(title: const Text('🎤 Karaoke Reading - Level 3')),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -250,11 +243,7 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
                 boxShadow: [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 8,
-                    offset: Offset(0, 4),
-                  )
+                  BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4))
                 ],
               ),
               child: SingleChildScrollView(
@@ -267,20 +256,18 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
             LinearProgressIndicator(
               value: (currentSentenceIndex + 1) / sentences.length,
               backgroundColor: Colors.grey[300],
-              valueColor: const AlwaysStoppedAnimation<Color>(Colors.blueAccent),
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                  Color.fromARGB(255, 116, 170, 252)),
             ),
             const SizedBox(height: 20),
             ElevatedButton.icon(
-              icon: Icon(isPlaying ? Icons.stop : Icons.play_arrow),
-              label: Text(isPlaying ? 'إيقاف الصوت' : 'استمع للجملة'),
-              onPressed: () => toggleAudio(currentSentence["audio"]!),
+              icon: Icon(isPlaying ? Icons.stop : Icons.volume_up),
+              label: Text(isPlaying ? 'Stop Reading' : 'Read Sentence'),
+              onPressed: speakSentence,
               style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30)),
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                 backgroundColor: isPlaying
-                    ? const Color.fromARGB(255, 255, 210, 210)
-                    : const Color.fromARGB(255, 255, 235, 180),
+                    ? const Color.fromARGB(255, 255, 212, 212)
+                    : const Color.fromARGB(255, 255, 238, 190),
                 foregroundColor: Colors.black,
                 minimumSize: Size(screenWidth * 0.8, 44),
               ),
@@ -288,11 +275,11 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
             const SizedBox(height: 12),
             ElevatedButton.icon(
               icon: Icon(isListening ? Icons.stop : Icons.mic),
-              label: Text(isListening ? 'إيقاف' : 'ابدأ التحدث'),
+              label: Text(isListening ? 'Stop' : 'Start Speaking'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: isListening
-                    ? const Color.fromARGB(255, 252, 136, 127)
-                    : const Color.fromARGB(255, 127, 248, 131),
+                    ? const Color.fromARGB(255, 255, 204, 204)
+                    : const Color.fromARGB(255, 204, 255, 204),
                 foregroundColor: Colors.black,
                 minimumSize: Size(screenWidth * 0.8, 44),
               ),
@@ -305,11 +292,11 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => Evaluation2Screen(
+                        builder: (_) => EvaluationEnglishScreen(
                           recognizedText: recognizedText,
                           score: score,
                           stars: stars,
-                          level: 'level1',
+                          level: 'level3',
                           wordMatchResults: wordMatchResults,
                           onNext: () {
                             Navigator.pop(context);
@@ -324,7 +311,6 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
                 }
               },
             ),
-            const SizedBox(height: 30),
           ],
         ),
       ),
