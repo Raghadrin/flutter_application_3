@@ -69,7 +69,7 @@ class _ParentTopicChatScreenDyslexiaState
     HapticFeedback.lightImpact();
 
     try {
-      await _tapPlayer.play(AssetSource('sounds/voices-parent/flipcard.mp3'));
+      await _tapPlayer.play(AssetSource('sounds/voices-parent/screen_tap.mp3'));
     } catch (e) {
       debugPrint("Audio play error: $e");
     }

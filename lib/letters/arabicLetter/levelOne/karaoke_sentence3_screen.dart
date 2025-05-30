@@ -187,13 +187,31 @@ class _KaraokeSentenceLevel3ScreenState
         padding: const EdgeInsets.all(24.0),
         child: Column(
           children: [
-            Expanded(
+            Container(
+              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.only(bottom: 20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 8,
+                    offset: Offset(0, 4),
+                  )
+                ],
+              ),
               child: SingleChildScrollView(
                 child: RichText(
                   textAlign: TextAlign.center,
                   text: TextSpan(children: buildHighlightedSentence()),
                 ),
               ),
+            ),
+            LinearProgressIndicator(
+              value: (currentSentenceIndex + 1) / sentences.length,
+              backgroundColor: Colors.grey[300],
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.blueAccent),
             ),
             const SizedBox(height: 20),
             ElevatedButton.icon(

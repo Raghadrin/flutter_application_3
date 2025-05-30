@@ -7,10 +7,12 @@ class KaraokeSentenceLevel2Screen extends StatefulWidget {
   const KaraokeSentenceLevel2Screen({super.key});
 
   @override
-  _KaraokeSentenceLevel2ScreenState createState() => _KaraokeSentenceLevel2ScreenState();
+  _KaraokeSentenceLevel2ScreenState createState() =>
+      _KaraokeSentenceLevel2ScreenState();
 }
 
-class _KaraokeSentenceLevel2ScreenState extends State<KaraokeSentenceLevel2Screen> {
+class _KaraokeSentenceLevel2ScreenState
+    extends State<KaraokeSentenceLevel2Screen> {
   late AudioPlayer audioPlayer;
   late stt.SpeechToText speech;
   bool isListening = false;
@@ -22,15 +24,18 @@ class _KaraokeSentenceLevel2ScreenState extends State<KaraokeSentenceLevel2Scree
 
   List<Map<String, String>> sentences = [
     {
-      "text": "ذهبت العائلة الى البحر وقضت وقتا ممتعا في السباحة وبناء القلاع الرملية",
+      "text":
+          "ذهبت العائلة الى البحر وقضت وقتا ممتعا في السباحة وبناء القلاع الرملية",
       "audio": "audio/family.mp3",
     },
     {
-      "text": "استيقظ سامي مبكرا وحمل حقيبته الجديده وذهب الى المدرسه بحماس كبير",
+      "text":
+          "استيقظ سامي مبكرا وحمل حقيبته الجديده وذهب الى المدرسه بحماس كبير",
       "audio": "audio/school.mp3",
     },
     {
-      "text": "اشتريت كتابا جديدا عن الفضاء وقرات عن الكواكب والنجوم والمجرات البعيده",
+      "text":
+          "اشتريت كتابا جديدا عن الفضاء وقرات عن الكواكب والنجوم والمجرات البعيده",
       "audio": "audio/book.mp3",
     },
   ];
@@ -127,31 +132,30 @@ class _KaraokeSentenceLevel2ScreenState extends State<KaraokeSentenceLevel2Scree
     });
   }
 
- List<TextSpan> buildHighlightedSentence() {
-  String fullSentence = currentSentence["text"]!;
-  List<String> words = fullSentence.split(RegExp(r'\s+'));
-  return words.map((word) {
-    bool? matched = wordMatchResults[word];
-    Color color;
-    if (matched == true) {
-      color = Colors.green;
-    } else if (matched == false) {
-      color = Colors.red;
-    } else {
-      color = Colors.black;
-    }
+  List<TextSpan> buildHighlightedSentence() {
+    String fullSentence = currentSentence["text"]!;
+    List<String> words = fullSentence.split(RegExp(r'\s+'));
+    return words.map((word) {
+      bool? matched = wordMatchResults[word];
+      Color color;
+      if (matched == true) {
+        color = Colors.green;
+      } else if (matched == false) {
+        color = Colors.red;
+      } else {
+        color = Colors.black;
+      }
 
-    return TextSpan(
-      text: '$word ',
-      style: TextStyle(
-        color: color,
-        fontSize: 28,
-        fontWeight: FontWeight.bold,
-      ),
-    );
-  }).toList();
-}
-
+      return TextSpan(
+        text: '$word ',
+        style: TextStyle(
+          color: color,
+          fontSize: 28,
+          fontWeight: FontWeight.bold,
+        ),
+      );
+    }).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -165,13 +169,31 @@ class _KaraokeSentenceLevel2ScreenState extends State<KaraokeSentenceLevel2Scree
         padding: const EdgeInsets.all(24.0),
         child: Column(
           children: [
-            Expanded(
+            Container(
+              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.only(bottom: 20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 8,
+                    offset: Offset(0, 4),
+                  )
+                ],
+              ),
               child: SingleChildScrollView(
                 child: RichText(
                   textAlign: TextAlign.center,
                   text: TextSpan(children: buildHighlightedSentence()),
                 ),
               ),
+            ),
+            LinearProgressIndicator(
+              value: (currentSentenceIndex + 1) / sentences.length,
+              backgroundColor: Colors.grey[300],
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.blueAccent),
             ),
             SizedBox(height: 20),
             ElevatedButton.icon(
@@ -193,28 +215,27 @@ class _KaraokeSentenceLevel2ScreenState extends State<KaraokeSentenceLevel2Scree
               ),
               onPressed: () {
                 if (isListening) {
-  speech.stop();
-  setState(() => isListening = false);
-  Future.delayed(Duration(seconds: 1), () {
-    evaluateResult();
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => EvaluationScreen(
-          recognizedText: recognizedText,
-          score: score,
-          stars: stars,
-          wordMatchResults: wordMatchResults,
-          onNext: () {
-            Navigator.pop(context);
-            nextSentence();
-          },
-        ),
-      ),
-    );
-  });
-}
-else {
+                  speech.stop();
+                  setState(() => isListening = false);
+                  Future.delayed(Duration(seconds: 1), () {
+                    evaluateResult();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => EvaluationScreen(
+                          recognizedText: recognizedText,
+                          score: score,
+                          stars: stars,
+                          wordMatchResults: wordMatchResults,
+                          onNext: () {
+                            Navigator.pop(context);
+                            nextSentence();
+                          },
+                        ),
+                      ),
+                    );
+                  });
+                } else {
                   startListening();
                 }
               },

@@ -132,7 +132,7 @@ class _SplashScreenState extends State<SplashScreen> {
               const SizedBox(height: 20),
               Text(
                 'حكاية',
-                style: TextStyle(
+                style: GoogleFonts.cairo(
                   color: const Color.fromARGB(255, 228, 80, 0),
                   fontSize: 54,
                 ),
@@ -147,7 +147,7 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
               Text(
                 'welcome to fun learning',
-                style: TextStyle(
+                style: GoogleFonts.poppins(
                   color: const Color.fromARGB(255, 255, 255, 255),
                   fontSize: 20,
                 ),
