@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
@@ -47,6 +49,67 @@ class _KaraokeSentenceLevel2ScreenState
     super.initState();
     audioPlayer = AudioPlayer();
     speech = stt.SpeechToText();
+  }
+
+  Future<void> saveKaraokeEvaluation({
+    required String sentence,
+    required String recognizedText,
+    required List<String> correctWords,
+    required List<String> wrongWords,
+    required double score,
+    required int stars,
+  }) async {
+    try {
+      String? parentId = "";
+      String? childId = "";
+
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        print("User not logged in");
+        return;
+      }
+      parentId = user.uid;
+
+      final childrenSnapshot = await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(parentId)
+          .collection('children')
+          .get();
+
+      if (childrenSnapshot.docs.isNotEmpty) {
+        childId = childrenSnapshot.docs.first.id;
+      } else {
+        print("No children found for this parent.");
+        return;
+      }
+
+      if (parentId.isEmpty || childId == null) {
+        print("Cannot save evaluation: parentId or childId missing");
+        return;
+      }
+
+      await FirebaseFirestore.instance
+          .collection('parents')
+          .doc(parentId)
+          .collection('children')
+          .doc(childId)
+          .collection('karaoke')
+          .doc('arKaraoke')
+          .collection('level2')
+          .add({
+        'sentence': sentence,
+        'recognizedText': recognizedText,
+        'correctWords': correctWords,
+        'wrongWords': wrongWords,
+        'score': score,
+        'stars': stars,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      print("Karaoke evaluation saved successfully");
+    } catch (e) {
+      print("Error saving karaoke evaluation: $e");
+    }
   }
 
   Future<void> playAudio(String path) async {
@@ -100,7 +163,7 @@ class _KaraokeSentenceLevel2ScreenState
     }
   }
 
-  void evaluateResult() {
+  Future<void> evaluateResult() async {
     int correct = wordMatchResults.values.where((v) => v == true).length;
     int total = wordMatchResults.length;
     score = total > 0 ? (correct / total) * 100 : 0.0;
@@ -114,7 +177,24 @@ class _KaraokeSentenceLevel2ScreenState
     } else {
       stars = 0;
     }
+    List<String> correctWords = wordMatchResults.entries
+        .where((entry) => entry.value)
+        .map((entry) => entry.key)
+        .toList();
 
+    List<String> wrongWords = wordMatchResults.entries
+        .where((entry) => !entry.value)
+        .map((entry) => entry.key)
+        .toList();
+
+    await saveKaraokeEvaluation(
+      sentence: currentSentence["text"]!,
+      recognizedText: recognizedText,
+      correctWords: correctWords,
+      wrongWords: wrongWords,
+      score: score,
+      stars: stars,
+    );
     setState(() {});
   }
 
@@ -226,6 +306,7 @@ class _KaraokeSentenceLevel2ScreenState
                           recognizedText: recognizedText,
                           score: score,
                           stars: stars,
+                          level: 'level2',
                           wordMatchResults: wordMatchResults,
                           onNext: () {
                             Navigator.pop(context);

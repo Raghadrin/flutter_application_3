@@ -97,7 +97,9 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
           .doc(parentId)
           .collection('children')
           .doc(childId)
-          .collection('karaoke_evaluations')
+          .collection('karaoke')
+          .doc('arKaraoke')
+          .collection('level1')
           .add({
         'sentence': sentence,
         'recognizedText': recognizedText,
@@ -305,6 +307,7 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
                           recognizedText: recognizedText,
                           score: score,
                           stars: stars,
+                          level: 'level1',
                           wordMatchResults: wordMatchResults,
                           onNext: () {
                             Navigator.pop(context);
