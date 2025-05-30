@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter_application_3/letters/arabicLetter/levelOne/evaluation2_screen.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
-import 'evaluation_screen.dart'; // تأكد من مسار الملف
+import 'evaluation2_screen.dart'; // تأكد من مسار الملف
 
 class KaraokeSentenceLevel3Screen extends StatefulWidget {
   const KaraokeSentenceLevel3Screen({super.key});
@@ -25,18 +26,19 @@ class _KaraokeSentenceLevel3ScreenState
   List<Map<String, String>> sentences = [
     {
       "text":
-          "في صباح يوم مشمس خرجت ريم مع صديقاتها في رحله مدرسيه الى حديقه الحيوان لمشاهده الحيوانات والتعرف على بيئاتها المختلفه",
+         "مع شروق ضوء قوي، خرجت ريم مع بعض من صديقاتها في يوم دراسي، مشَين في صف طويل نحو مكان فيه أسد، زرافة، طير، وقرد، يشاهدن ما يدور في بيئات مليئة بالحركة، ويتعرفن على كل كائن دون توقف",
       "audio": "audio/zoo.mp3",
     },
     {
       "text":
-          "حينما حل المساء جلست الاسرة حول المدفأه تحكي الجدة قصصا مشوقة عن مغامراتها عندما كانت صغيرة في القرية",
-      "audio": "audio/gran.mp3",
+         "مع غياب ضوء شمس، جلست عائلة قرب نار دافئة، وبدأت جدة تحكي حكايات عن سفر قديم، فيها خطر ودهشة، عن أرض بعيدة، فيها نخل وجبال وبحر ", 
+           "audio": "audio/gran.mp3",
     },
     {
       "text":
-          "قررت ليلى ان تزرع حديقه منزلها بالزهور الملونه فذهبت مع والدها الى السوق واشترت بذورا واسمده ومعدات للزراعه",
-      "audio": "audio/gard.mp3",
+        "ليلى فكرت في زرع زهور في ساحة قرب بيتها، أخذت وقتًا في اختيار بذور من نوع جميل، ثم ذهبت مع والدها إلى سوق قريب، حملت أكياس فيها تربة، ماء، وأدوات تساعدها في عمل بسيط ومفيد"
+
+,    "audio": "audio/gard.mp3",
     },
   ];
 
@@ -161,7 +163,7 @@ class _KaraokeSentenceLevel3ScreenState
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => EvaluationScreen(
+        builder: (_) => Evaluation2Screen(
           recognizedText: recognizedText,
           score: score,
           stars: stars,
