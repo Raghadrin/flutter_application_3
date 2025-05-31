@@ -242,89 +242,90 @@ class _KaraokeSentenceLevel2ScreenState
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('🎤 كاريوكي الجمل - المستوى ٢'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              margin: const EdgeInsets.only(bottom: 20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 8,
-                    offset: Offset(0, 4),
-                  )
-                ],
-              ),
-              child: SingleChildScrollView(
-                child: RichText(
-                  textAlign: TextAlign.center,
-                  text: TextSpan(children: buildHighlightedSentence()),
-                ),
-              ),
-            ),
-            LinearProgressIndicator(
-              value: (currentSentenceIndex + 1) / sentences.length,
-              backgroundColor: Colors.grey[300],
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.blueAccent),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton.icon(
-              icon: Icon(Icons.play_arrow),
-              label: Text('استمع للجملة'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blueAccent,
-                minimumSize: Size(screenWidth * 0.8, 44),
-              ),
-              onPressed: () => playAudio(currentSentence["audio"]!),
-            ),
-            SizedBox(height: 12),
-            ElevatedButton.icon(
-              icon: Icon(isListening ? Icons.stop : Icons.mic),
-              label: Text(isListening ? 'إيقاف' : 'ابدأ التحدث'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: isListening ? Colors.red : Colors.green,
-                minimumSize: Size(screenWidth * 0.8, 44),
-              ),
-              onPressed: () {
-                if (isListening) {
-                  speech.stop();
-                  setState(() => isListening = false);
-                  Future.delayed(Duration(seconds: 1), () {
-                    evaluateResult();
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => Evaluation2Screen(
-                          recognizedText: recognizedText,
-                          score: score,
-                          stars: stars,
-                          level: 'level2',
-                          wordMatchResults: wordMatchResults,
-                          onNext: () {
-                            Navigator.pop(context);
-                            nextSentence();
-                          },
-                        ),
-                      ),
-                    );
-                  });
-                } else {
-                  startListening();
-                }
-              },
-            ),
-            SizedBox(height: 30),
-          ],
+        appBar: AppBar(
+          title: Text('🎤 كاريوكي الجمل - المستوى ٢'),
         ),
-      ),
-    );
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  margin: const EdgeInsets.only(bottom: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 8,
+                        offset: Offset(0, 4),
+                      )
+                    ],
+                  ),
+                  child: SingleChildScrollView(
+                    child: RichText(
+                      textAlign: TextAlign.center,
+                      text: TextSpan(children: buildHighlightedSentence()),
+                    ),
+                  ),
+                ),
+                LinearProgressIndicator(
+                  value: (currentSentenceIndex + 1) / sentences.length,
+                  backgroundColor: Colors.grey[300],
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.blueAccent),
+                ),
+                SizedBox(height: 20),
+                ElevatedButton.icon(
+                  icon: Icon(Icons.play_arrow),
+                  label: Text('استمع للجملة'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blueAccent,
+                    minimumSize: Size(screenWidth * 0.8, 44),
+                  ),
+                  onPressed: () => playAudio(currentSentence["audio"]!),
+                ),
+                SizedBox(height: 12),
+                ElevatedButton.icon(
+                  icon: Icon(isListening ? Icons.stop : Icons.mic),
+                  label: Text(isListening ? 'إيقاف' : 'ابدأ التحدث'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isListening ? Colors.red : Colors.green,
+                    minimumSize: Size(screenWidth * 0.8, 44),
+                  ),
+                  onPressed: () {
+                    if (isListening) {
+                      speech.stop();
+                      setState(() => isListening = false);
+                      Future.delayed(Duration(seconds: 1), () {
+                        evaluateResult();
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => Evaluation2Screen(
+                              recognizedText: recognizedText,
+                              score: score,
+                              stars: stars,
+                              level: 'level2',
+                              wordMatchResults: wordMatchResults,
+                              onNext: () {
+                                Navigator.pop(context);
+                                nextSentence();
+                              },
+                            ),
+                          ),
+                        );
+                      });
+                    } else {
+                      startListening();
+                    }
+                  },
+                ),
+                SizedBox(height: 30),
+              ],
+            ),
+          ),
+        ));
   }
 }
