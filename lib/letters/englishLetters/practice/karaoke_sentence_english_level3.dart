@@ -91,8 +91,8 @@ class _KaraokeSentenceEnglishLevel3ScreenState
         localeId: 'en_US',
         listenMode: stt.ListenMode.dictation,
         partialResults: true,
-        listenFor: const Duration(seconds: 60),
-        pauseFor: const Duration(seconds: 3),
+        listenFor: const Duration(seconds: 90),
+        pauseFor: const Duration(seconds: 5),
         onResult: (val) async {
           recognizedText = val.recognizedWords;
           updateMatchedWords();

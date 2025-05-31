@@ -25,7 +25,7 @@ class _KaraokeSentenceArabicScreenState extends State<KaraokeSentenceArabicScree
   double score = 0.0;
   int stars = 0;
   int currentSentenceIndex = 0;
-  int currentSpokenWordIndex = -1;
+  int matchedWordCount = 0;
 
   Map<String, bool> wordMatchResults = {};
   List<String> spokenWordSequence = [];
@@ -40,9 +40,10 @@ class _KaraokeSentenceArabicScreenState extends State<KaraokeSentenceArabicScree
       "audio": "assets/audio/turtle2.mp3"
     },
     {
-      "text": "سارت معه حتى وصل إلى بيته. قال الأرنب: \"كنت أظن السلاحف فقط بطيئة!\" \"لكنك ذكية وتعرفين ما تفعلين.\" ابتسمت السلحفاة وقالت: \"لا تحكم من الشكل!\" ومن يومها، أصبح الأرنب صديقها.",
-      "audio": "assets/audio/turtle3.mp3"
-    },
+ "text": "سارت معه حتى وصل إلى بيته. قال الأرنب: \"كنت أظن السلاحف فقط بطيئة!\" ولكنك ذكية وتعرفين ما تفعلين. ابتسمت السلحفاة وقالت: \"لا تحكم من الشكل!\" ومن يومها، أصبح الأرنب صديقها.",
+ "audio": "assets/audio/turtle3.mp3"
+}
+
   ];
 
   Map<String, String> get currentSentence => sentences[currentSentenceIndex];
@@ -68,30 +69,57 @@ class _KaraokeSentenceArabicScreenState extends State<KaraokeSentenceArabicScree
       onStatus: (val) {
         if (val == 'done') {
           setState(() => isListening = false);
-          Future.delayed(const Duration(milliseconds: 500), () => showEvaluation());
         }
       },
       onError: (val) => print('Error: $val'),
     );
+
     if (available) {
       setState(() {
         isListening = true;
         recognizedText = "";
         wordMatchResults.clear();
-        currentSpokenWordIndex = -1;
         spokenWordSequence.clear();
+        matchedWordCount = 0;
       });
+
       speech.listen(
         localeId: 'ar_SA',
         listenMode: stt.ListenMode.dictation,
         partialResults: true,
-        listenFor: const Duration(seconds: 90),
-        pauseFor: const Duration(seconds: 8),
-        onResult: (val) {
-          setState(() {
-            recognizedText = val.recognizedWords;
-            updateMatchedWords();
-          });
+        listenFor: const Duration(seconds: 60),
+        pauseFor: const Duration(seconds: 6), // <-- Increased pause duration from 3 to 6 seconds
+        onResult: (val) async {
+          recognizedText = val.recognizedWords;
+
+          matchedWordCount = recognizedText
+              .replaceAll(RegExp(r'[^\u0621-\u064A\s]'), '')
+              .split(RegExp(r'\s+'))
+              .where((w) => w.trim().isNotEmpty)
+              .length;
+
+          updateMatchedWords();
+
+          if (val.finalResult) {
+            await evaluateResult();
+            if (!mounted) return;
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => Evaluation2Screen(
+                  recognizedText: recognizedText,
+                  score: score,
+                  stars: stars,
+                  level: 'level1',
+                  wordMatchResults: wordMatchResults,
+                  onNext: () {
+                    Navigator.pop(context);
+                    nextSentence();
+                  },
+                ),
+              ),
+            );
+          }
         },
       );
     }
@@ -104,27 +132,19 @@ class _KaraokeSentenceArabicScreenState extends State<KaraokeSentenceArabicScree
         .replaceAll(RegExp(r'[^\u0621-\u064A\s]'), '')
         .split(RegExp(r'\s+'));
 
-    Set<String> spokenWordsSet = recognizedText
+    List<String> spokenWords = recognizedText
         .replaceAll(RegExp(r'[^\u0621-\u064A\s]'), '')
-        .split(RegExp(r'\s+'))
-        .toSet();
+        .split(RegExp(r'\s+'));
 
-    wordMatchResults.clear();
-    spokenWordSequence = spokenWordsSet.toList();
-
-    for (String expectedWord in expectedWords) {
-      bool matchFound = spokenWordsSet.any((spokenWord) {
-        return levenshtein(expectedWord, spokenWord) <= 1;
-      });
-      wordMatchResults[expectedWord] = matchFound;
+    Map<String, bool> newResults = {};
+    for (var word in expectedWords) {
+      newResults[word] = spokenWords.any((spoken) => levenshtein(word, spoken) <= 1);
     }
 
-    if (spokenWordSequence.isNotEmpty) {
-      String lastSpoken = spokenWordSequence.last;
-      int index = expectedWords.indexWhere(
-          (word) => levenshtein(word, lastSpoken) <= 1);
-      if (index != -1) currentSpokenWordIndex = index;
-    }
+    setState(() {
+      wordMatchResults = newResults;
+      spokenWordSequence = spokenWords;
+    });
   }
 
   Future<void> evaluateResult() async {
@@ -160,8 +180,8 @@ class _KaraokeSentenceArabicScreenState extends State<KaraokeSentenceArabicScree
         .doc(parentId)
         .collection('children')
         .get();
-
     if (childrenSnapshot.docs.isEmpty) return;
+
     final childId = childrenSnapshot.docs.first.id;
 
     await FirebaseFirestore.instance
@@ -183,31 +203,20 @@ class _KaraokeSentenceArabicScreenState extends State<KaraokeSentenceArabicScree
     });
   }
 
-  void showEvaluation() async {
-    await evaluateResult();
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => Evaluation2Screen(
-          recognizedText: recognizedText,
-          score: score,
-          stars: stars,
-          level: 'level1',
-          wordMatchResults: wordMatchResults,
-          onNext: () {
-            Navigator.pop(context);
-            setState(() {
-              currentSentenceIndex = (currentSentenceIndex + 1) % sentences.length;
-              recognizedText = '';
-              wordMatchResults.clear();
-              stars = 0;
-              score = 0;
-              currentSpokenWordIndex = -1;
-            });
-          },
-        ),
-      ),
-    );
+  void nextSentence() {
+    setState(() {
+      if (currentSentenceIndex < sentences.length - 1) {
+        currentSentenceIndex++;
+      } else {
+        currentSentenceIndex = 0;
+      }
+      recognizedText = '';
+      score = 0.0;
+      stars = 0;
+      wordMatchResults.clear();
+      spokenWordSequence.clear();
+      matchedWordCount = 0;
+    });
   }
 
   List<InlineSpan> buildHighlightedSentence() {
@@ -217,48 +226,24 @@ class _KaraokeSentenceArabicScreenState extends State<KaraokeSentenceArabicScree
     return List.generate(words.length, (i) {
       String word = words[i];
       String normalized = word.replaceAll(RegExp(r'[^\u0621-\u064A]'), '');
-      bool matched = wordMatchResults[normalized] ?? false;
+      Color color = Colors.black;
 
-      if (!isListening && recognizedText.isNotEmpty) {
-        return TextSpan(
-          text: '$word ',
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-            color: matched ? Colors.green : Colors.red,
-          ),
-        );
-      } else if (i == currentSpokenWordIndex) {
-        return WidgetSpan(
-          child: TweenAnimationBuilder(
-            tween: Tween<double>(begin: 1.0, end: 1.1),
-            duration: const Duration(milliseconds: 800),
-            curve: Curves.easeInOut,
-            builder: (context, scale, child) {
-              return Transform.scale(
-                scale: scale,
-                child: Text(
-                  '$word ',
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue,
-                  ),
-                ),
-              );
-            },
-          ),
-        );
-      } else {
-        return TextSpan(
-          text: '$word ',
-          style: const TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        );
+      if (isListening && i < matchedWordCount) {
+        color = Colors.blue;
+      } else if (!isListening && recognizedText.isNotEmpty) {
+        if (wordMatchResults.containsKey(normalized)) {
+          color = wordMatchResults[normalized]! ? Colors.green : Colors.red;
+        }
       }
+
+      return TextSpan(
+        text: '$word ',
+        style: TextStyle(
+          fontSize: 28,
+          fontWeight: FontWeight.bold,
+          color: color,
+        ),
+      );
     });
   }
 
@@ -291,13 +276,6 @@ class _KaraokeSentenceArabicScreenState extends State<KaraokeSentenceArabicScree
             ElevatedButton.icon(
               icon: Icon(isPlaying ? Icons.stop : Icons.play_arrow),
               label: Text(isPlaying ? 'إيقاف الصوت' : 'استمع للجملة'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: isPlaying
-                    ? const Color.fromARGB(255, 255, 220, 220)
-                    : const Color.fromARGB(255, 255, 238, 180),
-                foregroundColor: Colors.black,
-                minimumSize: Size(screenWidth * 0.8, 44),
-              ),
               onPressed: () {
                 if (isPlaying) {
                   audioPlayer.stop();
@@ -306,11 +284,26 @@ class _KaraokeSentenceArabicScreenState extends State<KaraokeSentenceArabicScree
                   playAudio(currentSentence["audio"]!);
                 }
               },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: isPlaying
+                    ? const Color.fromARGB(255, 255, 220, 220)
+                    : const Color.fromARGB(255, 255, 238, 180),
+                foregroundColor: Colors.black,
+                minimumSize: Size(screenWidth * 0.8, 44),
+              ),
             ),
             const SizedBox(height: 12),
             ElevatedButton.icon(
               icon: Icon(isListening ? Icons.stop : Icons.mic),
               label: Text(isListening ? 'إيقاف' : 'ابدأ التحدث'),
+              onPressed: () {
+                if (isListening) {
+                  speech.stop();
+                  setState(() => isListening = false);
+                } else {
+                  startListening();
+                }
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: isListening
                     ? const Color.fromARGB(255, 246, 110, 101)
@@ -318,15 +311,6 @@ class _KaraokeSentenceArabicScreenState extends State<KaraokeSentenceArabicScree
                 foregroundColor: Colors.black,
                 minimumSize: Size(screenWidth * 0.8, 44),
               ),
-              onPressed: () {
-                if (isListening) {
-                  speech.stop();
-                  setState(() => isListening = false);
-                  Future.delayed(const Duration(milliseconds: 300), () => showEvaluation());
-                } else {
-                  startListening();
-                }
-              },
             ),
           ],
         ),
@@ -339,10 +323,8 @@ class _KaraokeSentenceArabicScreenState extends State<KaraokeSentenceArabicScree
 int levenshtein(String s1, String s2) {
   List<List<int>> dp = List.generate(
       s1.length + 1, (_) => List.filled(s2.length + 1, 0));
-
   for (int i = 0; i <= s1.length; i++) dp[i][0] = i;
   for (int j = 0; j <= s2.length; j++) dp[0][j] = j;
-
   for (int i = 1; i <= s1.length; i++) {
     for (int j = 1; j <= s2.length; j++) {
       int cost = s1[i - 1] == s2[j - 1] ? 0 : 1;
@@ -353,6 +335,5 @@ int levenshtein(String s1, String s2) {
       ].reduce((a, b) => a < b ? a : b);
     }
   }
-
   return dp[s1.length][s2.length];
 }

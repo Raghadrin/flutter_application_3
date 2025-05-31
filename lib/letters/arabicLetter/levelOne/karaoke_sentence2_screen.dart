@@ -13,8 +13,8 @@ class KaraokeSentenceLevel2Screen extends StatefulWidget {
       _KaraokeSentenceLevel2ScreenState();
 }
 
-class _KaraokeSentenceLevel2ScreenState
-    extends State<KaraokeSentenceLevel2Screen> with TickerProviderStateMixin {
+class _KaraokeSentenceLevel2ScreenState extends State<KaraokeSentenceLevel2Screen>
+    with TickerProviderStateMixin {
   late AudioPlayer audioPlayer;
   late stt.SpeechToText speech;
   bool isListening = false;
@@ -24,7 +24,7 @@ class _KaraokeSentenceLevel2ScreenState
   double score = 0.0;
   int stars = 0;
   int currentSentenceIndex = 0;
-  int currentSpokenWordIndex = -1;
+  int matchedWordCount = 0;
 
   Map<String, bool> wordMatchResults = {};
   List<String> spokenWordSequence = [];
@@ -32,22 +32,23 @@ class _KaraokeSentenceLevel2ScreenState
   final List<Map<String, String>> sentences = [
     {
       "text":
-          "انتقل عمر مع عائلته إلى مدينة جديدة. في أول يوم في المدرسة، شعر بالخجل. جلس في المقعد الأخير يراقب زملاءه وهم يتحدثون. ضحك البعض على رسمة قام برسمها، فشعر بالحزن وتساءل: \"هل سأبقى وحيدًا؟\"",
+          "انتقل عمر مع عائلته إلى مدينة جديدة. في أول يوم في المدرسة، شعر بالخجل. جلس في المقعد الأخير يراقب زملاءه وهم يتحدثون. ضحك البعض على رسمة قام برسمها، فشعر بالحزن،وتساءل: هل سأبقى وحيدًا ؟",
       "audio": "audio/omar1.mp3"
     },
     {
       "text":
-          'في اليوم التالي، رأى عمر طفلًا يجلس وحده تحت شجرة. اقترب منه وقال: "مرحبًا، هل أستطيع الجلوس؟" رد الطفل مبتسمًا: "بالطبع، اسمي إياد وأنت؟" ورد عمر، "أنا عمر"، وشعر عمر بالراحة لأول مرة.',
+        'في اليوم التالي، رأى عمر طفلًا يجلس وحده تحت شجرة. اقترب منه وقال: مرحبًا، هل أستطيع الجلوس؟ رد الطفل مبتسمًا: بالطبع، اسمي إياد، وأنت؟ ورد عمر: أنا عمر، وشعر عمر بالراحة لأول مرة.',
       "audio": "audio/omar2.mp3"
     },
     {
       "text":
-          'مع الوقت، أصبح عمر وإياد صديقين. شاركا في مسابقة للسيارات وفازا. قال عمر: "أنا سعيدٌ بصداقتنا"، ابتسم إياد وقال: "وأنا سعيد كذلك بها."',
+      'مع الوقت، أصبح عمر وإياد صديقين. شاركا في مسابقة للسيارات وفازا. قال عمر: "أنا سعيدٌ بصداقتنا." ابتسم إياد وقال: "وأنا سعيد كذلك بها."',
       "audio": "audio/omar3.mp3"
-    },
+    }
   ];
 
   Map<String, String> get currentSentence => sentences[currentSentenceIndex];
+
 
   @override
   void initState() {
@@ -65,7 +66,6 @@ class _KaraokeSentenceLevel2ScreenState
       setState(() => isPlaying = false);
     } else {
       setState(() => isPlaying = true);
-      await audioPlayer.setPlaybackRate(0.75);
       await audioPlayer.play(AssetSource(path));
     }
   }
@@ -77,29 +77,54 @@ class _KaraokeSentenceLevel2ScreenState
           setState(() => isListening = false);
         }
       },
-      onError: (val) {
-        print('Error: $val');
-      },
+      onError: (val) => print('Error: $val'),
     );
+
     if (available) {
       setState(() {
         isListening = true;
         recognizedText = '';
         wordMatchResults.clear();
         spokenWordSequence.clear();
-        currentSpokenWordIndex = -1;
+        matchedWordCount = 0;
       });
+
       speech.listen(
         localeId: 'ar_SA',
         listenMode: stt.ListenMode.dictation,
         partialResults: true,
-        pauseFor: const Duration(seconds: 10),
         listenFor: const Duration(minutes: 2),
-        onResult: (val) {
-          setState(() {
-            recognizedText = val.recognizedWords;
-            updateMatchedWords();
-          });
+        pauseFor: const Duration(seconds: 8), // هنا التعديل المهم
+        onResult: (val) async {
+          recognizedText = val.recognizedWords;
+          matchedWordCount = recognizedText
+              .replaceAll(RegExp(r'[^ء-ي\s]'), '')
+              .split(RegExp(r'\s+'))
+              .where((w) => w.trim().isNotEmpty)
+              .length;
+
+          updateMatchedWords();
+
+          if (val.finalResult) {
+            await evaluateResult();
+            if (!mounted) return;
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => Evaluation2Screen(
+                  recognizedText: recognizedText,
+                  score: score,
+                  stars: stars,
+                  level: 'level2',
+                  wordMatchResults: wordMatchResults,
+                  onNext: () {
+                    Navigator.pop(context);
+                    nextSentence();
+                  },
+                ),
+              ),
+            );
+          }
         },
       );
     }
@@ -111,125 +136,34 @@ class _KaraokeSentenceLevel2ScreenState
     List<String> expectedWords =
         expected.replaceAll(RegExp(r'[^ء-ي\s]'), '').split(RegExp(r'\s+'));
 
-    Set<String> spokenWordsSet = recognizedText
+    List<String> spokenWords = recognizedText
         .replaceAll(RegExp(r'[^ء-ي\s]'), '')
-        .split(RegExp(r'\s+'))
-        .toSet();
+        .split(RegExp(r'\s+'));
 
-    wordMatchResults.clear();
-    spokenWordSequence = spokenWordsSet.toList();
-
-    for (String rawWord in expectedWords) {
-      String expectedWord = rawWord.replaceAll(RegExp(r'[^ء-ي]'), '');
-      bool matchFound = spokenWordsSet.any((spokenWord) {
-        return levenshtein(expectedWord, spokenWord) <= 1;
-      });
-      wordMatchResults[expectedWord] = matchFound;
+    Map<String, bool> newResults = {};
+    for (var word in expectedWords) {
+      newResults[word] = spokenWords.any((spoken) => levenshtein(word, spoken) <= 1);
     }
 
-    if (spokenWordSequence.isNotEmpty) {
-      String lastSpoken = spokenWordSequence.last;
-      int index = expectedWords
-          .indexWhere((word) => levenshtein(word, lastSpoken) <= 1);
-      if (index != -1) currentSpokenWordIndex = index;
-    }
-  }
-
-  List<InlineSpan> buildHighlightedSentence() {
-    String sentence = currentSentence["text"]!;
-    List<String> words = sentence.split(RegExp(r'\s+'));
-
-    return List.generate(words.length, (i) {
-      String word = words[i];
-      String normalized = word.replaceAll(RegExp(r'[^ء-ي]'), '');
-      bool matched = wordMatchResults[normalized] ?? false;
-
-      if (!isListening && recognizedText.isNotEmpty) {
-        return TextSpan(
-          text: '$word ',
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-            color: matched ? Colors.green : Colors.red,
-          ),
-        );
-      } else if (i == currentSpokenWordIndex) {
-        return WidgetSpan(
-          child: TweenAnimationBuilder(
-            tween: Tween<double>(begin: 1.0, end: 1.1),
-            duration: const Duration(milliseconds: 800),
-            builder: (context, scale, child) {
-              return Transform.scale(
-                scale: scale,
-                child: Text(
-                  '$word ',
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue,
-                  ),
-                ),
-              );
-            },
-          ),
-        );
-      } else {
-        return TextSpan(
-          text: '$word ',
-          style: const TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
-          ),
-        );
-      }
+    setState(() {
+      wordMatchResults = newResults;
+      spokenWordSequence = spokenWords;
     });
-  }
-
-  int levenshtein(String s1, String s2) {
-    List<List<int>> dp =
-        List.generate(s1.length + 1, (_) => List.filled(s2.length + 1, 0));
-
-    for (int i = 0; i <= s1.length; i++) dp[i][0] = i;
-    for (int j = 0; j <= s2.length; j++) dp[0][j] = j;
-
-    for (int i = 1; i <= s1.length; i++) {
-      for (int j = 1; j <= s2.length; j++) {
-        int cost = s1[i - 1] == s2[j - 1] ? 0 : 1;
-        dp[i][j] = [dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + cost]
-            .reduce((a, b) => a < b ? a : b);
-      }
-    }
-
-    return dp[s1.length][s2.length];
   }
 
   Future<void> evaluateResult() async {
     int correct = wordMatchResults.values.where((v) => v).length;
     int total = wordMatchResults.length;
     score = total > 0 ? (correct / total) * 100 : 0.0;
-    stars = (score >= 90)
-        ? 3
-        : (score >= 60)
-            ? 2
-            : (score > 0)
-                ? 1
-                : 0;
-
-    List<String> correctWords = wordMatchResults.entries
-        .where((e) => e.value)
-        .map((e) => e.key)
-        .toList();
-    List<String> wrongWords = wordMatchResults.entries
-        .where((e) => !e.value)
-        .map((e) => e.key)
-        .toList();
+    stars = (score >= 90) ? 3 : (score >= 60) ? 2 : (score > 0) ? 1 : 0;
 
     await saveKaraokeEvaluation(
       sentence: currentSentence["text"]!,
       recognizedText: recognizedText,
-      correctWords: correctWords,
-      wrongWords: wrongWords,
+      correctWords:
+          wordMatchResults.entries.where((e) => e.value).map((e) => e.key).toList(),
+      wrongWords:
+          wordMatchResults.entries.where((e) => !e.value).map((e) => e.key).toList(),
       score: score,
       stars: stars,
     );
@@ -252,8 +186,8 @@ class _KaraokeSentenceLevel2ScreenState
         .doc(parentId)
         .collection('children')
         .get();
-
     if (childrenSnapshot.docs.isEmpty) return;
+
     final childId = childrenSnapshot.docs.first.id;
 
     await FirebaseFirestore.instance
@@ -277,13 +211,64 @@ class _KaraokeSentenceLevel2ScreenState
 
   void nextSentence() {
     setState(() {
-      currentSentenceIndex = (currentSentenceIndex + 1) % sentences.length;
+      if (currentSentenceIndex < sentences.length - 1) {
+        currentSentenceIndex++;
+      } else {
+        currentSentenceIndex = 0;
+      }
       recognizedText = '';
       score = 0.0;
       stars = 0;
       wordMatchResults.clear();
-      currentSpokenWordIndex = -1;
+      spokenWordSequence.clear();
+      matchedWordCount = 0;
     });
+  }
+
+  List<InlineSpan> buildHighlightedSentence() {
+    String sentence = currentSentence["text"]!;
+    List<String> words = sentence.split(RegExp(r'\s+'));
+
+    return List.generate(words.length, (i) {
+      String word = words[i];
+      String normalized = word.replaceAll(RegExp(r'[^ء-ي]'), '');
+      Color color = Colors.black;
+
+      if (isListening && i < matchedWordCount) {
+        color = Colors.blue;
+      } else if (!isListening && recognizedText.isNotEmpty) {
+        if (wordMatchResults.containsKey(normalized)) {
+          color = wordMatchResults[normalized]! ? Colors.green : Colors.red;
+        }
+      }
+
+      return TextSpan(
+        text: '$word ',
+        style: TextStyle(
+          fontSize: 28,
+          fontWeight: FontWeight.bold,
+          color: color,
+        ),
+      );
+    });
+  }
+
+  int levenshtein(String s1, String s2) {
+    List<List<int>> dp =
+        List.generate(s1.length + 1, (_) => List.filled(s2.length + 1, 0));
+    for (int i = 0; i <= s1.length; i++) dp[i][0] = i;
+    for (int j = 0; j <= s2.length; j++) dp[0][j] = j;
+    for (int i = 1; i <= s1.length; i++) {
+      for (int j = 1; j <= s2.length; j++) {
+        int cost = s1[i - 1] == s2[j - 1] ? 0 : 1;
+        dp[i][j] = [
+          dp[i - 1][j] + 1,
+          dp[i][j - 1] + 1,
+          dp[i - 1][j - 1] + cost
+        ].reduce((a, b) => a < b ? a : b);
+      }
+    }
+    return dp[s1.length][s2.length];
   }
 
   @override
@@ -313,13 +298,13 @@ class _KaraokeSentenceLevel2ScreenState
               LinearProgressIndicator(
                 value: (currentSentenceIndex + 1) / sentences.length,
                 backgroundColor: Colors.grey[300],
-                valueColor:
-                    const AlwaysStoppedAnimation<Color>(Colors.blueAccent),
+                valueColor: const AlwaysStoppedAnimation<Color>(Colors.blueAccent),
               ),
               const SizedBox(height: 20),
               ElevatedButton.icon(
                 icon: Icon(isPlaying ? Icons.stop : Icons.play_arrow),
                 label: Text(isPlaying ? 'إيقاف الصوت' : 'استمع للجملة'),
+                onPressed: () => toggleAudio(currentSentence["audio"]!),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: isPlaying
                       ? const Color.fromARGB(255, 255, 220, 220)
@@ -327,12 +312,19 @@ class _KaraokeSentenceLevel2ScreenState
                   foregroundColor: Colors.black,
                   minimumSize: Size(screenWidth * 0.8, 44),
                 ),
-                onPressed: () => toggleAudio(currentSentence["audio"]!),
               ),
               const SizedBox(height: 12),
               ElevatedButton.icon(
                 icon: Icon(isListening ? Icons.stop : Icons.mic),
                 label: Text(isListening ? 'إيقاف' : 'ابدأ التحدث'),
+                onPressed: () {
+                  if (isListening) {
+                    speech.stop();
+                    setState(() => isListening = false);
+                  } else {
+                    startListening();
+                  }
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: isListening
                       ? const Color.fromARGB(255, 246, 110, 101)
@@ -340,33 +332,6 @@ class _KaraokeSentenceLevel2ScreenState
                   foregroundColor: Colors.black,
                   minimumSize: Size(screenWidth * 0.8, 44),
                 ),
-                onPressed: () {
-                  if (isListening) {
-                    speech.stop();
-                    setState(() => isListening = false);
-                    Future.delayed(const Duration(milliseconds: 500), () {
-                      evaluateResult();
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => Evaluation2Screen(
-                            recognizedText: recognizedText,
-                            score: score,
-                            stars: stars,
-                            level: 'level2',
-                            wordMatchResults: wordMatchResults,
-                            onNext: () {
-                              Navigator.pop(context);
-                              nextSentence();
-                            },
-                          ),
-                        ),
-                      );
-                    });
-                  } else {
-                    startListening();
-                  }
-                },
               ),
               const SizedBox(height: 30),
             ],
