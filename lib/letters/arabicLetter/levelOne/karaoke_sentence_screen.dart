@@ -1,6 +1,3 @@
-
-// Karaoke Level 1 - Arabic with Audio Playback, Evaluation and Firebase Saving
-
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -35,18 +32,15 @@ class _KaraokeSentenceArabicScreenState extends State<KaraokeSentenceArabicScree
 
   List<Map<String, String>> sentences = [
     {
-      "text":
-          "في غابة جميلة، كانت تعيش سلحفاة. كانت تمشي ببطء، لكنها تفكر بهدوء. كلما اختلفت الحيوانات، نادت السلحفاة. الكل يسمع كلامها لأنها حكيمة وطيبة.",
+      "text": "في غابة جميلة، كانت تعيش سلحفاة. كانت تمشي ببطء، لكنها تفكر بهدوء. كلما اختلفت الحيوانات، نادت السلحفاة. الكل يسمع كلامها لأنها حكيمة وطيبة.",
       "audio": "assets/audio/turtle1.mp3"
     },
     {
-      "text":
-          "في يوم من الأيام، ضاع أرنب صغير. ركض كثيرًا ولم يعرف طريق البيت. كان خائفًا ويبكي تحت الشجرة. جاءت السلحفاة وسألته: \"هل تحتاج مساعدة؟\"",
+      "text": "في يوم من الأيام، ضاع أرنب صغير. ركض كثيرًا ولم يعرف طريق البيت. كان خائفًا ويبكي تحت الشجرة. جاءت السلحفاة وسألته: \"هل تحتاج مساعدة؟\"",
       "audio": "assets/audio/turtle2.mp3"
     },
     {
-      "text":
-          "سارت معه حتى وصل إلى بيته. قال الأرنب: \"كنت أظن السلحفاة فقط بطيئة!\" \"لكنك ذكية وتعرفين ما تفعلين.\" ابتسمت السلحفاة وقالت: \"لا تحكم من الشكل!\" ومن يومها، أصبح الأرنب صديقها.",
+      "text": "سارت معه حتى وصل إلى بيته. قال الأرنب: \"كنت أظن السلاحف فقط بطيئة!\" \"لكنك ذكية وتعرفين ما تفعلين.\" ابتسمت السلحفاة وقالت: \"لا تحكم من الشكل!\" ومن يومها، أصبح الأرنب صديقها.",
       "audio": "assets/audio/turtle3.mp3"
     },
   ];
@@ -77,9 +71,7 @@ class _KaraokeSentenceArabicScreenState extends State<KaraokeSentenceArabicScree
           Future.delayed(const Duration(milliseconds: 500), () => showEvaluation());
         }
       },
-      onError: (val) {
-        print('Error: \$val');
-      },
+      onError: (val) => print('Error: $val'),
     );
     if (available) {
       setState(() {
@@ -107,19 +99,30 @@ class _KaraokeSentenceArabicScreenState extends State<KaraokeSentenceArabicScree
 
   void updateMatchedWords() {
     String expected = currentSentence["text"] ?? "";
-    List<String> expectedWords = expected.split(RegExp(r'\s+'));
-    List<String> spokenWords = recognizedText.split(RegExp(r'\s+'));
+
+    List<String> expectedWords = expected
+        .replaceAll(RegExp(r'[^\u0621-\u064A\s]'), '')
+        .split(RegExp(r'\s+'));
+
+    Set<String> spokenWordsSet = recognizedText
+        .replaceAll(RegExp(r'[^\u0621-\u064A\s]'), '')
+        .split(RegExp(r'\s+'))
+        .toSet();
 
     wordMatchResults.clear();
-    spokenWordSequence = spokenWords;
+    spokenWordSequence = spokenWordsSet.toList();
 
-    for (var word in expectedWords) {
-      wordMatchResults[word] = spokenWords.contains(word);
+    for (String expectedWord in expectedWords) {
+      bool matchFound = spokenWordsSet.any((spokenWord) {
+        return levenshtein(expectedWord, spokenWord) <= 1;
+      });
+      wordMatchResults[expectedWord] = matchFound;
     }
 
-    if (spokenWords.isNotEmpty) {
-      String lastSpoken = spokenWords.last;
-      int index = expectedWords.indexOf(lastSpoken);
+    if (spokenWordSequence.isNotEmpty) {
+      String lastSpoken = spokenWordSequence.last;
+      int index = expectedWords.indexWhere(
+          (word) => levenshtein(word, lastSpoken) <= 1);
       if (index != -1) currentSpokenWordIndex = index;
     }
   }
@@ -213,7 +216,8 @@ class _KaraokeSentenceArabicScreenState extends State<KaraokeSentenceArabicScree
 
     return List.generate(words.length, (i) {
       String word = words[i];
-      bool? matched = wordMatchResults[word];
+      String normalized = word.replaceAll(RegExp(r'[^\u0621-\u064A]'), '');
+      bool matched = wordMatchResults[normalized] ?? false;
 
       if (!isListening && recognizedText.isNotEmpty) {
         return TextSpan(
@@ -221,40 +225,24 @@ class _KaraokeSentenceArabicScreenState extends State<KaraokeSentenceArabicScree
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
-            color: matched == true
-                ? Colors.green
-                : matched == false
-                    ? Colors.red
-                    : Colors.black,
+            color: matched ? Colors.green : Colors.red,
           ),
         );
       } else if (i == currentSpokenWordIndex) {
         return WidgetSpan(
           child: TweenAnimationBuilder(
-            tween: Tween<double>(begin: 1.0, end: 1.2),
-            duration: const Duration(milliseconds: 1600),
-            curve: Curves.easeInOutCubic,
+            tween: Tween<double>(begin: 1.0, end: 1.1),
+            duration: const Duration(milliseconds: 800),
+            curve: Curves.easeInOut,
             builder: (context, scale, child) {
               return Transform.scale(
                 scale: scale,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 2),
-                  decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.blueAccent.withOpacity(0.5),
-                        blurRadius: 10,
-                        spreadRadius: 1,
-                      ),
-                    ],
-                  ),
-                  child: Text(
-                    '\$word ',
-                    style: const TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blue,
-                    ),
+                child: Text(
+                  '$word ',
+                  style: const TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
                   ),
                 ),
               );
@@ -305,8 +293,8 @@ class _KaraokeSentenceArabicScreenState extends State<KaraokeSentenceArabicScree
               label: Text(isPlaying ? 'إيقاف الصوت' : 'استمع للجملة'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: isPlaying
-                    ? Color.fromARGB(255, 255, 220, 220)
-                    : Color.fromARGB(255, 255, 238, 180),
+                    ? const Color.fromARGB(255, 255, 220, 220)
+                    : const Color.fromARGB(255, 255, 238, 180),
                 foregroundColor: Colors.black,
                 minimumSize: Size(screenWidth * 0.8, 44),
               ),
@@ -325,8 +313,8 @@ class _KaraokeSentenceArabicScreenState extends State<KaraokeSentenceArabicScree
               label: Text(isListening ? 'إيقاف' : 'ابدأ التحدث'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: isListening
-                    ? Color.fromARGB(255, 246, 110, 101)
-                    : Color.fromARGB(255, 125, 255, 129),
+                    ? const Color.fromARGB(255, 246, 110, 101)
+                    : const Color.fromARGB(255, 125, 255, 129),
                 foregroundColor: Colors.black,
                 minimumSize: Size(screenWidth * 0.8, 44),
               ),
@@ -334,6 +322,7 @@ class _KaraokeSentenceArabicScreenState extends State<KaraokeSentenceArabicScree
                 if (isListening) {
                   speech.stop();
                   setState(() => isListening = false);
+                  Future.delayed(const Duration(milliseconds: 300), () => showEvaluation());
                 } else {
                   startListening();
                 }
@@ -344,4 +333,26 @@ class _KaraokeSentenceArabicScreenState extends State<KaraokeSentenceArabicScree
       ),
     );
   }
+}
+
+// Levenshtein Distance Helper
+int levenshtein(String s1, String s2) {
+  List<List<int>> dp = List.generate(
+      s1.length + 1, (_) => List.filled(s2.length + 1, 0));
+
+  for (int i = 0; i <= s1.length; i++) dp[i][0] = i;
+  for (int j = 0; j <= s2.length; j++) dp[0][j] = j;
+
+  for (int i = 1; i <= s1.length; i++) {
+    for (int j = 1; j <= s2.length; j++) {
+      int cost = s1[i - 1] == s2[j - 1] ? 0 : 1;
+      dp[i][j] = [
+        dp[i - 1][j] + 1,
+        dp[i][j - 1] + 1,
+        dp[i - 1][j - 1] + cost
+      ].reduce((a, b) => a < b ? a : b);
+    }
+  }
+
+  return dp[s1.length][s2.length];
 }

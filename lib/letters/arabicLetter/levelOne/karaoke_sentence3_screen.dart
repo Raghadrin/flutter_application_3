@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -70,7 +69,7 @@ class _KaraokeSentenceLevel3ScreenState extends State<KaraokeSentenceLevel3Scree
         if (val == 'done') setState(() => isListening = false);
       },
       onError: (val) {
-        print('Error: \$val');
+        print('Error: $val');
       },
     );
     if (available) {
@@ -99,19 +98,28 @@ class _KaraokeSentenceLevel3ScreenState extends State<KaraokeSentenceLevel3Scree
 
   void updateMatchedWords() {
     String expected = currentSentence["text"] ?? "";
-    List<String> expectedWords = expected.split(RegExp(r'\s+'));
-    List<String> spokenWords = recognizedText.split(RegExp(r'\s+'));
+    List<String> expectedWords = expected
+        .replaceAll(RegExp(r'[^ء-ي\s]'), '')
+        .split(RegExp(r'\s+'));
+
+    Set<String> spokenWordsSet = recognizedText
+        .replaceAll(RegExp(r'[^ء-ي\s]'), '')
+        .split(RegExp(r'\s+'))
+        .toSet();
 
     wordMatchResults.clear();
-    spokenWordSequence = spokenWords;
+    spokenWordSequence = spokenWordsSet.toList();
 
-    for (var word in expectedWords) {
-      wordMatchResults[word] = spokenWords.contains(word);
+    for (String word in expectedWords) {
+      bool matchFound = spokenWordsSet.any((spokenWord) {
+        return levenshtein(word, spokenWord) <= 1;
+      });
+      wordMatchResults[word] = matchFound;
     }
 
-    if (spokenWords.isNotEmpty) {
-      String lastSpoken = spokenWords.last;
-      int index = expectedWords.indexOf(lastSpoken);
+    if (spokenWordSequence.isNotEmpty) {
+      String lastSpoken = spokenWordSequence.last;
+      int index = expectedWords.indexWhere((word) => levenshtein(word, lastSpoken) <= 1);
       if (index != -1) currentSpokenWordIndex = index;
     }
   }
@@ -121,6 +129,57 @@ class _KaraokeSentenceLevel3ScreenState extends State<KaraokeSentenceLevel3Scree
     int total = wordMatchResults.length;
     score = total > 0 ? (correct / total) * 100 : 0.0;
     stars = (score >= 90) ? 3 : (score >= 60) ? 2 : (score > 0) ? 1 : 0;
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final parentId = user.uid;
+    final childrenSnapshot = await FirebaseFirestore.instance
+        .collection('parents')
+        .doc(parentId)
+        .collection('children')
+        .get();
+
+    if (childrenSnapshot.docs.isEmpty) return;
+    final childId = childrenSnapshot.docs.first.id;
+
+    await FirebaseFirestore.instance
+        .collection('parents')
+        .doc(parentId)
+        .collection('children')
+        .doc(childId)
+        .collection('karaoke')
+        .doc('arKaraoke')
+        .collection('level3')
+        .add({
+      'sentence': currentSentence["text"]!,
+      'recognizedText': recognizedText,
+      'correctWords': wordMatchResults.entries.where((e) => e.value).map((e) => e.key).toList(),
+      'wrongWords': wordMatchResults.entries.where((e) => !e.value).map((e) => e.key).toList(),
+      'score': score,
+      'stars': stars,
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+  }
+
+  void showEvaluation() async {
+    await evaluateResult();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => Evaluation2Screen(
+          recognizedText: recognizedText,
+          score: score,
+          stars: stars,
+          level: 'level3',
+          wordMatchResults: wordMatchResults,
+          onNext: () {
+            Navigator.pop(context);
+            nextSentence();
+          },
+        ),
+      ),
+    );
   }
 
   void nextSentence() {
@@ -138,14 +197,21 @@ class _KaraokeSentenceLevel3ScreenState extends State<KaraokeSentenceLevel3Scree
   List<InlineSpan> buildHighlightedSentence() {
     String sentence = currentSentence["text"]!;
     List<String> words = sentence.split(RegExp(r'\s+'));
+
     return List.generate(words.length, (i) {
       String word = words[i];
+      String normalized = word.replaceAll(RegExp(r'[^ء-ي]'), '');
+      bool matched = wordMatchResults[normalized] ?? false;
+
       if (!isListening && recognizedText.isNotEmpty) {
-        if (wordMatchResults[word] == true) {
-          return TextSpan(text: '$word ', style: TextStyle(fontSize: 24, color: Colors.green));
-        } else {
-          return TextSpan(text: '$word ', style: TextStyle(fontSize: 24, color: Colors.red));
-        }
+        return TextSpan(
+          text: '$word ',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: matched ? Colors.green : Colors.red,
+          ),
+        );
       } else if (i == currentSpokenWordIndex) {
         return WidgetSpan(
           child: TweenAnimationBuilder(
@@ -154,35 +220,29 @@ class _KaraokeSentenceLevel3ScreenState extends State<KaraokeSentenceLevel3Scree
             builder: (context, scale, child) {
               return Transform.scale(
                 scale: scale,
-                child: Text('\$word ', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.blue)),
+                child: Text(
+                  '$word ',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
+                  ),
+                ),
               );
             },
           ),
         );
       } else {
-        return TextSpan(text: '$word ', style: TextStyle(fontSize: 24, color: Colors.black));
+        return TextSpan(
+          text: '$word ',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        );
       }
     });
-  }
-
-  void showEvaluation() {
-    evaluateResult();
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => Evaluation2Screen(
-          recognizedText: recognizedText,
-          score: score,
-          stars: stars,
-          level: 'level3',
-          wordMatchResults: wordMatchResults,
-          onNext: () {
-            Navigator.pop(context);
-            nextSentence();
-          },
-        ),
-      ),
-    );
   }
 
   @override
@@ -236,7 +296,7 @@ class _KaraokeSentenceLevel3ScreenState extends State<KaraokeSentenceLevel3Scree
                 if (isListening) {
                   speech.stop();
                   setState(() => isListening = false);
-                  Future.delayed(Duration(seconds: 1), () => showEvaluation());
+                  Future.delayed(Duration(milliseconds: 300), () => showEvaluation());
                 } else {
                   startListening();
                 }
@@ -247,4 +307,18 @@ class _KaraokeSentenceLevel3ScreenState extends State<KaraokeSentenceLevel3Scree
       ),
     );
   }
+}
+
+// Levenshtein distance function
+int levenshtein(String s1, String s2) {
+  List<List<int>> dp = List.generate(s1.length + 1, (_) => List.filled(s2.length + 1, 0));
+  for (int i = 0; i <= s1.length; i++) dp[i][0] = i;
+  for (int j = 0; j <= s2.length; j++) dp[0][j] = j;
+  for (int i = 1; i <= s1.length; i++) {
+    for (int j = 1; j <= s2.length; j++) {
+      int cost = s1[i - 1] == s2[j - 1] ? 0 : 1;
+      dp[i][j] = [dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + cost].reduce((a, b) => a < b ? a : b);
+    }
+  }
+  return dp[s1.length][s2.length];
 }
