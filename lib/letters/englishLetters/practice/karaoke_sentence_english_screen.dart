@@ -14,8 +14,8 @@ class KaraokeSentenceEnglishScreen extends StatefulWidget {
       _KaraokeSentenceEnglishScreenState();
 }
 
-class _KaraokeSentenceEnglishScreenState
-    extends State<KaraokeSentenceEnglishScreen> with TickerProviderStateMixin {
+class _KaraokeSentenceEnglishScreenState extends State<KaraokeSentenceEnglishScreen>
+    with TickerProviderStateMixin {
   final FlutterTts flutterTts = FlutterTts();
   late stt.SpeechToText speech;
   bool isListening = false;
@@ -25,8 +25,8 @@ class _KaraokeSentenceEnglishScreenState
   double score = 0.0;
   int stars = 0;
   int currentSentenceIndex = 0;
-  int currentSpokenWordIndex = -1;
 
+  int matchedWordCount = 0;
   Map<String, bool> wordMatchResults = {};
   List<String> spokenWordSequence = [];
 
@@ -55,6 +55,8 @@ class _KaraokeSentenceEnglishScreenState
   void initState() {
     super.initState();
     speech = stt.SpeechToText();
+    flutterTts.setLanguage("en-US");
+    flutterTts.setSpeechRate(0.45);
   }
 
   Future<void> speakSentence() async {
@@ -62,14 +64,9 @@ class _KaraokeSentenceEnglishScreenState
       await flutterTts.stop();
       setState(() => isPlaying = false);
     } else {
-      await flutterTts.setLanguage("en-US");
-      await flutterTts.setSpeechRate(0.45);
       setState(() => isPlaying = true);
-
       await flutterTts.speak(currentSentence["text"]!);
-      flutterTts.setCompletionHandler(() {
-        setState(() => isPlaying = false);
-      });
+      flutterTts.setCompletionHandler(() => setState(() => isPlaying = false));
     }
   }
 
@@ -80,29 +77,52 @@ class _KaraokeSentenceEnglishScreenState
           setState(() => isListening = false);
         }
       },
-      onError: (val) {
-        print('Error: $val');
-      },
+      onError: (val) => print('Error: $val'),
     );
+
     if (available) {
       setState(() {
         isListening = true;
         recognizedText = "";
         wordMatchResults.clear();
-        currentSpokenWordIndex = -1;
         spokenWordSequence.clear();
+        matchedWordCount = 0;
       });
+
       speech.listen(
         localeId: 'en_US',
         listenMode: stt.ListenMode.dictation,
         partialResults: true,
         listenFor: const Duration(seconds: 60),
-        pauseFor: const Duration(seconds: 60),
-        onResult: (val) {
-          setState(() {
-            recognizedText = val.recognizedWords;
-            updateMatchedWords();
-          });
+        pauseFor: const Duration(seconds: 3),
+        onResult: (val) async {
+          recognizedText = val.recognizedWords;
+          updateMatchedWords();
+          matchedWordCount = recognizedText
+              .split(RegExp(r'\s+'))
+              .where((w) => w.trim().isNotEmpty)
+              .length;
+
+          if (val.finalResult) {
+            await evaluateResult();
+            if (!mounted) return;
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => EvaluationEnglishScreen(
+                  recognizedText: recognizedText,
+                  score: score,
+                  stars: stars,
+                  level: 'level1',
+                  wordMatchResults: wordMatchResults,
+                  onNext: () {
+                    Navigator.pop(context);
+                    nextSentence();
+                  },
+                ),
+              ),
+            );
+          }
         },
       );
     }
@@ -114,40 +134,27 @@ class _KaraokeSentenceEnglishScreenState
         .split(RegExp(r'\s+'))
         .map((w) => w.replaceAll(RegExp(r'[^\w]'), '').toLowerCase())
         .toList();
-
     List<String> spokenWords = recognizedText
         .split(RegExp(r'\s+'))
         .map((w) => w.replaceAll(RegExp(r'[^\w]'), '').toLowerCase())
         .toList();
 
-    wordMatchResults.clear();
-    spokenWordSequence = spokenWords;
-
+    Map<String, bool> newResults = {};
     for (var word in expectedWords) {
-      wordMatchResults[word] = spokenWords.contains(word);
+      newResults[word] = spokenWords.any((spoken) => levenshtein(word, spoken) <= 1);
     }
 
-    if (spokenWords.isNotEmpty) {
-      String lastSpoken = spokenWords.last;
-      int index = expectedWords.indexOf(lastSpoken);
-      if (index != -1) currentSpokenWordIndex = index;
-    }
+    setState(() {
+      wordMatchResults = newResults;
+      spokenWordSequence = spokenWords;
+    });
   }
 
   Future<void> evaluateResult() async {
     int correct = wordMatchResults.values.where((v) => v).length;
     int total = wordMatchResults.length;
     score = total > 0 ? (correct / total) * 100 : 0.0;
-
-    if (score >= 90) {
-      stars = 3;
-    } else if (score >= 60) {
-      stars = 2;
-    } else if (score > 0) {
-      stars = 1;
-    } else {
-      stars = 0;
-    }
+    stars = score >= 90 ? 3 : (score >= 60 ? 2 : (score > 0 ? 1 : 0));
 
     List<String> correctWords =
         wordMatchResults.entries.where((e) => e.value).map((e) => e.key).toList();
@@ -175,7 +182,6 @@ class _KaraokeSentenceEnglishScreenState
     try {
       final user = FirebaseAuth.instance.currentUser;
       if (user == null) return;
-
       final parentId = user.uid;
       final childrenSnapshot = await FirebaseFirestore.instance
           .collection('parents')
@@ -183,9 +189,7 @@ class _KaraokeSentenceEnglishScreenState
           .collection('children')
           .get();
       if (childrenSnapshot.docs.isEmpty) return;
-
       final childId = childrenSnapshot.docs.first.id;
-
       await FirebaseFirestore.instance
           .collection('parents')
           .doc(parentId)
@@ -204,7 +208,7 @@ class _KaraokeSentenceEnglishScreenState
         'timestamp': FieldValue.serverTimestamp(),
       });
     } catch (e) {
-      print("Error saving evaluation: \$e");
+      print("Error saving evaluation: $e");
     }
   }
 
@@ -220,7 +224,7 @@ class _KaraokeSentenceEnglishScreenState
       stars = 0;
       wordMatchResults.clear();
       spokenWordSequence.clear();
-      currentSpokenWordIndex = -1;
+      matchedWordCount = 0;
     });
   }
 
@@ -228,54 +232,29 @@ class _KaraokeSentenceEnglishScreenState
     String sentence = currentSentence["text"]!;
     List<String> words = sentence.split(RegExp(r'\s+'));
 
-    return List.generate(words.length, (i) {
-      String originalWord = words[i];
-      String cleanWord = originalWord.replaceAll(RegExp(r'[^\w]'), '').toLowerCase();
+    return words.asMap().entries.map((entry) {
+      int index = entry.key;
+      String word = entry.value;
+      String cleanWord = word.replaceAll(RegExp(r'[^\w]'), '').toLowerCase();
+      Color wordColor = Colors.black;
 
-      if (!isListening && recognizedText.isNotEmpty) {
-        if (wordMatchResults[cleanWord] == true) {
-          return TextSpan(
-            text: '$originalWord ',
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.green),
-          );
-        } else {
-          return TextSpan(
-            text: '$originalWord ',
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.red),
-          );
+      if (isListening && index < matchedWordCount) {
+        wordColor = Colors.blue;
+      } else if (!isListening && recognizedText.isNotEmpty) {
+        if (wordMatchResults.containsKey(cleanWord)) {
+          wordColor = wordMatchResults[cleanWord]! ? Colors.green : Colors.red;
         }
-      } else if (i == currentSpokenWordIndex) {
-        return WidgetSpan(
-          child: TweenAnimationBuilder(
-            tween: Tween<double>(begin: 1.0, end: 1.1),
-            duration: const Duration(milliseconds: 800),
-            curve: Curves.easeInOut,
-            builder: (context, scale, child) {
-              return Transform.scale(
-                scale: scale,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 2),
-                  decoration: BoxDecoration(
-                    boxShadow: [
-                      BoxShadow(color: Colors.blueAccent.withOpacity(0.6), blurRadius: 10, spreadRadius: 1),
-                    ],
-                  ),
-                  child: Text(
-                    '$originalWord ',
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.blue),
-                  ),
-                ),
-              );
-            },
-          ),
-        );
-      } else {
-        return TextSpan(
-          text: '$originalWord ',
-          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black54),
-        );
       }
-    });
+
+      return TextSpan(
+        text: '$word ',
+        style: TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+          color: wordColor,
+        ),
+      );
+    }).toList();
   }
 
   @override
@@ -314,7 +293,9 @@ class _KaraokeSentenceEnglishScreenState
               label: Text(isPlaying ? 'Stop Reading' : 'Read Sentence'),
               onPressed: speakSentence,
               style: ElevatedButton.styleFrom(
-                backgroundColor: isPlaying ? const Color.fromARGB(255, 255, 170, 170) : const Color.fromARGB(255, 255, 231, 176),
+                backgroundColor: isPlaying
+                    ? const Color.fromARGB(255, 255, 170, 170)
+                    : const Color.fromARGB(255, 255, 231, 176),
                 foregroundColor: Colors.black,
                 minimumSize: Size(screenWidth * 0.8, 44),
               ),
@@ -323,11 +304,6 @@ class _KaraokeSentenceEnglishScreenState
             ElevatedButton.icon(
               icon: Icon(isListening ? Icons.stop : Icons.mic),
               label: Text(isListening ? 'Stop' : 'Start Speaking'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: isListening ? const Color.fromARGB(255, 255, 204, 204) : const Color.fromARGB(255, 204, 255, 204),
-                foregroundColor: Colors.black,
-                minimumSize: Size(screenWidth * 0.8, 44),
-              ),
               onPressed: () {
                 if (isListening) {
                   speech.stop();
@@ -336,40 +312,36 @@ class _KaraokeSentenceEnglishScreenState
                   startListening();
                 }
               },
-            ),
-            const SizedBox(height: 16),
-            if (!isListening && recognizedText.isNotEmpty)
-              ElevatedButton.icon(
-                icon: const Icon(Icons.check_circle_outline),
-                label: const Text('Finish and Check'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orangeAccent,
-                  foregroundColor: Colors.black,
-                  minimumSize: Size(screenWidth * 0.8, 44),
-                ),
-                onPressed: () {
-                  evaluateResult();
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => EvaluationEnglishScreen(
-                        recognizedText: recognizedText,
-                        score: score,
-                        stars: stars,
-                        level: 'level1',
-                        wordMatchResults: wordMatchResults,
-                        onNext: () {
-                          Navigator.pop(context);
-                          nextSentence();
-                        },
-                      ),
-                    ),
-                  );
-                },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: isListening
+                    ? const Color.fromARGB(255, 255, 204, 204)
+                    : const Color.fromARGB(255, 204, 255, 204),
+                foregroundColor: Colors.black,
+                minimumSize: Size(screenWidth * 0.8, 44),
               ),
+            ),
           ],
         ),
       ),
     );
   }
+}
+
+// 🔁 Levenshtein Distance Helper
+int levenshtein(String s1, String s2) {
+  List<List<int>> dp = List.generate(
+      s1.length + 1, (_) => List.filled(s2.length + 1, 0));
+  for (int i = 0; i <= s1.length; i++) dp[i][0] = i;
+  for (int j = 0; j <= s2.length; j++) dp[0][j] = j;
+  for (int i = 1; i <= s1.length; i++) {
+    for (int j = 1; j <= s2.length; j++) {
+      int cost = s1[i - 1] == s2[j - 1] ? 0 : 1;
+      dp[i][j] = [
+        dp[i - 1][j] + 1,
+        dp[i][j - 1] + 1,
+        dp[i - 1][j - 1] + cost
+      ].reduce((a, b) => a < b ? a : b);
+    }
+  }
+  return dp[s1.length][s2.length];
 }
