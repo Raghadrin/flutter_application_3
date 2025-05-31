@@ -152,7 +152,7 @@ class _ArabicLevel1HomeScreenState extends State<ArabicLevel1HomeScreen> {
                 }).toList(),
               ],
             ),
-            const KaraokeSentenceScreen(),
+            const KaraokeSentenceArabicScreen(),
           ],
         ),
       ),

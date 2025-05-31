@@ -6,6 +6,7 @@ import 'locale_keys.dart';
 
 import 'english_level3_screen.dart';
 import 'english_level3_quiz_all_screen.dart';
+import 'karaoke_sentence_english_level3.dart';
 
 class EnglishLevel3HomeScreen extends StatelessWidget {
   final FlutterTts tts = FlutterTts();
@@ -109,76 +110,98 @@ class EnglishLevel3HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     _speak(context, tr(LocaleKeys.tts_level3_welcome));
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFFFF8E1),
-      appBar: AppBar(
-        backgroundColor: Colors.orange,
-        elevation: 0,
-        centerTitle: true,
-        title: Text(
-          tr(LocaleKeys.english_level3_title),
-          style: const TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        backgroundColor: const Color(0xFFFFF8E1),
+        appBar: AppBar(
+          backgroundColor: Colors.orange,
+          elevation: 0,
+          centerTitle: true,
+          title: Text(
+            tr(LocaleKeys.english_level3_title),
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
           ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.language, color: Colors.black),
-            onPressed: () {
-              final newLocale = context.locale.languageCode == 'ar'
-                  ? const Locale('en')
-                  : const Locale('ar');
-              context.setLocale(newLocale);
-            },
-          )
-        ],
-      ),
-      body: GridView.count(
-        crossAxisCount: 2,
-        padding: const EdgeInsets.all(16),
-        crossAxisSpacing: 16,
-        mainAxisSpacing: 16,
-        childAspectRatio: 0.75,
-        children: [
-          _buildTile(
-            context,
-            title: tr(LocaleKeys.level3_quiz_title),
-            jsonPath: "images/new_images/Quiz.json",
-            onTap: () {
-              _speak(context, tr(LocaleKeys.tts_start_final_quiz));
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const EnglishLevel3QuizAllScreen(),
-                ),
-              );
-            },
+          bottom: const TabBar(
+            indicatorColor: Colors.deepPurple,
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.black,
+            tabs: [
+              Tab(text: 'Karaoke'),
+              Tab(text: 'Exercises'),
+            ],
           ),
-          ...stories.map((story) {
-            return _buildTile(
-              context,
-              title: tr(story['title']),
-              jsonPath: story['animation'],
-              onTap: () {
-                _speak(context, "${tr(LocaleKeys.selectedPrefix)} ${tr(story['title'])}");
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => EnglishLevel3Screen(
-                      title: tr(story['title']),
-                      storyText: story['paragraph'],
-                      questions: List<String>.from(story['questions']),
-                      correctAnswers: List<String>.from(story['answers']),
-                      answerChoices: List<List<String>>.from(story['answerChoices']),
-                    ),
-                  ),
-                );
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.language, color: Colors.black),
+              onPressed: () {
+                final newLocale = context.locale.languageCode == 'ar'
+                    ? const Locale('en')
+                    : const Locale('ar');
+                context.setLocale(newLocale);
               },
-            );
-          }).toList(),
-        ],
+            )
+          ],
+        ),
+        body: TabBarView(
+          children: [
+            // Karaoke Tab
+            Center(
+              child: KaraokeSentenceEnglishLevel3Screen(),
+            ),
+
+            // Exercises Tab
+            GridView.count(
+              crossAxisCount: 2,
+              padding: const EdgeInsets.all(16),
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              childAspectRatio: 0.75,
+              children: [
+                _buildTile(
+                  context,
+                  title: tr(LocaleKeys.level3_quiz_title),
+                  jsonPath: "images/new_images/Quiz.json",
+                  onTap: () {
+                    _speak(context, tr(LocaleKeys.tts_start_final_quiz));
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const EnglishLevel3QuizAllScreen(),
+                      ),
+                    );
+                  },
+                ),
+                ...stories.map((story) {
+                  return _buildTile(
+                    context,
+                    title: tr(story['title']),
+                    jsonPath: story['animation'],
+                    onTap: () {
+                      _speak(context, "${tr(LocaleKeys.selectedPrefix)} ${tr(story['title'])}");
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => EnglishLevel3Screen(
+                            title: tr(story['title']),
+                            storyText: story['paragraph'],
+                            questions: List<String>.from(story['questions']),
+                            correctAnswers: List<String>.from(story['answers']),
+                            answerChoices: List<List<String>>.from(story['answerChoices']),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                }).toList(),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -1,43 +1,53 @@
+
+// Karaoke Level 1 - Arabic with Audio Playback, Evaluation and Firebase Saving
+
 import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
-import 'evaluation2_screen.dart'; // تأكد أن هذا الملف موجود
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'evaluation2_screen.dart';
 
-class KaraokeSentenceScreen extends StatefulWidget {
-  const KaraokeSentenceScreen({super.key});
+class KaraokeSentenceArabicScreen extends StatefulWidget {
+  const KaraokeSentenceArabicScreen({super.key});
 
   @override
-  State<KaraokeSentenceScreen> createState() => _KaraokeSentenceScreenState();
+  State<KaraokeSentenceArabicScreen> createState() =>
+      _KaraokeSentenceArabicScreenState();
 }
 
-class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
-  late AudioPlayer audioPlayer;
+class _KaraokeSentenceArabicScreenState extends State<KaraokeSentenceArabicScreen>
+    with TickerProviderStateMixin {
   late stt.SpeechToText speech;
+  late AudioPlayer audioPlayer;
   bool isListening = false;
-  String recognizedText = "";
+  bool isPlaying = false;
+
+  String recognizedText = '';
   double score = 0.0;
   int stars = 0;
   int currentSentenceIndex = 0;
+  int currentSpokenWordIndex = -1;
+
   Map<String, bool> wordMatchResults = {};
+  List<String> spokenWordSequence = [];
 
   List<Map<String, String>> sentences = [
     {
       "text":
           "في غابة جميلة، كانت تعيش سلحفاة. كانت تمشي ببطء، لكنها تفكر بهدوء. كلما اختلفت الحيوانات، نادت السلحفاة. الكل يسمع كلامها لأنها حكيمة وطيبة.",
-      "audio": "audio/turtle1.mp3",
+      "audio": "assets/audio/turtle1.mp3"
     },
     {
       "text":
           "في يوم من الأيام، ضاع أرنب صغير. ركض كثيرًا ولم يعرف طريق البيت. كان خائفًا ويبكي تحت الشجرة. جاءت السلحفاة وسألته: \"هل تحتاج مساعدة؟\"",
-      "audio": "audio/turtle2.mp3",
+      "audio": "assets/audio/turtle2.mp3"
     },
     {
       "text":
           "سارت معه حتى وصل إلى بيته. قال الأرنب: \"كنت أظن السلحفاة فقط بطيئة!\" \"لكنك ذكية وتعرفين ما تفعلين.\" ابتسمت السلحفاة وقالت: \"لا تحكم من الشكل!\" ومن يومها، أصبح الأرنب صديقها.",
-      "audio": "audio/turtle3.mp3",
+      "audio": "assets/audio/turtle3.mp3"
     },
   ];
 
@@ -46,74 +56,17 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
   @override
   void initState() {
     super.initState();
-    audioPlayer = AudioPlayer();
     speech = stt.SpeechToText();
+    audioPlayer = AudioPlayer();
   }
 
   Future<void> playAudio(String path) async {
     await audioPlayer.stop();
-    await audioPlayer.play(AssetSource(path));
-  }
-
-  Future<void> saveKaraokeEvaluation({
-    required String sentence,
-    required String recognizedText,
-    required List<String> correctWords,
-    required List<String> wrongWords,
-    required double score,
-    required int stars,
-  }) async {
-    try {
-      String? parentId = "";
-      String? childId = "";
-
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
-        print("User not logged in");
-        return;
-      }
-      parentId = user.uid;
-
-      final childrenSnapshot = await FirebaseFirestore.instance
-          .collection('parents')
-          .doc(parentId)
-          .collection('children')
-          .get();
-
-      if (childrenSnapshot.docs.isNotEmpty) {
-        childId = childrenSnapshot.docs.first.id;
-      } else {
-        print("No children found for this parent.");
-        return;
-      }
-
-      if (parentId.isEmpty || childId == null) {
-        print("Cannot save evaluation: parentId or childId missing");
-        return;
-      }
-
-      await FirebaseFirestore.instance
-          .collection('parents')
-          .doc(parentId)
-          .collection('children')
-          .doc(childId)
-          .collection('karaoke')
-          .doc('arKaraoke')
-          .collection('level1')
-          .add({
-        'sentence': sentence,
-        'recognizedText': recognizedText,
-        'correctWords': correctWords,
-        'wrongWords': wrongWords,
-        'score': score,
-        'stars': stars,
-        'timestamp': FieldValue.serverTimestamp(),
-      });
-
-      print("Karaoke evaluation saved successfully");
-    } catch (e) {
-      print("Error saving karaoke evaluation: $e");
-    }
+    await audioPlayer.play(AssetSource(path.replaceFirst("assets/", "")));
+    setState(() => isPlaying = true);
+    audioPlayer.onPlayerComplete.listen((event) {
+      setState(() => isPlaying = false);
+    });
   }
 
   Future<void> startListening() async {
@@ -121,10 +74,11 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
       onStatus: (val) {
         if (val == 'done') {
           setState(() => isListening = false);
+          Future.delayed(const Duration(milliseconds: 500), () => showEvaluation());
         }
       },
       onError: (val) {
-        print('Error: $val');
+        print('Error: \$val');
       },
     );
     if (available) {
@@ -132,13 +86,15 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
         isListening = true;
         recognizedText = "";
         wordMatchResults.clear();
+        currentSpokenWordIndex = -1;
+        spokenWordSequence.clear();
       });
       speech.listen(
         localeId: 'ar_SA',
         listenMode: stt.ListenMode.dictation,
         partialResults: true,
-        pauseFor: Duration(seconds: 5),
-        listenFor: Duration(minutes: 1),
+        listenFor: const Duration(seconds: 90),
+        pauseFor: const Duration(seconds: 8),
         onResult: (val) {
           setState(() {
             recognizedText = val.recognizedWords;
@@ -155,8 +111,16 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
     List<String> spokenWords = recognizedText.split(RegExp(r'\s+'));
 
     wordMatchResults.clear();
+    spokenWordSequence = spokenWords;
+
     for (var word in expectedWords) {
       wordMatchResults[word] = spokenWords.contains(word);
+    }
+
+    if (spokenWords.isNotEmpty) {
+      String lastSpoken = spokenWords.last;
+      int index = expectedWords.indexOf(lastSpoken);
+      if (index != -1) currentSpokenWordIndex = index;
     }
   }
 
@@ -164,75 +128,150 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
     int correct = wordMatchResults.values.where((v) => v).length;
     int total = wordMatchResults.length;
     score = total > 0 ? (correct / total) * 100 : 0.0;
-
-    if (score >= 90) {
-      stars = 3;
-    } else if (score >= 60) {
-      stars = 2;
-    } else if (score > 0) {
-      stars = 1;
-    } else {
-      stars = 0;
-    }
-    // Extract correct and wrong words
-    List<String> correctWords = wordMatchResults.entries
-        .where((entry) => entry.value)
-        .map((entry) => entry.key)
-        .toList();
-
-    List<String> wrongWords = wordMatchResults.entries
-        .where((entry) => !entry.value)
-        .map((entry) => entry.key)
-        .toList();
+    stars = (score >= 90) ? 3 : (score >= 60) ? 2 : (score > 0) ? 1 : 0;
 
     await saveKaraokeEvaluation(
       sentence: currentSentence["text"]!,
       recognizedText: recognizedText,
-      correctWords: correctWords,
-      wrongWords: wrongWords,
+      correctWords: wordMatchResults.entries.where((e) => e.value).map((e) => e.key).toList(),
+      wrongWords: wordMatchResults.entries.where((e) => !e.value).map((e) => e.key).toList(),
       score: score,
       stars: stars,
     );
-    setState(() {});
   }
 
-  void nextSentence() {
-    setState(() {
-      if (currentSentenceIndex < sentences.length - 1) {
-        currentSentenceIndex++;
-      } else {
-        currentSentenceIndex = 0;
-      }
-      recognizedText = "";
-      score = 0.0;
-      stars = 0;
-      wordMatchResults.clear();
+  Future<void> saveKaraokeEvaluation({
+    required String sentence,
+    required String recognizedText,
+    required List<String> correctWords,
+    required List<String> wrongWords,
+    required double score,
+    required int stars,
+  }) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    final parentId = user.uid;
+    final childrenSnapshot = await FirebaseFirestore.instance
+        .collection('parents')
+        .doc(parentId)
+        .collection('children')
+        .get();
+
+    if (childrenSnapshot.docs.isEmpty) return;
+    final childId = childrenSnapshot.docs.first.id;
+
+    await FirebaseFirestore.instance
+        .collection('parents')
+        .doc(parentId)
+        .collection('children')
+        .doc(childId)
+        .collection('karaoke')
+        .doc('arKaraoke')
+        .collection('level1')
+        .add({
+      'sentence': sentence,
+      'recognizedText': recognizedText,
+      'correctWords': correctWords,
+      'wrongWords': wrongWords,
+      'score': score,
+      'stars': stars,
+      'timestamp': FieldValue.serverTimestamp(),
     });
   }
 
-  List<TextSpan> buildHighlightedSentence() {
+  void showEvaluation() async {
+    await evaluateResult();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => Evaluation2Screen(
+          recognizedText: recognizedText,
+          score: score,
+          stars: stars,
+          level: 'level1',
+          wordMatchResults: wordMatchResults,
+          onNext: () {
+            Navigator.pop(context);
+            setState(() {
+              currentSentenceIndex = (currentSentenceIndex + 1) % sentences.length;
+              recognizedText = '';
+              wordMatchResults.clear();
+              stars = 0;
+              score = 0;
+              currentSpokenWordIndex = -1;
+            });
+          },
+        ),
+      ),
+    );
+  }
+
+  List<InlineSpan> buildHighlightedSentence() {
     String sentence = currentSentence["text"]!;
     List<String> words = sentence.split(RegExp(r'\s+'));
-    return words.map((word) {
-      bool? matched = wordMatchResults[word];
-      Color color;
-      if (matched == true) {
-        color = Colors.green;
-      } else if (matched == false) {
-        color = Colors.red;
-      } else {
-        color = Colors.black;
-      }
 
-      return TextSpan(
-        text: '$word ',
-        style: TextStyle(
-          fontSize: 28,
-          fontWeight: FontWeight.bold,
-          color: color,
-        ),
-      );
-    }).toList();
+    return List.generate(words.length, (i) {
+      String word = words[i];
+      bool? matched = wordMatchResults[word];
+
+      if (!isListening && recognizedText.isNotEmpty) {
+        return TextSpan(
+          text: '$word ',
+          style: TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            color: matched == true
+                ? Colors.green
+                : matched == false
+                    ? Colors.red
+                    : Colors.black,
+          ),
+        );
+      } else if (i == currentSpokenWordIndex) {
+        return WidgetSpan(
+          child: TweenAnimationBuilder(
+            tween: Tween<double>(begin: 1.0, end: 1.2),
+            duration: const Duration(milliseconds: 1600),
+            curve: Curves.easeInOutCubic,
+            builder: (context, scale, child) {
+              return Transform.scale(
+                scale: scale,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 2),
+                  decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.blueAccent.withOpacity(0.5),
+                        blurRadius: 10,
+                        spreadRadius: 1,
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    '\$word ',
+                    style: const TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue,
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      } else {
+        return TextSpan(
+          text: '$word ',
+          style: const TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        );
+      }
+    });
   }
 
   @override
@@ -240,9 +279,7 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('🎤 كاريوكي الجمل - المستوى ١'),
-      ),
+      appBar: AppBar(title: const Text('🎤 كاريوكي - المستوى ١')),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -253,13 +290,7 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 8,
-                    offset: Offset(0, 4),
-                  )
-                ],
+                boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4))],
               ),
               child: SingleChildScrollView(
                 child: RichText(
@@ -268,61 +299,46 @@ class _KaraokeSentenceScreenState extends State<KaraokeSentenceScreen> {
                 ),
               ),
             ),
-            LinearProgressIndicator(
-              value: (currentSentenceIndex + 1) / sentences.length,
-              backgroundColor: Colors.grey[300],
-              valueColor: AlwaysStoppedAnimation<Color>(Colors.blueAccent),
-            ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
             ElevatedButton.icon(
-              icon: const Icon(Icons.play_arrow),
-              label: const Text('استمع للجملة'),
-              onPressed: () => playAudio(currentSentence["audio"]!),
+              icon: Icon(isPlaying ? Icons.stop : Icons.play_arrow),
+              label: Text(isPlaying ? 'إيقاف الصوت' : 'استمع للجملة'),
               style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30)),
-                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                backgroundColor: Colors.blueAccent,
+                backgroundColor: isPlaying
+                    ? Color.fromARGB(255, 255, 220, 220)
+                    : Color.fromARGB(255, 255, 238, 180),
+                foregroundColor: Colors.black,
                 minimumSize: Size(screenWidth * 0.8, 44),
               ),
+              onPressed: () {
+                if (isPlaying) {
+                  audioPlayer.stop();
+                  setState(() => isPlaying = false);
+                } else {
+                  playAudio(currentSentence["audio"]!);
+                }
+              },
             ),
             const SizedBox(height: 12),
             ElevatedButton.icon(
               icon: Icon(isListening ? Icons.stop : Icons.mic),
               label: Text(isListening ? 'إيقاف' : 'ابدأ التحدث'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: isListening ? Colors.red : Colors.green,
+                backgroundColor: isListening
+                    ? Color.fromARGB(255, 246, 110, 101)
+                    : Color.fromARGB(255, 125, 255, 129),
+                foregroundColor: Colors.black,
                 minimumSize: Size(screenWidth * 0.8, 44),
               ),
               onPressed: () {
                 if (isListening) {
                   speech.stop();
                   setState(() => isListening = false);
-                  Future.delayed(const Duration(seconds: 1), () {
-                    evaluateResult();
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => Evaluation2Screen(
-                          recognizedText: recognizedText,
-                          score: score,
-                          stars: stars,
-                          level: 'level1',
-                          wordMatchResults: wordMatchResults,
-                          onNext: () {
-                            Navigator.pop(context);
-                            nextSentence();
-                          },
-                        ),
-                      ),
-                    );
-                  });
                 } else {
                   startListening();
                 }
               },
             ),
-            const SizedBox(height: 30),
           ],
         ),
       ),

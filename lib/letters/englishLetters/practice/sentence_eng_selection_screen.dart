@@ -6,6 +6,7 @@ import 'locale_keys.dart';
 
 import 'english_level1_quiz_all.dart';
 import 'english_level1_screen.dart';
+import 'karaoke_sentence_english_screen.dart';
 
 class EnglishLevel1HomeScreen extends StatelessWidget {
   final FlutterTts tts = FlutterTts();
@@ -14,21 +15,13 @@ class EnglishLevel1HomeScreen extends StatelessWidget {
 
   Future<void> configureTts(BuildContext context) async {
     final langCode = context.locale.languageCode;
-
     if (langCode == 'ar') {
       await tts.setLanguage("ar-SA");
-      await tts.setVoice({
-        'name': 'ar-xa-x-arm-local',
-        'locale': 'ar-SA',
-      });
+      await tts.setVoice({'name': 'ar-xa-x-arm-local', 'locale': 'ar-SA'});
     } else {
       await tts.setLanguage("en-US");
-      await tts.setVoice({
-        'name': 'en-gb-x-rjs-local',
-        'locale': 'en-US',
-      });
+      await tts.setVoice({'name': 'en-gb-x-rjs-local', 'locale': 'en-US'});
     }
-
     await tts.setSpeechRate(0.45);
     await tts.setPitch(1.0);
   }
@@ -70,72 +63,92 @@ class EnglishLevel1HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     _speak(context, tr(LocaleKeys.tts_welcome));
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFFFF8E1),
-      appBar: AppBar(
-        backgroundColor: Colors.orange,
-        elevation: 0,
-        title: Text(
-          tr(LocaleKeys.english_level1_title),
-          style: const TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        backgroundColor: const Color(0xFFFFF8E1),
+        appBar: AppBar(
+          backgroundColor: Colors.orange,
+          elevation: 0,
+          centerTitle: true,
+          title: Text(
+            tr(LocaleKeys.english_level1_title),
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
           ),
-        ),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.language, color: Colors.black),
-            onPressed: () {
-              final newLocale = context.locale.languageCode == 'ar'
-                  ? const Locale('en')
-                  : const Locale('ar');
-              context.setLocale(newLocale);
-            },
-          )
-        ],
-      ),
-      body: GridView.count(
-        crossAxisCount: 2,
-        padding: const EdgeInsets.all(16),
-        mainAxisSpacing: 16,
-        crossAxisSpacing: 16,
-        childAspectRatio: 0.75,
-        children: [
-          _buildTile(
-            context,
-            title: tr(LocaleKeys.level1_quiz_title),
-            jsonPath: "images/new_images/Quiz.json",
-            onTap: () {
-              _speak(context, tr(LocaleKeys.tts_start_quiz));
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const EnglishLetterQuizScreen(),
-                ),
-              );
-            },
+          bottom: const TabBar(
+            indicatorColor: Colors.deepPurple,
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.black,
+            tabs: [
+              Tab(text: 'Karaoke'),
+              Tab(text: 'Exercises'),
+            ],
           ),
-          ...sentences.map((s) {
-            return _buildTile(
-              context,
-              title: tr(s["title"]!),
-              jsonPath: s["animation"]!,
-              onTap: () {
-                _speak(context, "${tr(LocaleKeys.selectedPrefix)} ${tr(s["title"]!)}");
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => EnglishLevel1Screen(
-                      sentence: tr(s["text"]!),
-                    ),
-                  ),
-                );
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.language, color: Colors.black),
+              onPressed: () {
+                final newLocale = context.locale.languageCode == 'ar'
+                    ? const Locale('en')
+                    : const Locale('ar');
+                context.setLocale(newLocale);
               },
-            );
-          }).toList(),
-        ],
+            )
+          ],
+        ),
+        body: TabBarView(
+          children: [
+            // Karaoke Tab
+            KaraokeSentenceEnglishScreen(),
+
+            // Exercises Tab
+            GridView.count(
+              crossAxisCount: 2,
+              padding: const EdgeInsets.all(16),
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              childAspectRatio: 0.75,
+              children: [
+                _buildTile(
+                  context,
+                  title: tr(LocaleKeys.level1_quiz_title),
+                  jsonPath: "images/new_images/Quiz.json",
+                  onTap: () {
+                    _speak(context, tr(LocaleKeys.tts_start_quiz));
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const EnglishLetterQuizScreen(),
+                      ),
+                    );
+                  },
+                ),
+                ...sentences.map((s) {
+                  return _buildTile(
+                    context,
+                    title: tr(s["title"]!),
+                    jsonPath: s["animation"]!,
+                    onTap: () {
+                      _speak(context, "${tr(LocaleKeys.selectedPrefix)} ${tr(s["title"]!)}");
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => EnglishLevel1Screen(
+                            sentence: tr(s["text"]!),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                }).toList(),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -162,12 +175,12 @@ class EnglishLevel1HomeScreen extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               title,
-              textAlign: TextAlign.center,
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
                 color: Colors.deepOrange,
               ),
+              textAlign: TextAlign.center,
             ),
           ],
         ),
