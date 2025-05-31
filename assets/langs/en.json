@@ -498,7 +498,40 @@
   "subject": "Subject",
   "level": "Level",
   "score": "Score",
-  "karaoke": "Karaoke"
+  "karaoke": "Karaoke",
+  "difficulty_analysis": "Difficulty Analysis",
+  "child_name": "Child Name",
+  "avg_score": "Average Score",
+  "problem_description": "Problem Description",
+  "suggestion": "Suggestion",
+  "no_issue": "No Issue",
+  "mild_difficulty": "Mild Difficulty",
+  "severe_difficulty": "Severe Difficulty",
+  "keep_up_the_good_work": "Keep up the excellent work! Your progress is impressive. 👍✨",
+  "consistent_review_and_support_recommended": "Consistent review and support will help strengthen your skills. 🔄📚",
+  "additional_practice_and_guidance_needed": "Additional practice and guidance are recommended to improve further. 📝👩‍🏫",
+  "intensive_support_and_repetition_needed": "Intensive support and repetition are needed to help overcome challenges. ⚠️🔁",
+
+    "parent_notes": "Parent Notes",
+  "parent_notes_description": "Here you can add any important notes or observations related to your child’s progress and learning habits.",
+  "parent_note_example": "Example: John has shown remarkable improvement in reading fluency over the past month.",
+  "tap_for_score_history": "Tap to view score history",
+  "no_data_available": "No data available",
+  "level": "Level",
+  "suggestions_and_recommendations": "Suggestions and Recommendations",
+  "needs_improvement": "Needs Improvement",
+  "excellent": "Excellent",
+    "score_history": "Score History",
+  "attempt": "Attempt",
+  "close": "Close",
+    "level_1_reading": "Learning to connect sounds to letters",
+  "level_2_reading": "Improving reading speed and word retrieval",
+  "level_3_reading": "Building comprehension and vocabulary",
+
+  "level_1_math": "Learning to recognize numbers and basic math",
+  "level_2_math": "Comparing numbers and understanding operation order",
+  "level_3_math": "Solving word problems and finding unknowns",  "reading_summary": "Reading Summary",
+  "math_summary": "Math Summary"
 
   }
   

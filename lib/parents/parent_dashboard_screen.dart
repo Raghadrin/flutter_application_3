@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_application_3/parents/ChildDifficultyAnalysisScreen.dart';
 import 'package:flutter_application_3/parents/child_performance_screen.dart';
 
 import 'awareness_videos_screen.dart';
@@ -30,6 +31,12 @@ class ParentDashboardScreen extends StatelessWidget {
         imagePath: 'images/parent_image/progress-icon.png',
         heroTag: 'progress',
         screen: const CombinedChildPerformanceScreen(),
+      ),
+      _DashboardItem(
+        titleKey: 'Child Analysis',
+        imagePath: 'images/ana.png',
+        heroTag: 'Difficulty Analysis',
+        screen: ChildDifficultyAnalysisScreen(),
       ),
       _DashboardItem(
         titleKey: LocaleKeys.supportTopics,

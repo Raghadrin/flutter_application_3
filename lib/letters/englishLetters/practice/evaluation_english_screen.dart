@@ -59,7 +59,7 @@ class _EvaluationEnglishScreenState extends State<EvaluationEnglishScreen> {
         .collection('children')
         .doc(childId)
         .collection('karaoke')
-        .doc('enKaraoke') // <-- Note this for English
+        .doc('enKaraoke')
         .collection(widget.level.toString())
         .orderBy('timestamp', descending: true)
         .limit(5)
