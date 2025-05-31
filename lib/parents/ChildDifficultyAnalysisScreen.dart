@@ -21,7 +21,26 @@ class _ChildDifficultyAnalysisScreenState
 
   /// Parent notes per subject-level, keyed by 'subject_level' string
   Map<String, TextEditingController> _notesControllers = {};
-
+  final Map<String, Map<String, String>> levelGoals = {
+    'Arabic': {
+      '1':
+          'يهدف هذا المستوى إلى تعريف الطفل بالحروف الأبجدية وأصواتها الأساسية.',
+      '2': 'يبدأ الطفل في دمج الحروف وتكوين مقاطع صوتية بسيطة.',
+      '3': 'الطفل يقرأ كلمات وجمل قصيرة مع تعزيز الفهم القرائي.',
+    },
+    'English': {
+      '1': 'This level focuses on recognizing letters and beginning phonics.',
+      '2': 'Students blend sounds to form simple syllables and words.',
+      '3': 'The child reads short sentences and begins understanding context.',
+    },
+    'Math': {
+      '1':
+          'This level identifies basic number recognition and simple counting.',
+      '2': 'Focus on basic operations like addition and subtraction.',
+      '3':
+          'The child starts solving multi-step problems and understanding concepts.',
+    },
+  };
   @override
   void initState() {
     super.initState();
@@ -506,193 +525,337 @@ class _ChildDifficultyAnalysisScreenState
     Map<String, Map<String, List<double>>> scoresMap,
     bool isDark,
   ) {
+    final ScrollController scrollController = ScrollController();
     final levels = scoresMap[subject]?.keys.toList() ?? [];
+    const double cardWidth = 280;
+    const double separatorWidth = 18;
 
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      margin: const EdgeInsets.only(bottom: 24),
-      elevation: 6,
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Subject title
-            Text(
+    void scrollLeft() {
+      final newPosition =
+          (scrollController.offset - (cardWidth + separatorWidth))
+              .clamp(0, scrollController.position.maxScrollExtent);
+      scrollController.animateTo(
+        newPosition.roundToDouble(),
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
+
+    void scrollRight() {
+      final newPosition =
+          (scrollController.offset + (cardWidth + separatorWidth))
+              .clamp(0, scrollController.position.maxScrollExtent);
+      scrollController.animateTo(
+        newPosition.toDouble(),
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOut,
+      );
+    }
+
+    if (levels.isEmpty) {
+      return Text(
+        tr('no_data_available'),
+        style: TextStyle(
+          fontStyle: FontStyle.italic,
+          color: isDark ? Colors.grey[400] : Colors.grey[600],
+          fontSize: 16,
+        ),
+      );
+    }
+
+    return SizedBox(
+      height: 940, // add some extra height for subject title
+      child: Stack(
+        children: [
+          Positioned(
+            left: 22,
+            top: 10,
+            child: Text(
               subject.toUpperCase(),
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.2,
-                  ),
+              style: TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : Colors.black87,
+              ),
             ),
+          ),
+          ListView.separated(
+            controller: scrollController,
+            scrollDirection: Axis.horizontal,
+            itemCount: levels.length,
+            padding: const EdgeInsets.symmetric(vertical: 50, horizontal: 22),
+            separatorBuilder: (_, __) => const SizedBox(width: separatorWidth),
+            itemBuilder: (context, index) {
+              final level = levels[index];
+              final scoresList =
+                  (scoresMap[subject]?[level] ?? []).cast<double>();
+              final avgLevelScore = scoresList.isEmpty
+                  ? 0
+                  : scoresList.reduce((a, b) => a + b) / scoresList.length;
 
-            const SizedBox(height: 20),
+              final cleanLevelKey =
+                  'level${level.replaceAll(RegExp(r'[a-z]'), '')}';
+              final levelGoalText = levelGoals[subject]?[cleanLevelKey] ?? '';
 
-            // No data placeholder
-            if (levels.isEmpty)
-              Text(
-                tr('no_data_available'),
-                style: TextStyle(
-                  fontStyle: FontStyle.italic,
-                  color: isDark ? Colors.grey[400] : Colors.grey[600],
-                  fontSize: 16,
+              return Container(
+                width: cardWidth,
+                padding:
+                    const EdgeInsets.symmetric(vertical: 40, horizontal: 22),
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.grey[900] : Colors.grey[100],
+                  borderRadius: BorderRadius.circular(18),
+                  boxShadow: [
+                    BoxShadow(
+                      color: isDark
+                          ? Colors.black54
+                          : Colors.grey.withOpacity(0.2),
+                      blurRadius: 14,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
                 ),
-              )
-            else
-              SizedBox(
-                height: 540,
-                child: ListView.separated(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: levels.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 18),
-                  itemBuilder: (context, index) {
-                    final level = levels[index];
-                    final scoresList =
-                        (scoresMap[subject]?[level] ?? []).cast<double>();
-                    final avgLevelScore = scoresList.isEmpty
-                        ? 0
-                        : scoresList.reduce((a, b) => a + b) /
-                            scoresList.length;
-
-                    final key = '$subject-$level';
-                    final noteController = _notesControllers[key]!;
-
-                    return Container(
-                      width: 280,
-                      padding: const EdgeInsets.all(22),
-                      decoration: BoxDecoration(
-                        color: isDark ? Colors.grey[900] : Colors.grey[100],
-                        borderRadius: BorderRadius.circular(18),
-                        boxShadow: [
-                          BoxShadow(
-                            color: isDark
-                                ? Colors.black54
-                                : Colors.grey.withOpacity(0.2),
-                            blurRadius: 14,
-                            offset: const Offset(0, 6),
-                          ),
-                        ],
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${tr('level')} ${level.replaceAll(RegExp(r'[a-z]'), '')}',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 20,
+                        color: isDark ? Colors.white : Colors.black87,
                       ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Pie chart and legend
+                    Center(
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Level heading
-                          Text(
-                            '${tr('level')} ${level.replaceAll(RegExp(r'[a-z]'), '')}',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 20,
-                              color: isDark ? Colors.white : Colors.black87,
-                            ),
-                          ),
-
-                          const SizedBox(height: 16),
-
-                          // Pie chart centered
-                          // Pie chart centered with color legend
-                          Center(
-                            child: Column(
-                              children: [
-                                SizedBox(
-                                  height: 160,
-                                  width: 110,
-                                  child: PieChart(
-                                    PieChartData(
-                                      sections: _buildPieChartData(subject),
-                                      centerSpaceRadius: 35,
-                                      sectionsSpace: 6,
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(height: 20),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    _buildLegendItem(
-                                        Colors.green, tr('excellent')),
-                                    const SizedBox(height: 8),
-                                    _buildLegendItem(
-                                        Colors.red, tr('needs_improvement')),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          const SizedBox(height: 14),
-
-                          // Severity row
-                          Center(
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  getSeverityIcon(avgLevelScore.toDouble()),
-                                  color: getSeverityColor(
-                                      avgLevelScore.toDouble()),
-                                  size: 32,
-                                ),
-                                const SizedBox(width: 12),
-                                Text(
-                                  getSeverity(avgLevelScore.toDouble()),
-                                  style: TextStyle(
-                                    color: getSeverityColor(
-                                        avgLevelScore.toDouble()),
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 18,
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          const SizedBox(height: 18),
-
-                          Text(
-                            tr('suggestions_and_recommendations'),
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              color: isDark ? Colors.white70 : Colors.black87,
-                            ),
-                          ),
-
-                          const SizedBox(height: 10),
-
-// Scrollable suggestions area with padding
-                          Expanded(
-                            child: Scrollbar(
-                              // show scrollbar always for clarity
-                              child: SingleChildScrollView(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 6),
-                                physics: const BouncingScrollPhysics(),
-                                child: Text(
-                                  getRecommendations(avgLevelScore.toDouble()),
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    height: 1.5,
-                                    color: isDark
-                                        ? Colors.white60
-                                        : Colors.black87,
-                                  ),
-                                ),
+                          SizedBox(
+                            height: 160,
+                            width: 110,
+                            child: PieChart(
+                              PieChartData(
+                                sections: _buildPieChartData(subject),
+                                centerSpaceRadius: 35,
+                                sectionsSpace: 6,
                               ),
                             ),
                           ),
+                          const SizedBox(height: 20),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              _buildLegendItem(Colors.green, tr('excellent')),
+                              const SizedBox(height: 8),
+                              _buildLegendItem(
+                                  Colors.red, tr('needs_improvement')),
+                            ],
+                          ),
                         ],
                       ),
-                    );
-                  },
+                    ),
+
+                    const SizedBox(height: 14),
+
+                    // Severity
+                    Center(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            getSeverityIcon(avgLevelScore.toDouble()),
+                            color: getSeverityColor(avgLevelScore.toDouble()),
+                            size: 32,
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            getSeverity(avgLevelScore.toDouble()),
+                            style: TextStyle(
+                              color: getSeverityColor(avgLevelScore.toDouble()),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 18),
+
+                    // Recommendations heading
+                    Text(
+                      tr('suggestions_and_recommendations'),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: isDark ? Colors.white70 : Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+
+                    if (levelGoalText.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: Text(
+                          levelGoalText,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: isDark ? Colors.white70 : Colors.black87,
+                            fontStyle: FontStyle.italic,
+                            height: 1.4,
+                          ),
+                        ),
+                      ),
+
+                    // Recommendations scrollable
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                        physics: const BouncingScrollPhysics(),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              getRecommendations(avgLevelScore.toDouble()),
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 14,
+                                height: 1.5,
+                                color: isDark ? Colors.white60 : Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(height: 18),
+                            Container(
+                              margin: const EdgeInsets.symmetric(
+                                  vertical: 12, horizontal: 8),
+                              padding: const EdgeInsets.all(16),
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? Colors.grey[850]
+                                    : Colors.grey[200],
+                                borderRadius: BorderRadius.circular(16),
+                                boxShadow: [
+                                  if (!isDark)
+                                    BoxShadow(
+                                      color: Colors.black12,
+                                      blurRadius: 6,
+                                      offset: Offset(0, 3),
+                                    ),
+                                ],
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.help_outline,
+                                        color: isDark
+                                            ? Colors.white
+                                            : Colors.black87,
+                                        size: 20,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Flexible(
+                                        child: Text(
+                                          tr('how_this_level_helps'),
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 15,
+                                            color: isDark
+                                                ? Colors.white
+                                                : Colors.black87,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 10),
+                                  Text(
+                                    getLearningSupportExplanation(subject),
+                                    softWrap: true,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      height: 1.5,
+                                      color: isDark
+                                          ? Colors.white70
+                                          : Colors.black87,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              );
+            },
+          ),
+
+          // Left arrow
+          Positioned(
+            left: 0,
+            top: 0,
+            bottom: 0,
+            child: Center(
+              child: Material(
+                color: Colors.transparent,
+                child: IconButton(
+                  icon: Icon(
+                    Icons.arrow_back_ios_new,
+                    color: isDark ? Colors.white70 : Colors.black54,
+                  ),
+                  onPressed: scrollLeft,
+                  tooltip: 'Scroll Left',
                 ),
               ),
-          ],
-        ),
+            ),
+          ),
+
+          // Right arrow
+          Positioned(
+            right: 0,
+            top: 0,
+            bottom: 0,
+            child: Center(
+              child: Material(
+                color: Colors.transparent,
+                child: IconButton(
+                  icon: Icon(
+                    Icons.arrow_forward_ios,
+                    color: isDark ? Colors.white70 : Colors.black54,
+                  ),
+                  onPressed: scrollRight,
+                  tooltip: 'Scroll Right',
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
+  }
+
+  String getLearningSupportExplanation(String subject) {
+    switch (subject.toLowerCase()) {
+      case 'arabic':
+        return "Helps children with dyslexia by reinforcing letter recognition, phoneme awareness, and reading fluency in Arabic, using structured repetition and multisensory activities.";
+      case 'english':
+        return "Supports children with dyslexia by improving decoding skills, phonics, and spelling patterns in English through gradual complexity and clear visual cues.";
+      case 'math':
+        return "Assists children with dyscalculia by building number sense, pattern recognition, and problem-solving strategies using visual aids and step-by-step guidance.";
+      default:
+        return "This level is designed to support foundational cognitive and learning skills tailored to each subject.";
+    }
   }
 
   Widget _buildLegendItem(Color color, String label) {

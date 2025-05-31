@@ -531,7 +531,13 @@
   "level_1_math": "Learning to recognize numbers and basic math",
   "level_2_math": "Comparing numbers and understanding operation order",
   "level_3_math": "Solving word problems and finding unknowns",  "reading_summary": "Reading Summary",
-  "math_summary": "Math Summary"
+  "math_summary": "Math Summary",
+    "level": "Level",
+  "suggestions_and_recommendations": "Suggestions & Recommendations",
+  "no_data_available": "No data available for this subject.",
+  "excellent": "Excellent",
+  "needs_improvement": "Needs Improvement",
+  "how_this_level_helps": "How this level helps with dyslexia and dyscalculia"
 
   }
   

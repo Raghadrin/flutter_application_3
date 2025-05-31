@@ -577,6 +577,12 @@
   "level_2_math": "مقارنة الأعداد وفهم ترتيب العمليات",
   "level_3_math": "حل مسائل الكلمات وإيجاد المجهول",
     "reading_summary": "ملخص القراءة",
-  "math_summary": "ملخص الرياضيات"
+  "math_summary": "ملخص الرياضيات",
+    "level": "المستوى",
+  "suggestions_and_recommendations": "الاقتراحات والتوصيات",
+  "no_data_available": "لا توجد بيانات متاحة لهذه المادة.",
+  "excellent": "ممتاز",
+  "needs_improvement": "يحتاج إلى تحسين",
+  "how_this_level_helps": "كيف يساعد هذا المستوى في صعوبات القراءة والرياضيات"
 
 }
