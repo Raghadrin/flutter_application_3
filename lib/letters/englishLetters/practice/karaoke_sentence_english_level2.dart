@@ -14,8 +14,8 @@ class KaraokeSentenceEnglishLevel2Screen extends StatefulWidget {
       _KaraokeSentenceEnglishLevel2ScreenState();
 }
 
-class _KaraokeSentenceEnglishLevel2ScreenState extends State<KaraokeSentenceEnglishLevel2Screen>
-    with TickerProviderStateMixin {
+class _KaraokeSentenceEnglishLevel2ScreenState
+    extends State<KaraokeSentenceEnglishLevel2Screen> with TickerProviderStateMixin {
   final FlutterTts flutterTts = FlutterTts();
   late stt.SpeechToText speech;
   bool isListening = false;
@@ -72,9 +72,27 @@ class _KaraokeSentenceEnglishLevel2ScreenState extends State<KaraokeSentenceEngl
 
   Future<void> startListening() async {
     bool available = await speech.initialize(
-      onStatus: (val) {
+      onStatus: (val) async {
         if (val == 'done') {
           setState(() => isListening = false);
+          await evaluateResult();
+          if (!mounted) return;
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => EvaluationEnglishScreen(
+                recognizedText: recognizedText,
+                score: score,
+                stars: stars,
+                level: 'level2',
+                wordMatchResults: wordMatchResults,
+                onNext: () {
+                  Navigator.pop(context);
+                  nextSentence();
+                },
+              ),
+            ),
+          );
         }
       },
       onError: (val) => print('Error: $val'),
@@ -95,34 +113,13 @@ class _KaraokeSentenceEnglishLevel2ScreenState extends State<KaraokeSentenceEngl
         partialResults: true,
         listenFor: const Duration(seconds: 60),
         pauseFor: const Duration(seconds: 3),
-        onResult: (val) async {
+        onResult: (val) {
           recognizedText = val.recognizedWords;
           updateMatchedWords();
           matchedWordCount = recognizedText
               .split(RegExp(r'\s+'))
               .where((w) => w.trim().isNotEmpty)
               .length;
-
-          if (val.finalResult) {
-            await evaluateResult();
-            if (!mounted) return;
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => EvaluationEnglishScreen(
-                  recognizedText: recognizedText,
-                  score: score,
-                  stars: stars,
-                  level: 'level2',
-                  wordMatchResults: wordMatchResults,
-                  onNext: () {
-                    Navigator.pop(context);
-                    nextSentence();
-                  },
-                ),
-              ),
-            );
-          }
         },
       );
     }
@@ -327,7 +324,7 @@ class _KaraokeSentenceEnglishLevel2ScreenState extends State<KaraokeSentenceEngl
   }
 }
 
-// 🔁 Levenshtein Distance Helper
+// Levenshtein Distance Helper
 int levenshtein(String s1, String s2) {
   List<List<int>> dp = List.generate(
       s1.length + 1, (_) => List.filled(s2.length + 1, 0));
