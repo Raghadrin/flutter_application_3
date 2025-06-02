@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_application_3/auth/forget_password.dart';
 import 'package:flutter_application_3/pages/main_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'signup.dart';
@@ -99,7 +100,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       ],
                     ),
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ForgotPasswordPage()));
+                      },
                       child: const Text("Forgot password?",
                           style: TextStyle(color: Colors.white)),
                     ),

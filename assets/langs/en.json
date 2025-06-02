@@ -537,8 +537,25 @@
   "no_data_available": "No data available for this subject.",
   "excellent": "Excellent",
   "needs_improvement": "Needs Improvement",
-  "how_this_level_helps": "How this level helps with dyslexia and dyscalculia"
+  "how_this_level_helps": "How this level helps with dyslexia and dyscalculia",  "level_goals": {
+    "Arabic": {
+      "level1": "This level focuses on recognizing letters and beginning phonics.",
+      "level2": "Students blend sounds to form simple syllables and words.",
+      "level3": "The child reads short sentences and begins understanding context."
+    },
+    "English": {
+      "level1": "This level focuses on recognizing letters and beginning phonics.",
+      "level2": "Students blend sounds to form simple syllables and words.",
+      "level3": "The child reads short sentences and begins understanding context."
+    },
+    "Math": {
+      "level1": "This level identifies basic number recognition and simple counting.",
+      "level2": "Focus on basic operations like addition and subtraction.",
+      "level3": "The child starts solving multi-step problems and understanding concepts."
+    }
 
+  },
+  "Child Analysis":"Child Analysis"
   }
   
 

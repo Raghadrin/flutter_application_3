@@ -2,6 +2,7 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_application_3/Theme/splash2_screen.dart';
 import 'package:flutter_application_3/auth/signup.dart';
 import 'package:flutter_application_3/database/firebase_options.dart';
 import 'package:flutter_application_3/pages/main_screen.dart';
@@ -61,7 +62,7 @@ class MyApp extends StatelessWidget {
       localizationsDelegates: context.localizationDelegates,
       supportedLocales: context.supportedLocales,
       locale: context.locale,
-      home: SplashScreen(),
+      home: SplashScreen2(),
 
       // Force the font everywhere:
       builder: (context, child) {
@@ -74,88 +75,88 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class SplashScreen extends StatefulWidget {
-  const SplashScreen({super.key});
+// class SplashScreen extends StatefulWidget {
+//   const SplashScreen({super.key});
 
-  @override
-  State<SplashScreen> createState() => _SplashScreenState();
-}
+//   @override
+//   State<SplashScreen> createState() => _SplashScreenState();
+// }
 
-class _SplashScreenState extends State<SplashScreen> {
-  @override
-  void initState() {
-    super.initState();
-    _navigateToNextScreen();
-  }
+// class _SplashScreenState extends State<SplashScreen> {
+//   @override
+//   void initState() {
+//     super.initState();
+//     _navigateToNextScreen();
+//   }
 
-  Future<void> _navigateToNextScreen() async {
-    await Future.delayed(const Duration(seconds: 2));
-    final user = FirebaseAuth.instance.currentUser;
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) =>
-            user != null ? const MainScreen() : const SignUpScreen(),
-      ),
-    );
-  }
+//   Future<void> _navigateToNextScreen() async {
+//     await Future.delayed(const Duration(seconds: 2));
+//     final user = FirebaseAuth.instance.currentUser;
+//     Navigator.pushReplacement(
+//       context,
+//       MaterialPageRoute(
+//         builder: (_) =>
+//             user != null ? const MainScreen() : const SignUpScreen(),
+//       ),
+//     );
+//   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Color.fromARGB(255, 255, 172, 113),
-              Color.fromARGB(255, 255, 222, 196),
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                height: 160,
-                width: 180,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(50),
-                  image: const DecorationImage(
-                    image: AssetImage('images/logo.jpg'),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'حكاية',
-                style: GoogleFonts.cairo(
-                  color: const Color.fromARGB(255, 228, 80, 0),
-                  fontSize: 54,
-                ),
-              ),
-              Text(
-                'أهلا بك في التعلم المرح',
-                style: GoogleFonts.amiri(
-                  color: const Color.fromARGB(255, 72, 25, 0),
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                'welcome to fun learning',
-                style: GoogleFonts.poppins(
-                  color: const Color.fromARGB(255, 255, 255, 255),
-                  fontSize: 20,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       body: Container(
+//         decoration: const BoxDecoration(
+//           gradient: LinearGradient(
+//             colors: [
+//               Color.fromARGB(255, 255, 172, 113),
+//               Color.fromARGB(255, 255, 222, 196),
+//             ],
+//             begin: Alignment.topCenter,
+//             end: Alignment.bottomRight,
+//           ),
+//         ),
+//         child: Center(
+//           child: Column(
+//             mainAxisAlignment: MainAxisAlignment.center,
+//             children: [
+//               Container(
+//                 height: 160,
+//                 width: 180,
+//                 decoration: BoxDecoration(
+//                   borderRadius: BorderRadius.circular(50),
+//                   image: const DecorationImage(
+//                     image: AssetImage('images/logo.jpg'),
+//                     fit: BoxFit.cover,
+//                   ),
+//                 ),
+//               ),
+//               const SizedBox(height: 20),
+//               Text(
+//                 'حكاية',
+//                 style: GoogleFonts.cairo(
+//                   color: const Color.fromARGB(255, 228, 80, 0),
+//                   fontSize: 54,
+//                 ),
+//               ),
+//               Text(
+//                 'أهلا بك في التعلم المرح',
+//                 style: GoogleFonts.amiri(
+//                   color: const Color.fromARGB(255, 72, 25, 0),
+//                   fontSize: 20,
+//                   fontWeight: FontWeight.bold,
+//                 ),
+//               ),
+//               Text(
+//                 'welcome to fun learning',
+//                 style: GoogleFonts.poppins(
+//                   color: const Color.fromARGB(255, 255, 255, 255),
+//                   fontSize: 20,
+//                 ),
+//               ),
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }

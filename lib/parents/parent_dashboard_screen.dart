@@ -33,7 +33,7 @@ class ParentDashboardScreen extends StatelessWidget {
         screen: const CombinedChildPerformanceScreen(),
       ),
       _DashboardItem(
-        titleKey: 'Child Analysis',
+        titleKey: 'Child Analysis'.tr(),
         imagePath: 'images/ana.png',
         heroTag: 'Difficulty Analysis',
         screen: ChildDifficultyAnalysisScreen(),
