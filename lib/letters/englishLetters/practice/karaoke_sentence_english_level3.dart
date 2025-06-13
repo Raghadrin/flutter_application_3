@@ -33,6 +33,55 @@ class _KaraokeSentenceEnglishLevel3ScreenState
   int matchedWordCount = 0;
   Map<String, bool> wordMatchResults = {};
   List<String> spokenWordSequence = [];
+  late Map<String, List<String>> categoryIssues;
+  Map<String, String> wordCategories = {
+    // Space & Astronomy
+    "space": "Space Vocabulary",
+    "exploration": "Space Vocabulary",
+    "rockets": "Space Vocabulary",
+    "planets": "Space Vocabulary",
+    "astronauts": "Space Vocabulary",
+    "gravity": "Space Vocabulary",
+    "station": "Space Vocabulary",
+    "moon": "Space Vocabulary",
+    "earth": "Space Vocabulary",
+    "astronaut": "Space Vocabulary",
+    "stars": "Space Vocabulary",
+
+    // Descriptive Adjectives
+    "big": "Descriptive Words",
+    "rocky": "Descriptive Words",
+    "small": "Descriptive Words",
+    "blue": "Descriptive Words",
+    "amazed": "Descriptive Words",
+    "twinkled": "Descriptive Words",
+    "distant": "Descriptive Words",
+
+    // Actions (Verbs)
+    "opened": "Action Verbs",
+    "saw": "Action Verbs",
+    "flying": "Action Verbs",
+    "floating": "Action Verbs",
+    "showed": "Action Verbs",
+    "shared": "Action Verbs",
+    "explained": "Action Verbs",
+    "trained": "Action Verbs",
+    "protected": "Action Verbs",
+    "dreamed": "Action Verbs",
+    "reach": "Action Verbs",
+
+    // School / Learning
+    "book": "School Vocabulary",
+    "class": "School Vocabulary",
+    "friends": "School Vocabulary",
+    "learned": "School Vocabulary",
+    "learn": "School Vocabulary",
+
+    // Miscellaneous
+    "suits": "Clothing",
+    "night": "Time",
+    "cheering": "Emotion/Support",
+  };
 
   List<Map<String, String>> sentences = [
     {
@@ -72,6 +121,21 @@ class _KaraokeSentenceEnglishLevel3ScreenState
       await flutterTts.speak(currentSentence["text"]!);
       flutterTts.setCompletionHandler(() => setState(() => isPlaying = false));
     }
+  }
+
+  Map<String, List<String>> getCategoryAnalysis() {
+    Map<String, List<String>> categoryIssues = {};
+
+    wordMatchResults.forEach((word, isCorrect) {
+      if (!isCorrect) {
+        String? category = wordCategories[word.toLowerCase()];
+        if (category != null) {
+          categoryIssues.putIfAbsent(category, () => []).add(word);
+        }
+      }
+    });
+
+    return categoryIssues;
   }
 
   Future<void> startListening() async {
@@ -119,6 +183,7 @@ class _KaraokeSentenceEnglishLevel3ScreenState
                     Navigator.pop(context);
                     nextSentence();
                   },
+                  categoryIssues: categoryIssues,
                 ),
               ),
             );
@@ -166,7 +231,7 @@ class _KaraokeSentenceEnglishLevel3ScreenState
         .where((e) => !e.value)
         .map((e) => e.key)
         .toList();
-
+    categoryIssues = getCategoryAnalysis();
     await saveEvaluation(
       sentence: currentSentence["text"]!,
       recognizedText: recognizedText,
@@ -212,6 +277,7 @@ class _KaraokeSentenceEnglishLevel3ScreenState
         'score': score,
         'stars': stars,
         'timestamp': FieldValue.serverTimestamp(),
+        'categoryIssues': categoryIssues,
       });
     } catch (e) {
       print("Error saving evaluation: $e");

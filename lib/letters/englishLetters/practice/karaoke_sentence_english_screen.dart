@@ -32,6 +32,65 @@ class _KaraokeSentenceEnglishScreenState
   int matchedWordCount = 0;
   Map<String, bool> wordMatchResults = {};
   List<String> spokenWordSequence = [];
+  late Map<String, List<String>> categoryIssues;
+  Map<String, String> wordCategories = {
+    // School / Learning
+    "science": "School Vocabulary",
+    "fair": "School Vocabulary",
+    "materials": "School Vocabulary",
+    "school": "School Vocabulary",
+    "students": "School Vocabulary",
+    "teacher": "School Vocabulary",
+    "project": "School Vocabulary",
+    "presentation": "School Vocabulary",
+    "judges": "School Vocabulary",
+    "questions": "School Vocabulary",
+
+    // Actions (Verbs)
+    "woke": "Action Verbs",
+    "packed": "Action Verbs",
+    "checked": "Action Verbs",
+    "hurried": "Action Verbs",
+    "eat": "Action Verbs",
+    "heading": "Action Verbs",
+    "carried": "Action Verbs",
+    "greeted": "Action Verbs",
+    "joined": "Action Verbs",
+    "present": "Action Verbs",
+    "explained": "Action Verbs",
+    "listened": "Action Verbs",
+    "asked": "Action Verbs",
+    "felt": "Action Verbs",
+    "paid": "Action Verbs",
+    "learned": "Action Verbs",
+    "given": "Action Verbs",
+
+    // Emotions / Feelings
+    "excitement": "Emotions",
+    "confidently": "Emotions",
+    "proud": "Emotions",
+    "hard": "Emotions",
+    "best": "Emotions",
+
+    // Technology & Creativity
+    "robot": "Technology",
+    "inventions": "Technology",
+    "display": "Technology",
+    "chores": "Technology",
+    "posters": "Technology",
+
+    // Descriptive Words
+    "big": "Descriptive Words",
+    "colorful": "Descriptive Words",
+    "unique": "Descriptive Words",
+    "thoughtful": "Descriptive Words",
+    "early": "Descriptive Words",
+
+    // Time / Journey
+    "before": "Time",
+    "after": "Time",
+    "journey": "Time",
+  };
 
   List<Map<String, String>> sentences = [
     {
@@ -71,6 +130,21 @@ class _KaraokeSentenceEnglishScreenState
       await flutterTts.speak(currentSentence["text"]!);
       flutterTts.setCompletionHandler(() => setState(() => isPlaying = false));
     }
+  }
+
+  Map<String, List<String>> getCategoryAnalysis() {
+    Map<String, List<String>> categoryIssues = {};
+
+    wordMatchResults.forEach((word, isCorrect) {
+      if (!isCorrect) {
+        String? category = wordCategories[word.toLowerCase()];
+        if (category != null) {
+          categoryIssues.putIfAbsent(category, () => []).add(word);
+        }
+      }
+    });
+
+    return categoryIssues;
   }
 
   Future<void> startListening() async {
@@ -122,6 +196,7 @@ class _KaraokeSentenceEnglishScreenState
                     Navigator.pop(context);
                     nextSentence();
                   },
+                  categoryIssues: categoryIssues,
                 ),
               ),
             );
@@ -168,7 +243,7 @@ class _KaraokeSentenceEnglishScreenState
         .where((e) => !e.value)
         .map((e) => e.key)
         .toList();
-
+    categoryIssues = getCategoryAnalysis();
     await saveEvaluation(
       sentence: currentSentence["text"]!,
       recognizedText: recognizedText,
@@ -214,6 +289,7 @@ class _KaraokeSentenceEnglishScreenState
         'score': score,
         'stars': stars,
         'timestamp': FieldValue.serverTimestamp(),
+        'categoryIssues': categoryIssues,
       });
     } catch (e) {
       print("Error saving evaluation: $e");

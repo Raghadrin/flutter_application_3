@@ -29,6 +29,40 @@ class _KaraokeSentenceLevel2ScreenState
 
   Map<String, bool> wordMatchResults = {};
   List<String> spokenWordSequence = [];
+  late Map<String, List<String>> categoryIssues;
+  final Map<String, String> wordCategoriesAr = {
+    'عمر': 'أشخاص',
+    'إياد': 'أشخاص',
+    'عائلته': 'أشخاص',
+    'زملاءه': 'أشخاص',
+    'طفل': 'أشخاص',
+    'مدرسة': 'أماكن',
+    'مدينة': 'أماكن',
+    'المقعد': 'أشياء',
+    'شجرة': 'أشياء',
+    'رسمة': 'أشياء',
+    'الخجل': 'مشاعر',
+    'الحزن': 'مشاعر',
+    'الراحة': 'مشاعر',
+    'وحده': 'مشاعر',
+    'صداقتنا': 'مفاهيم',
+    'مسابقة': 'مفاهيم',
+    'السيارات': 'أشياء',
+    'سعيد': 'صفات',
+    'مبتسمًا': 'صفات',
+    'جلس': 'أفعال',
+    'راقب': 'أفعال',
+    'ضحك': 'أفعال',
+    'رسم': 'أفعال',
+    'قال': 'أفعال',
+    'رد': 'أفعال',
+    'اقترب': 'أفعال',
+    'شعر': 'أفعال',
+    'أصبح': 'أفعال',
+    'شاركا': 'أفعال',
+    'فازا': 'أفعال',
+    'انتقل': 'أفعال',
+  };
 
   final List<Map<String, String>> sentences = [
     {
@@ -68,6 +102,21 @@ class _KaraokeSentenceLevel2ScreenState
       setState(() => isPlaying = true);
       await audioPlayer.play(AssetSource(path));
     }
+  }
+
+  Map<String, List<String>> getCategoryAnalysis() {
+    Map<String, List<String>> categoryIssues = {};
+
+    wordMatchResults.forEach((word, isCorrect) {
+      if (!isCorrect) {
+        String? category = wordCategoriesAr[word.toLowerCase()];
+        if (category != null) {
+          categoryIssues.putIfAbsent(category, () => []).add(word);
+        }
+      }
+    });
+
+    return categoryIssues;
   }
 
   Future<void> startListening() async {
@@ -121,6 +170,7 @@ class _KaraokeSentenceLevel2ScreenState
                     Navigator.pop(context);
                     nextSentence();
                   },
+                  categoryIssues: categoryIssues,
                 ),
               ),
             );
@@ -153,6 +203,7 @@ class _KaraokeSentenceLevel2ScreenState
   }
 
   Future<void> evaluateResult() async {
+    categoryIssues = getCategoryAnalysis();
     int correct = wordMatchResults.values.where((v) => v).length;
     int total = wordMatchResults.length;
     score = total > 0 ? (correct / total) * 100 : 0.0;
@@ -217,6 +268,7 @@ class _KaraokeSentenceLevel2ScreenState
       'score': score,
       'stars': stars,
       'timestamp': FieldValue.serverTimestamp(),
+      'categoryIssues': categoryIssues,
     });
   }
 

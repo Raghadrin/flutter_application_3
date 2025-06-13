@@ -30,6 +30,29 @@ class _KaraokeSentenceArabicScreenState
 
   Map<String, bool> wordMatchResults = {};
   List<String> spokenWordSequence = [];
+  late Map<String, List<String>> categoryIssues;
+  final Map<String, String> wordCategoriesAr = {
+    'غابة': 'أماكن',
+    'سلحفاة': 'حيوانات',
+    'أرنب': 'حيوانات',
+    'شجرة': 'أشياء',
+    'بيت': 'أماكن',
+    'الحيوانات': 'حيوانات',
+    'الكل': 'أشخاص',
+    'الشكل': 'مفاهيم',
+    'كلام': 'مفاهيم',
+    'مساعدة': 'مفاهيم',
+    'خائف': 'صفات',
+    'يبكي': 'أفعال',
+    'ابتسمت': 'أفعال',
+    'سارت': 'أفعال',
+    'ركض': 'أفعال',
+    'ضاعت': 'أفعال',
+    'طيبة': 'صفات',
+    'حكيمة': 'صفات',
+    'بطيئة': 'صفات',
+    'ذكية': 'صفات',
+  };
 
   List<Map<String, String>> sentences = [
     {
@@ -120,6 +143,7 @@ class _KaraokeSentenceArabicScreenState
                     Navigator.pop(context);
                     nextSentence();
                   },
+                  categoryIssues: categoryIssues,
                 ),
               ),
             );
@@ -127,6 +151,21 @@ class _KaraokeSentenceArabicScreenState
         },
       );
     }
+  }
+
+  Map<String, List<String>> getCategoryAnalysis() {
+    Map<String, List<String>> categoryIssues = {};
+
+    wordMatchResults.forEach((word, isCorrect) {
+      if (!isCorrect) {
+        String? category = wordCategoriesAr[word.toLowerCase()];
+        if (category != null) {
+          categoryIssues.putIfAbsent(category, () => []).add(word);
+        }
+      }
+    });
+
+    return categoryIssues;
   }
 
   void updateMatchedWords() {
@@ -164,6 +203,7 @@ class _KaraokeSentenceArabicScreenState
                 ? 1
                 : 0;
 
+    categoryIssues = getCategoryAnalysis();
     await saveKaraokeEvaluation(
       sentence: currentSentence["text"]!,
       recognizedText: recognizedText,
@@ -217,6 +257,7 @@ class _KaraokeSentenceArabicScreenState
       'score': score,
       'stars': stars,
       'timestamp': FieldValue.serverTimestamp(),
+      'categoryIssues': categoryIssues,
     });
   }
 

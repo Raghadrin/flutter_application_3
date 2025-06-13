@@ -31,6 +31,24 @@ class _KaraokeSentenceEnglishLevel2ScreenState
   int matchedWordCount = 0;
   Map<String, bool> wordMatchResults = {};
   List<String> spokenWordSequence = [];
+  late Map<String, List<String>> categoryIssues;
+
+  final Map<String, String> wordCategories = {
+    'school': 'Places',
+    'window': 'Objects',
+    'umbrella': 'Objects',
+    'cat': 'Animals',
+    'rain': 'Weather',
+    'bench': 'Places',
+    'parents': 'People',
+    'home': 'Places',
+    'sunny': 'Weather',
+    'puddles': 'Nature',
+    'clouds': 'Weather',
+    'sky': 'Nature',
+    'face': 'Body Parts',
+    'story': 'Concepts',
+  };
 
   List<Map<String, String>> sentences = [
     {
@@ -92,6 +110,7 @@ class _KaraokeSentenceEnglishLevel2ScreenState
                   Navigator.pop(context);
                   nextSentence();
                 },
+                categoryIssues: categoryIssues,
               ),
             ),
           );
@@ -164,6 +183,7 @@ class _KaraokeSentenceEnglishLevel2ScreenState
         .where((e) => !e.value)
         .map((e) => e.key)
         .toList();
+    categoryIssues = getCategoryAnalysis();
 
     await saveEvaluation(
       sentence: currentSentence["text"]!,
@@ -210,10 +230,26 @@ class _KaraokeSentenceEnglishLevel2ScreenState
         'score': score,
         'stars': stars,
         'timestamp': FieldValue.serverTimestamp(),
+        'categoryIssues': categoryIssues,
       });
     } catch (e) {
       print("Error saving evaluation: $e");
     }
+  }
+
+  Map<String, List<String>> getCategoryAnalysis() {
+    Map<String, List<String>> categoryIssues = {};
+
+    wordMatchResults.forEach((word, isCorrect) {
+      if (!isCorrect) {
+        String? category = wordCategories[word.toLowerCase()];
+        if (category != null) {
+          categoryIssues.putIfAbsent(category, () => []).add(word);
+        }
+      }
+    });
+
+    return categoryIssues;
   }
 
   void nextSentence() {

@@ -28,6 +28,46 @@ class _KaraokeSentenceLevel3ScreenState
 
   Map<String, bool> wordMatchResults = {};
   List<String> spokenWordSequence = [];
+  late Map<String, List<String>> categoryIssues;
+  final Map<String, String> wordCategoriesAr = {
+    'سامر': 'أشخاص',
+    'زميلًا': 'أشخاص',
+    'المعلمة': 'أشخاص',
+    'الطالب': 'أشخاص',
+    'زملائه': 'أشخاص',
+    'المنزل': 'أماكن',
+    'العشاء': 'أشياء',
+    'ورقة': 'أشياء',
+    'القراءة': 'مفاهيم',
+    'العلوم': 'مفاهيم',
+    'الرياضيات': 'مفاهيم',
+    'الامتحان': 'مفاهيم',
+    'الأمانة': 'مفاهيم',
+    'الصدق': 'مفاهيم',
+    'الاحترام': 'مفاهيم',
+    'الارتباك': 'مشاعر',
+    'القلق': 'مشاعر',
+    'الخوف': 'مشاعر',
+    'الفخر': 'مشاعر',
+    'شجاعًا': 'صفات',
+    'ذكيًا': 'صفات',
+    'صامتًا': 'صفات',
+    'يحاول': 'أفعال',
+    'يغش': 'أفعال',
+    'رأى': 'أفعال',
+    'شعر': 'أفعال',
+    'عاد': 'أفعال',
+    'فكر': 'أفعال',
+    'يخبر': 'أفعال',
+    'يصمت': 'أفعال',
+    'بقي': 'أفعال',
+    'قالت': 'أفعال',
+    'أثنت': 'أفعال',
+    'اختار': 'أفعال',
+    'نال': 'أفعال',
+    'تحدثت': 'أفعال',
+    'شرحَت': 'أفعال',
+  };
 
   final List<Map<String, String>> sentences = [
     {
@@ -67,6 +107,21 @@ class _KaraokeSentenceLevel3ScreenState
       setState(() => isPlaying = true);
       await audioPlayer.play(AssetSource(path));
     }
+  }
+
+  Map<String, List<String>> getCategoryAnalysis() {
+    Map<String, List<String>> categoryIssues = {};
+
+    wordMatchResults.forEach((word, isCorrect) {
+      if (!isCorrect) {
+        String? category = wordCategoriesAr[word.toLowerCase()];
+        if (category != null) {
+          categoryIssues.putIfAbsent(category, () => []).add(word);
+        }
+      }
+    });
+
+    return categoryIssues;
   }
 
   Future<void> startListening() async {
@@ -116,6 +171,7 @@ class _KaraokeSentenceLevel3ScreenState
                     Navigator.pop(context);
                     nextSentence();
                   },
+                  categoryIssues: categoryIssues,
                 ),
               ),
             );
@@ -148,6 +204,7 @@ class _KaraokeSentenceLevel3ScreenState
   }
 
   Future<void> evaluateResult() async {
+    categoryIssues = getCategoryAnalysis();
     int correct = wordMatchResults.values.where((v) => v).length;
     int total = wordMatchResults.length;
     score = total > 0 ? (correct / total) * 100 : 0.0;
@@ -194,6 +251,7 @@ class _KaraokeSentenceLevel3ScreenState
       'score': score,
       'stars': stars,
       'timestamp': FieldValue.serverTimestamp(),
+      'categoryIssues': categoryIssues,
     });
   }
 //FinalFeedbackScreenAr

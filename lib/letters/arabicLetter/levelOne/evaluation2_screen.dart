@@ -10,7 +10,7 @@ class Evaluation2Screen extends StatefulWidget {
   //final String level;
   final Map<String, bool> wordMatchResults;
   final VoidCallback onNext;
-
+  final Map<String, List<String>> categoryIssues;
   final dynamic level;
 
   const Evaluation2Screen({
@@ -21,6 +21,7 @@ class Evaluation2Screen extends StatefulWidget {
     required this.level,
     required this.wordMatchResults,
     required this.onNext,
+    required this.categoryIssues,
   });
 
   @override
@@ -35,6 +36,81 @@ class _Evaluation2ScreenState extends State<Evaluation2Screen> {
   @override
   void initState() {
     super.initState();
+  }
+
+  Widget buildCategoryAnalysisBox() {
+    final categoryAnalysis = widget.categoryIssues;
+
+    if (categoryAnalysis.isEmpty) {
+      return const SizedBox();
+    }
+
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: Colors.orange.shade50,
+      margin: const EdgeInsets.symmetric(vertical: 12),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "Possible Areas of Difficulty:",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+                color: Colors.deepOrange,
+              ),
+            ),
+            const SizedBox(height: 12),
+            ...categoryAnalysis.entries.map((entry) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.error_outline,
+                          color: Colors.deepOrange, size: 22),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              entry.key,
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.deepOrangeAccent,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 6,
+                              children: entry.value.map((issue) {
+                                return Chip(
+                                  backgroundColor: Colors.deepOrange.shade100,
+                                  label: Text(
+                                    issue,
+                                    style: const TextStyle(
+                                      color: Colors.deepOrange,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            )
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                )),
+          ],
+        ),
+      ),
+    );
   }
 
   List<Widget> buildStars() => List.generate(
@@ -155,6 +231,7 @@ class _Evaluation2ScreenState extends State<Evaluation2Screen> {
               Column(children: [
                 buildWordBox("✅ صحيح:", Colors.green),
                 buildWordBox("❌ خطأ:", Colors.red),
+                buildCategoryAnalysisBox(),
                 // const SizedBox(height: 16),
                 // buildChart(), // 📊 Chart section
                 // const SizedBox(

@@ -10,6 +10,7 @@ class EvaluationEnglishScreen extends StatefulWidget {
   final Map<String, bool> wordMatchResults;
   final VoidCallback onNext;
   final dynamic level;
+  final Map<String, List<String>> categoryIssues;
 
   const EvaluationEnglishScreen({
     super.key,
@@ -19,6 +20,7 @@ class EvaluationEnglishScreen extends StatefulWidget {
     required this.level,
     required this.wordMatchResults,
     required this.onNext,
+    required this.categoryIssues,
   });
 
   @override
@@ -44,6 +46,80 @@ class _EvaluationEnglishScreenState extends State<EvaluationEnglishScreen> {
           size: 16,
         ),
       );
+  Widget buildCategoryAnalysisBox() {
+    final categoryAnalysis = widget.categoryIssues;
+
+    if (categoryAnalysis.isEmpty) {
+      return const SizedBox();
+    }
+
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      color: Colors.orange.shade50,
+      margin: const EdgeInsets.symmetric(vertical: 12),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "Possible Areas of Difficulty:",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+                color: Colors.deepOrange,
+              ),
+            ),
+            const SizedBox(height: 12),
+            ...categoryAnalysis.entries.map((entry) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(Icons.error_outline,
+                          color: Colors.deepOrange, size: 22),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              entry.key,
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.deepOrangeAccent,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 6,
+                              children: entry.value.map((issue) {
+                                return Chip(
+                                  backgroundColor: Colors.deepOrange.shade100,
+                                  label: Text(
+                                    issue,
+                                    style: const TextStyle(
+                                      color: Colors.deepOrange,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            )
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                )),
+          ],
+        ),
+      ),
+    );
+  }
 
   Widget buildWordBox(String title, Color color) {
     final isCorrect = color == Colors.green;
@@ -155,6 +231,7 @@ class _EvaluationEnglishScreenState extends State<EvaluationEnglishScreen> {
                 children: [
                   buildWordBox("✅ Correct:", Colors.green),
                   buildWordBox("❌ Incorrect:", Colors.red),
+                  buildCategoryAnalysisBox(),
                   ElevatedButton.icon(
                     onPressed: () {
                       Navigator.pop(context);
