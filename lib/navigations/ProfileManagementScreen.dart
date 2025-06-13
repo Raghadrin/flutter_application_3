@@ -38,10 +38,11 @@ class _ProfileManagementScreenState extends State<ProfileManagementScreen> {
           .orderBy('timestamp', descending: true)
           .get();
 
-      final fetchedChildren = snapshot.docs
-          .map((doc) => doc.data() as Map<String, dynamic>)
-          .toList();
-
+      final fetchedChildren = snapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        data['id'] = doc.id; // 👈 Add the doc ID as 'id'
+        return data;
+      }).toList();
       setState(() {
         children = fetchedChildren;
       });
@@ -66,10 +67,15 @@ class _ProfileManagementScreenState extends State<ProfileManagementScreen> {
       selectedChild = child;
     });
 
-    // Save the selected child's name
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('lastSelectedChild', child['name']);
+    await prefs.setString('lastSelectedChildId', child['id']);
+    await prefs.setString('lastSelectedChildName', child['name']);
   }
+
+  //   // Save the selected child's name
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   await prefs.setString('lastSelectedChild', child['name']);
+  // }
 
   void _navigateToAddChild() async {
     bool? childAdded = await Navigator.push(

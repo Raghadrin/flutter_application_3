@@ -1,13 +1,12 @@
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_application_3/Theme/splash2_screen.dart';
-import 'package:flutter_application_3/auth/signup.dart';
+//import 'package:flutter_application_3/auth/signup.dart';
 import 'package:flutter_application_3/database/firebase_options.dart';
-import 'package:flutter_application_3/pages/main_screen.dart';
+//import 'package:flutter_application_3/pages/main_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+//import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:easy_localization/easy_localization.dart'; // Add this
 
 void main() async {

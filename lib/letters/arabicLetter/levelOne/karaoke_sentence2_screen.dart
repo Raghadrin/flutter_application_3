@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter_application_3/letters/arabicLetter/levelOne/FinalFeedbackScreenAr.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'evaluation2_screen.dart';
 
@@ -13,8 +14,8 @@ class KaraokeSentenceLevel2Screen extends StatefulWidget {
       _KaraokeSentenceLevel2ScreenState();
 }
 
-class _KaraokeSentenceLevel2ScreenState extends State<KaraokeSentenceLevel2Screen>
-    with TickerProviderStateMixin {
+class _KaraokeSentenceLevel2ScreenState
+    extends State<KaraokeSentenceLevel2Screen> with TickerProviderStateMixin {
   late AudioPlayer audioPlayer;
   late stt.SpeechToText speech;
   bool isListening = false;
@@ -37,18 +38,17 @@ class _KaraokeSentenceLevel2ScreenState extends State<KaraokeSentenceLevel2Scree
     },
     {
       "text":
-        'في اليوم التالي، رأى عمر طفلًا يجلس وحده تحت شجرة. اقترب منه وقال: مرحبًا، هل أستطيع الجلوس؟ رد الطفل مبتسمًا: بالطبع، اسمي إياد، وأنت؟ ورد عمر: أنا عمر، وشعر عمر بالراحة لأول مرة.',
+          'في اليوم التالي، رأى عمر طفلًا يجلس وحده تحت شجرة. اقترب منه وقال: مرحبًا، هل أستطيع الجلوس؟ رد الطفل مبتسمًا: بالطبع، اسمي إياد، وأنت؟ ورد عمر: أنا عمر، وشعر عمر بالراحة لأول مرة.',
       "audio": "audio/omar2.mp3"
     },
     {
       "text":
-      'مع الوقت، أصبح عمر وإياد صديقين. شاركا في مسابقة للسيارات وفازا. قال عمر: "أنا سعيدٌ بصداقتنا." ابتسم إياد وقال: "وأنا سعيد كذلك بها."',
+          'مع الوقت، أصبح عمر وإياد صديقين. شاركا في مسابقة للسيارات وفازا. قال عمر: "أنا سعيدٌ بصداقتنا." ابتسم إياد وقال: "وأنا سعيد كذلك بها."',
       "audio": "audio/omar3.mp3"
     }
   ];
 
   Map<String, String> get currentSentence => sentences[currentSentenceIndex];
-
 
   @override
   void initState() {
@@ -142,7 +142,8 @@ class _KaraokeSentenceLevel2ScreenState extends State<KaraokeSentenceLevel2Scree
 
     Map<String, bool> newResults = {};
     for (var word in expectedWords) {
-      newResults[word] = spokenWords.any((spoken) => levenshtein(word, spoken) <= 1);
+      newResults[word] =
+          spokenWords.any((spoken) => levenshtein(word, spoken) <= 1);
     }
 
     setState(() {
@@ -155,15 +156,25 @@ class _KaraokeSentenceLevel2ScreenState extends State<KaraokeSentenceLevel2Scree
     int correct = wordMatchResults.values.where((v) => v).length;
     int total = wordMatchResults.length;
     score = total > 0 ? (correct / total) * 100 : 0.0;
-    stars = (score >= 90) ? 3 : (score >= 60) ? 2 : (score > 0) ? 1 : 0;
+    stars = (score >= 90)
+        ? 3
+        : (score >= 60)
+            ? 2
+            : (score > 0)
+                ? 1
+                : 0;
 
     await saveKaraokeEvaluation(
       sentence: currentSentence["text"]!,
       recognizedText: recognizedText,
-      correctWords:
-          wordMatchResults.entries.where((e) => e.value).map((e) => e.key).toList(),
-      wrongWords:
-          wordMatchResults.entries.where((e) => !e.value).map((e) => e.key).toList(),
+      correctWords: wordMatchResults.entries
+          .where((e) => e.value)
+          .map((e) => e.key)
+          .toList(),
+      wrongWords: wordMatchResults.entries
+          .where((e) => !e.value)
+          .map((e) => e.key)
+          .toList(),
       score: score,
       stars: stars,
     );
@@ -211,10 +222,22 @@ class _KaraokeSentenceLevel2ScreenState extends State<KaraokeSentenceLevel2Scree
 
   void nextSentence() {
     setState(() {
-      if (currentSentenceIndex < sentences.length - 1) {
+      if (currentSentenceIndex < 2) {
         currentSentenceIndex++;
       } else {
-        currentSentenceIndex = 0;
+        // Go to FinalFeedbackScreen instead of showing a dialog
+        var totalStars = stars;
+        var totalScore = totalStars;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => FinalFeedbackScreenAr(
+              averageScore: totalScore / sentences.length,
+              totalStars: (totalStars / sentences.length).round(),
+              level: 'level2',
+            ),
+          ),
+        );
       }
       recognizedText = '';
       score = 0.0;
@@ -261,11 +284,8 @@ class _KaraokeSentenceLevel2ScreenState extends State<KaraokeSentenceLevel2Scree
     for (int i = 1; i <= s1.length; i++) {
       for (int j = 1; j <= s2.length; j++) {
         int cost = s1[i - 1] == s2[j - 1] ? 0 : 1;
-        dp[i][j] = [
-          dp[i - 1][j] + 1,
-          dp[i][j - 1] + 1,
-          dp[i - 1][j - 1] + cost
-        ].reduce((a, b) => a < b ? a : b);
+        dp[i][j] = [dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + cost]
+            .reduce((a, b) => a < b ? a : b);
       }
     }
     return dp[s1.length][s2.length];
@@ -276,7 +296,9 @@ class _KaraokeSentenceLevel2ScreenState extends State<KaraokeSentenceLevel2Scree
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('🎤 كاريوكي - المستوى ٢')),
+      appBar: AppBar(
+          title: const Text('🎤 كاريوكي - المستوى ٢',
+              style: TextStyle(fontSize: 18))),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
@@ -298,7 +320,8 @@ class _KaraokeSentenceLevel2ScreenState extends State<KaraokeSentenceLevel2Scree
               LinearProgressIndicator(
                 value: (currentSentenceIndex + 1) / sentences.length,
                 backgroundColor: Colors.grey[300],
-                valueColor: const AlwaysStoppedAnimation<Color>(Colors.blueAccent),
+                valueColor:
+                    const AlwaysStoppedAnimation<Color>(Colors.blueAccent),
               ),
               const SizedBox(height: 20),
               ElevatedButton.icon(

@@ -35,42 +35,6 @@ class _Evaluation2ScreenState extends State<Evaluation2Screen> {
   @override
   void initState() {
     super.initState();
-    fetchPreviousAttempts();
-  }
-
-  Future<void> fetchPreviousAttempts() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-
-    parentId = user.uid;
-
-    final childrenSnapshot = await FirebaseFirestore.instance
-        .collection('parents')
-        .doc(parentId)
-        .collection('children')
-        .get();
-
-    if (childrenSnapshot.docs.isEmpty) return;
-
-    childId = childrenSnapshot.docs.first.id;
-
-    final attemptsSnapshot = await FirebaseFirestore.instance
-        .collection('parents')
-        .doc(parentId)
-        .collection('children')
-        .doc(childId)
-        .collection('karaoke')
-        .doc('arKaraoke')
-        .collection(widget.level.toString()) // <-- dynamic level path
-        .orderBy('timestamp', descending: true)
-        .limit(5)
-        .get();
-
-    setState(() {
-      last5Scores = attemptsSnapshot.docs.reversed
-          .map((doc) => (doc['score'] as num).toDouble())
-          .toList();
-    });
   }
 
   List<Widget> buildStars() => List.generate(
@@ -147,141 +111,6 @@ class _Evaluation2ScreenState extends State<Evaluation2Screen> {
     return "حاول أن تركز أكثر في المحاولة القادمة 💪";
   }
 
-  Widget buildChart() {
-    if (last5Scores.isEmpty) {
-      return const Text(
-        "لا توجد بيانات كافية للرسم البياني.",
-        style: TextStyle(fontSize: 12),
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        const Text(
-          "📊 نتائج المحاولات الأخيرة:",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 14,
-            color: Colors.deepPurple,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.deepPurple.shade50,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.15),
-                spreadRadius: 1,
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          padding: const EdgeInsets.all(12),
-          child: AspectRatio(
-            aspectRatio: 1.8,
-            child: BarChart(
-              BarChartData(
-                alignment: BarChartAlignment.spaceAround,
-                maxY: 100,
-                barTouchData: BarTouchData(
-                  enabled: true,
-                  touchTooltipData: BarTouchTooltipData(
-                    tooltipBgColor: Colors.deepPurpleAccent.withOpacity(0.8),
-                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                      return BarTooltipItem(
-                        '${rod.toY.toStringAsFixed(1)}%',
-                        const TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                titlesData: FlTitlesData(
-                  leftTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      interval: 20,
-                      reservedSize: 32,
-                      getTitlesWidget: (value, meta) => Text(
-                        '${value.toInt()}%',
-                        style: const TextStyle(
-                          fontSize: 10,
-                          color: Colors.black54,
-                        ),
-                      ),
-                    ),
-                  ),
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      getTitlesWidget: (value, meta) => Padding(
-                        padding: const EdgeInsets.only(top: 8),
-                        child: Text(
-                          'محاولة ${value.toInt() + 1}',
-                          style: const TextStyle(
-                            fontSize: 10,
-                            color: Colors.black87,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  rightTitles: AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                  topTitles: AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
-                  ),
-                ),
-                gridData: FlGridData(
-                  show: true,
-                  drawVerticalLine: false,
-                  getDrawingHorizontalLine: (value) => FlLine(
-                    color: Colors.grey[300],
-                    strokeWidth: 1,
-                  ),
-                ),
-                borderData: FlBorderData(
-                  show: false,
-                ),
-                barGroups: List.generate(last5Scores.length, (index) {
-                  final value = last5Scores[index];
-                  return BarChartGroupData(
-                    x: index,
-                    barRods: [
-                      BarChartRodData(
-                        toY: value,
-                        width: 20,
-                        borderRadius: BorderRadius.circular(8),
-                        gradient: LinearGradient(
-                          colors: [
-                            Colors.deepPurple,
-                            Colors.deepPurpleAccent,
-                          ],
-                          begin: Alignment.bottomCenter,
-                          end: Alignment.topCenter,
-                        ),
-                      ),
-                    ],
-                  );
-                }),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 12),
-        Text(getFeedback(), style: const TextStyle(fontSize: 12)),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final total = widget.wordMatchResults.length;
@@ -323,25 +152,42 @@ class _Evaluation2ScreenState extends State<Evaluation2Screen> {
                 children: buildStars(),
               ),
               const SizedBox(height: 12),
-              buildWordBox("✅ صحيح:", Colors.green),
-              buildWordBox("❌ خطأ:", Colors.red),
-              // const SizedBox(height: 16),
-              buildChart(), // 📊 Chart section
-              // const SizedBox(
-              //     height: 20), // Instead of Spacer(), fixed space for scroll
-              ElevatedButton.icon(
-                onPressed: widget.onNext,
-                icon: const Icon(Icons.navigate_next, size: 16),
-                label: const Text("التالي", style: TextStyle(fontSize: 15)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
-                  minimumSize:
-                      Size(MediaQuery.of(context).size.width * 0.45, 34),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              Column(children: [
+                buildWordBox("✅ صحيح:", Colors.green),
+                buildWordBox("❌ خطأ:", Colors.red),
+                // const SizedBox(height: 16),
+                // buildChart(), // 📊 Chart section
+                // const SizedBox(
+                //     height: 20), // Instead of Spacer(), fixed space for scroll
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(Icons.refresh, size: 16),
+                  label:
+                      const Text("Try Again", style: TextStyle(fontSize: 15)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    minimumSize:
+                        Size(MediaQuery.of(context).size.width * 0.45, 34),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
+                ElevatedButton.icon(
+                  onPressed: widget.onNext,
+                  icon: const Icon(Icons.navigate_next, size: 16),
+                  label: const Text("التالي", style: TextStyle(fontSize: 15)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    minimumSize:
+                        Size(MediaQuery.of(context).size.width * 0.45, 34),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  ),
+                ),
+                const SizedBox(height: 8),
+              ])
             ],
           ),
         ),

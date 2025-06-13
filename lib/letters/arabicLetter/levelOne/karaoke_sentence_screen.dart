@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter_application_3/letters/arabicLetter/levelOne/FinalFeedbackScreenAr.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -14,8 +15,8 @@ class KaraokeSentenceArabicScreen extends StatefulWidget {
       _KaraokeSentenceArabicScreenState();
 }
 
-class _KaraokeSentenceArabicScreenState extends State<KaraokeSentenceArabicScreen>
-    with TickerProviderStateMixin {
+class _KaraokeSentenceArabicScreenState
+    extends State<KaraokeSentenceArabicScreen> with TickerProviderStateMixin {
   late stt.SpeechToText speech;
   late AudioPlayer audioPlayer;
   bool isListening = false;
@@ -32,18 +33,20 @@ class _KaraokeSentenceArabicScreenState extends State<KaraokeSentenceArabicScree
 
   List<Map<String, String>> sentences = [
     {
-      "text": "في غابة جميلة، كانت تعيش سلحفاة. كانت تمشي ببطء، لكنها تفكر بهدوء. كلما اختلفت الحيوانات، نادت السلحفاة. الكل يسمع كلامها لأنها حكيمة وطيبة.",
+      "text":
+          "في غابة جميلة، كانت تعيش سلحفاة. كانت تمشي ببطء، لكنها تفكر بهدوء. كلما اختلفت الحيوانات، نادت السلحفاة. الكل يسمع كلامها لأنها حكيمة وطيبة.",
       "audio": "assets/audio/turtle1.mp3"
     },
     {
-      "text": "في يوم من الأيام، ضاع أرنب صغير. ركض كثيرًا ولم يعرف طريق البيت. كان خائفًا ويبكي تحت الشجرة. جاءت السلحفاة وسألته: \"هل تحتاج مساعدة؟\"",
+      "text":
+          "في يوم من الأيام، ضاع أرنب صغير. ركض كثيرًا ولم يعرف طريق البيت. كان خائفًا ويبكي تحت الشجرة. جاءت السلحفاة وسألته: \"هل تحتاج مساعدة؟\"",
       "audio": "assets/audio/turtle2.mp3"
     },
     {
- "text": "سارت معه حتى وصل إلى بيته. قال الأرنب: \"كنت أظن السلاحف فقط بطيئة!\" ولكنك ذكية وتعرفين ما تفعلين. ابتسمت السلحفاة وقالت: \"لا تحكم من الشكل!\" ومن يومها، أصبح الأرنب صديقها.",
- "audio": "assets/audio/turtle3.mp3"
-}
-
+      "text":
+          "سارت معه حتى وصل إلى بيته. قال الأرنب: \"كنت أظن السلاحف فقط بطيئة!\" ولكنك ذكية وتعرفين ما تفعلين. ابتسمت السلحفاة وقالت: \"لا تحكم من الشكل!\" ومن يومها، أصبح الأرنب صديقها.",
+      "audio": "assets/audio/turtle3.mp3"
+    }
   ];
 
   Map<String, String> get currentSentence => sentences[currentSentenceIndex];
@@ -88,7 +91,8 @@ class _KaraokeSentenceArabicScreenState extends State<KaraokeSentenceArabicScree
         listenMode: stt.ListenMode.dictation,
         partialResults: true,
         listenFor: const Duration(seconds: 60),
-        pauseFor: const Duration(seconds: 6), // <-- Increased pause duration from 3 to 6 seconds
+        pauseFor: const Duration(
+            seconds: 6), // <-- Increased pause duration from 3 to 6 seconds
         onResult: (val) async {
           recognizedText = val.recognizedWords;
 
@@ -138,7 +142,8 @@ class _KaraokeSentenceArabicScreenState extends State<KaraokeSentenceArabicScree
 
     Map<String, bool> newResults = {};
     for (var word in expectedWords) {
-      newResults[word] = spokenWords.any((spoken) => levenshtein(word, spoken) <= 1);
+      newResults[word] =
+          spokenWords.any((spoken) => levenshtein(word, spoken) <= 1);
     }
 
     setState(() {
@@ -151,13 +156,25 @@ class _KaraokeSentenceArabicScreenState extends State<KaraokeSentenceArabicScree
     int correct = wordMatchResults.values.where((v) => v).length;
     int total = wordMatchResults.length;
     score = total > 0 ? (correct / total) * 100 : 0.0;
-    stars = (score >= 90) ? 3 : (score >= 60) ? 2 : (score > 0) ? 1 : 0;
+    stars = (score >= 90)
+        ? 3
+        : (score >= 60)
+            ? 2
+            : (score > 0)
+                ? 1
+                : 0;
 
     await saveKaraokeEvaluation(
       sentence: currentSentence["text"]!,
       recognizedText: recognizedText,
-      correctWords: wordMatchResults.entries.where((e) => e.value).map((e) => e.key).toList(),
-      wrongWords: wordMatchResults.entries.where((e) => !e.value).map((e) => e.key).toList(),
+      correctWords: wordMatchResults.entries
+          .where((e) => e.value)
+          .map((e) => e.key)
+          .toList(),
+      wrongWords: wordMatchResults.entries
+          .where((e) => !e.value)
+          .map((e) => e.key)
+          .toList(),
       score: score,
       stars: stars,
     );
@@ -205,10 +222,22 @@ class _KaraokeSentenceArabicScreenState extends State<KaraokeSentenceArabicScree
 
   void nextSentence() {
     setState(() {
-      if (currentSentenceIndex < sentences.length - 1) {
+      if (currentSentenceIndex < 2) {
         currentSentenceIndex++;
       } else {
-        currentSentenceIndex = 0;
+        // Go to FinalFeedbackScreen instead of showing a dialog
+        var totalStars = stars;
+        var totalScore = totalStars;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => FinalFeedbackScreenAr(
+              averageScore: totalScore / sentences.length,
+              totalStars: (totalStars / sentences.length).round(),
+              level: 'level1',
+            ),
+          ),
+        );
       }
       recognizedText = '';
       score = 0.0;
@@ -252,7 +281,9 @@ class _KaraokeSentenceArabicScreenState extends State<KaraokeSentenceArabicScree
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('🎤 كاريوكي - المستوى ١')),
+      appBar: AppBar(
+          title: const Text('🎤 كاريوكي - المستوى ١',
+              style: TextStyle(fontSize: 18))),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -263,7 +294,12 @@ class _KaraokeSentenceArabicScreenState extends State<KaraokeSentenceArabicScree
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4))],
+                boxShadow: [
+                  BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 8,
+                      offset: Offset(0, 4))
+                ],
               ),
               child: SingleChildScrollView(
                 child: RichText(
@@ -321,18 +357,15 @@ class _KaraokeSentenceArabicScreenState extends State<KaraokeSentenceArabicScree
 
 // Levenshtein Distance Helper
 int levenshtein(String s1, String s2) {
-  List<List<int>> dp = List.generate(
-      s1.length + 1, (_) => List.filled(s2.length + 1, 0));
+  List<List<int>> dp =
+      List.generate(s1.length + 1, (_) => List.filled(s2.length + 1, 0));
   for (int i = 0; i <= s1.length; i++) dp[i][0] = i;
   for (int j = 0; j <= s2.length; j++) dp[0][j] = j;
   for (int i = 1; i <= s1.length; i++) {
     for (int j = 1; j <= s2.length; j++) {
       int cost = s1[i - 1] == s2[j - 1] ? 0 : 1;
-      dp[i][j] = [
-        dp[i - 1][j] + 1,
-        dp[i][j - 1] + 1,
-        dp[i - 1][j - 1] + cost
-      ].reduce((a, b) => a < b ? a : b);
+      dp[i][j] = [dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + cost]
+          .reduce((a, b) => a < b ? a : b);
     }
   }
   return dp[s1.length][s2.length];

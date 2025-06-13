@@ -1,8 +1,11 @@
+// ignore_for_file: unused_local_variable
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ChildDifficultyAnalysisScreen extends StatefulWidget {
   const ChildDifficultyAnalysisScreen({Key? key}) : super(key: key);
@@ -63,16 +66,30 @@ class _ChildDifficultyAnalysisScreenState
 
       final parentId = user.uid;
 
-      final childrenSnapshot = await FirebaseFirestore.instance
+      // Get selected child ID from SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final selectedChildId = prefs.getString('selected_child_id');
+
+      if (selectedChildId == null) {
+        print('No selected child ID found.');
+        setState(() => _isLoading = false);
+        return;
+      }
+
+      // Fetch child document by the selectedChildId
+      final childDoc = await FirebaseFirestore.instance
           .collection('parents')
           .doc(parentId)
           .collection('children')
+          .doc(selectedChildId)
           .get();
 
-      if (childrenSnapshot.docs.isEmpty) return;
-
-      final childDoc = childrenSnapshot.docs.first;
-      final childId = childDoc.id;
+      if (!childDoc.exists) {
+        print('Selected child document does not exist.');
+        setState(() => _isLoading = false);
+        return;
+      }
+      final childId = selectedChildId;
       final childDataLocal = childDoc.data();
 
       final Map<String, List<String>> subjectLevels = {
@@ -98,7 +115,9 @@ class _ChildDifficultyAnalysisScreenState
       // For loading existing notes from Firestore
       Map<String, String> existingNotes = {};
 
-      // Load quiz attempts
+      // make sure this is assigned before use
+
+// Now use childId safely in your loops
       for (var subject in subjectLevels.keys) {
         for (var level in subjectLevels[subject]!) {
           final attemptsSnapshot = await FirebaseFirestore.instance
@@ -126,20 +145,6 @@ class _ChildDifficultyAnalysisScreenState
           }
 
           // Load parent notes per subject-level
-          final noteDoc = await FirebaseFirestore.instance
-              .collection('parents')
-              .doc(parentId)
-              .collection('children')
-              .doc(childId)
-              .collection('notes')
-              .doc('$subject-$level')
-              .get();
-
-          if (noteDoc.exists) {
-            existingNotes['$subject-$level'] = noteDoc.data()?['note'] ?? '';
-          } else {
-            existingNotes['$subject-$level'] = '';
-          }
         }
       }
 
@@ -205,19 +210,15 @@ class _ChildDifficultyAnalysisScreenState
       return;
     }
 
-    final childId = childrenSnapshot.docs.first.id;
+    final prefs = await SharedPreferences.getInstance();
+    final selectedChildId = prefs.getString('lastSelectedChildId');
+
+    if (selectedChildId == null) {
+      print('No selected child ID found in SharedPreferences.');
+      return;
+    }
 
     final key = '$subject-$level';
-    final noteText = _notesControllers[key]?.text ?? '';
-
-    await FirebaseFirestore.instance
-        .collection('parents')
-        .doc(parentId)
-        .collection('children')
-        .doc(childId)
-        .collection('notes')
-        .doc(key)
-        .set({'note': noteText});
   }
 
   // Severity helpers

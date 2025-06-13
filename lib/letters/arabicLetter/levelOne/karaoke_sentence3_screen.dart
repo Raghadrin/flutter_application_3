@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter_application_3/letters/arabicLetter/levelOne/FinalFeedbackScreenAr.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'evaluation2_screen.dart';
 
@@ -9,11 +10,12 @@ class KaraokeSentenceLevel3Screen extends StatefulWidget {
   const KaraokeSentenceLevel3Screen({super.key});
 
   @override
-  State<KaraokeSentenceLevel3Screen> createState() => _KaraokeSentenceLevel3ScreenState();
+  State<KaraokeSentenceLevel3Screen> createState() =>
+      _KaraokeSentenceLevel3ScreenState();
 }
 
-class _KaraokeSentenceLevel3ScreenState extends State<KaraokeSentenceLevel3Screen>
-    with TickerProviderStateMixin {
+class _KaraokeSentenceLevel3ScreenState
+    extends State<KaraokeSentenceLevel3Screen> with TickerProviderStateMixin {
   late AudioPlayer audioPlayer;
   late stt.SpeechToText speech;
   bool isListening = false;
@@ -29,15 +31,18 @@ class _KaraokeSentenceLevel3ScreenState extends State<KaraokeSentenceLevel3Scree
 
   final List<Map<String, String>> sentences = [
     {
-      "text": "كان سامر فتى ذكيًا يحب القراءة والعلوم. في يوم امتحان الرياضيات، رأى زميلًا يغش من ورقة طالب آخر. شعر بالارتباك، ولم يعرف كيف يتصرف. حاول التركيز، ولم يستطع.",
+      "text":
+          "كان سامر فتى ذكيًا يحب القراءة والعلوم. في يوم امتحان الرياضيات، رأى زميلًا يغش من ورقة طالب آخر. شعر بالارتباك، ولم يعرف كيف يتصرف. حاول التركيز، ولم يستطع.",
       "audio": "audio/samer1.mp3"
     },
     {
-      "text": "عاد سامر إلى المنزل وهو قلق. فكر كثيرًا: هل يخبر المعلمة أم يصمت؟ خاف أن يظن زملاؤه أنه واشٍ. بقي صامتًا أثناء العشاء، ولم يكن مستعدًا للكلام.",
+      "text":
+          "عاد سامر إلى المنزل وهو قلق. فكر كثيرًا: هل يخبر المعلمة أم يصمت؟ خاف أن يظن زملاؤه أنه واشٍ. بقي صامتًا أثناء العشاء، ولم يكن مستعدًا للكلام.",
       "audio": "audio/samer2.mp3"
     },
     {
-      "text": "في اليوم التالي، أخبر سامر المعلمة بما رأى. شكرته وقالت إنها ستتصرف بالشكل المناسب. تحدثت مع الطالب وشرحَت له أهمية الأمانة. ثم أخبرت سامرًا أن تصرفه كان شجاعًا، وأثنت عليه أمام زملائه. شعر سامر بالفخر، لأنه اختار الصدق ونال احترام الجميع.",
+      "text":
+          "في اليوم التالي، أخبر سامر المعلمة بما رأى. شكرته وقالت إنها ستتصرف بالشكل المناسب. تحدثت مع الطالب وشرحَت له أهمية الأمانة. ثم أخبرت سامرًا أن تصرفه كان شجاعًا، وأثنت عليه أمام زملائه. شعر سامر بالفخر، لأنه اختار الصدق ونال احترام الجميع.",
       "audio": "audio/samer3.mp3"
     }
   ];
@@ -123,9 +128,8 @@ class _KaraokeSentenceLevel3ScreenState extends State<KaraokeSentenceLevel3Scree
   void updateMatchedWords() {
     String expected = currentSentence["text"] ?? "";
 
-    List<String> expectedWords = expected
-        .replaceAll(RegExp(r'[^ء-ي\s]'), '')
-        .split(RegExp(r'\s+'));
+    List<String> expectedWords =
+        expected.replaceAll(RegExp(r'[^ء-ي\s]'), '').split(RegExp(r'\s+'));
 
     List<String> spokenWords = recognizedText
         .replaceAll(RegExp(r'[^ء-ي\s]'), '')
@@ -133,7 +137,8 @@ class _KaraokeSentenceLevel3ScreenState extends State<KaraokeSentenceLevel3Scree
 
     Map<String, bool> newResults = {};
     for (var word in expectedWords) {
-      newResults[word] = spokenWords.any((spoken) => levenshtein(word, spoken) <= 1);
+      newResults[word] =
+          spokenWords.any((spoken) => levenshtein(word, spoken) <= 1);
     }
 
     setState(() {
@@ -146,7 +151,13 @@ class _KaraokeSentenceLevel3ScreenState extends State<KaraokeSentenceLevel3Scree
     int correct = wordMatchResults.values.where((v) => v).length;
     int total = wordMatchResults.length;
     score = total > 0 ? (correct / total) * 100 : 0.0;
-    stars = (score >= 90) ? 3 : (score >= 60) ? 2 : (score > 0) ? 1 : 0;
+    stars = (score >= 90)
+        ? 3
+        : (score >= 60)
+            ? 2
+            : (score > 0)
+                ? 1
+                : 0;
 
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
@@ -172,28 +183,46 @@ class _KaraokeSentenceLevel3ScreenState extends State<KaraokeSentenceLevel3Scree
         .add({
       'sentence': currentSentence["text"]!,
       'recognizedText': recognizedText,
-      'correctWords': wordMatchResults.entries.where((e) => e.value).map((e) => e.key).toList(),
-      'wrongWords': wordMatchResults.entries.where((e) => !e.value).map((e) => e.key).toList(),
+      'correctWords': wordMatchResults.entries
+          .where((e) => e.value)
+          .map((e) => e.key)
+          .toList(),
+      'wrongWords': wordMatchResults.entries
+          .where((e) => !e.value)
+          .map((e) => e.key)
+          .toList(),
       'score': score,
       'stars': stars,
       'timestamp': FieldValue.serverTimestamp(),
     });
   }
+//FinalFeedbackScreenAr
 
   void nextSentence() {
     setState(() {
-      if (currentSentenceIndex < sentences.length - 1) {
+      if (currentSentenceIndex < 2) {
         currentSentenceIndex++;
       } else {
-        currentSentenceIndex = 0;
+        // Go to FinalFeedbackScreen instead of showing a dialog
+        var totalStars = stars;
+        var totalScore = totalStars;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => FinalFeedbackScreenAr(
+              averageScore: totalScore / sentences.length,
+              totalStars: (totalStars / sentences.length).round(),
+              level: 'level3',
+            ),
+          ),
+        );
       }
-      recognizedText = "";
+      recognizedText = '';
       score = 0.0;
       stars = 0;
       wordMatchResults.clear();
       spokenWordSequence.clear();
       matchedWordCount = 0;
-      isPlaying = false;
     });
   }
 
@@ -226,18 +255,15 @@ class _KaraokeSentenceLevel3ScreenState extends State<KaraokeSentenceLevel3Scree
   }
 
   int levenshtein(String s1, String s2) {
-    List<List<int>> dp = List.generate(
-        s1.length + 1, (_) => List.filled(s2.length + 1, 0));
+    List<List<int>> dp =
+        List.generate(s1.length + 1, (_) => List.filled(s2.length + 1, 0));
     for (int i = 0; i <= s1.length; i++) dp[i][0] = i;
     for (int j = 0; j <= s2.length; j++) dp[0][j] = j;
     for (int i = 1; i <= s1.length; i++) {
       for (int j = 1; j <= s2.length; j++) {
         int cost = s1[i - 1] == s2[j - 1] ? 0 : 1;
-        dp[i][j] = [
-          dp[i - 1][j] + 1,
-          dp[i][j - 1] + 1,
-          dp[i - 1][j - 1] + cost
-        ].reduce((a, b) => a < b ? a : b);
+        dp[i][j] = [dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + cost]
+            .reduce((a, b) => a < b ? a : b);
       }
     }
     return dp[s1.length][s2.length];
@@ -247,7 +273,9 @@ class _KaraokeSentenceLevel3ScreenState extends State<KaraokeSentenceLevel3Scree
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
-      appBar: AppBar(title: Text('🎤 كاريوكي - المستوى ٣')),
+      appBar: AppBar(
+          title:
+              Text('🎤 كاريوكي - المستوى ٣', style: TextStyle(fontSize: 18))),
       body: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(

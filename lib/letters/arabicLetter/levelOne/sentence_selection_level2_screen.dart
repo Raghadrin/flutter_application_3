@@ -95,15 +95,15 @@ class _ArabicLevel2HomeScreenState extends State<ArabicLevel2HomeScreen> {
             ],
           ),
           actions: [
-            IconButton(
-              icon: const Icon(Icons.language, color: Colors.black),
-              onPressed: () {
-                final newLocale = context.locale.languageCode == 'ar'
-                    ? const Locale('en')
-                    : const Locale('ar');
-                context.setLocale(newLocale);
-              },
-            )
+            // IconButton(
+            //   icon: const Icon(Icons.language, color: Colors.black),
+            //   onPressed: () {
+            //     final newLocale = context.locale.languageCode == 'ar'
+            //         ? const Locale('en')
+            //         : const Locale('ar');
+            //     context.setLocale(newLocale);
+            //   },
+            // )
           ],
         ),
         body: TabBarView(
@@ -135,7 +135,8 @@ class _ArabicLevel2HomeScreenState extends State<ArabicLevel2HomeScreen> {
                     title: tr(s["title"]!),
                     jsonPath: s["animation"]!,
                     onTap: () {
-                      _speak(context, "${tr(LocaleKeys.selectedPrefix)} ${tr(s["title"]!)}");
+                      _speak(context,
+                          "${tr(LocaleKeys.selectedPrefix)} ${tr(s["title"]!)}");
                       Navigator.push(
                         context,
                         MaterialPageRoute(

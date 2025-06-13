@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_3/letters/englishLetters/practice/final_feedback_screen.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'evaluation_english_screen.dart';
@@ -17,7 +18,8 @@ class KaraokeSentenceEnglishLevel3Screen extends StatefulWidget {
 }
 
 class _KaraokeSentenceEnglishLevel3ScreenState
-    extends State<KaraokeSentenceEnglishLevel3Screen> with TickerProviderStateMixin {
+    extends State<KaraokeSentenceEnglishLevel3Screen>
+    with TickerProviderStateMixin {
   final FlutterTts flutterTts = FlutterTts();
   late stt.SpeechToText speech;
   bool isListening = false;
@@ -140,7 +142,8 @@ class _KaraokeSentenceEnglishLevel3ScreenState
 
     Map<String, bool> newResults = {};
     for (var word in expectedWords) {
-      newResults[word] = spokenWords.any((spoken) => levenshtein(word, spoken) <= 1);
+      newResults[word] =
+          spokenWords.any((spoken) => levenshtein(word, spoken) <= 1);
     }
 
     setState(() {
@@ -155,10 +158,14 @@ class _KaraokeSentenceEnglishLevel3ScreenState
     score = total > 0 ? (correct / total) * 100 : 0.0;
     stars = score >= 90 ? 3 : (score >= 60 ? 2 : (score > 0 ? 1 : 0));
 
-    List<String> correctWords =
-        wordMatchResults.entries.where((e) => e.value).map((e) => e.key).toList();
-    List<String> wrongWords =
-        wordMatchResults.entries.where((e) => !e.value).map((e) => e.key).toList();
+    List<String> correctWords = wordMatchResults.entries
+        .where((e) => e.value)
+        .map((e) => e.key)
+        .toList();
+    List<String> wrongWords = wordMatchResults.entries
+        .where((e) => !e.value)
+        .map((e) => e.key)
+        .toList();
 
     await saveEvaluation(
       sentence: currentSentence["text"]!,
@@ -213,10 +220,22 @@ class _KaraokeSentenceEnglishLevel3ScreenState
 
   void nextSentence() {
     setState(() {
-      if (currentSentenceIndex < sentences.length - 1) {
+      if (currentSentenceIndex < 2) {
         currentSentenceIndex++;
       } else {
-        currentSentenceIndex = 0;
+        // Go to FinalFeedbackScreen instead of showing a dialog
+        var totalStars = stars;
+        var totalScore = totalStars;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => FinalFeedbackScreen(
+              averageScore: totalScore / sentences.length,
+              totalStars: (totalStars / sentences.length).round(),
+              level: 'level3',
+            ),
+          ),
+        );
       }
       recognizedText = '';
       score = 0.0;
@@ -272,7 +291,12 @@ class _KaraokeSentenceEnglishLevel3ScreenState
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4))],
+                boxShadow: [
+                  BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 8,
+                      offset: Offset(0, 4))
+                ],
               ),
               child: SingleChildScrollView(
                 child: RichText(
@@ -284,7 +308,8 @@ class _KaraokeSentenceEnglishLevel3ScreenState
             LinearProgressIndicator(
               value: (currentSentenceIndex + 1) / sentences.length,
               backgroundColor: Colors.grey[300],
-              valueColor: const AlwaysStoppedAnimation<Color>(Color.fromARGB(255, 109, 175, 252)),
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                  Color.fromARGB(255, 109, 175, 252)),
             ),
             const SizedBox(height: 20),
             ElevatedButton.icon(
@@ -328,18 +353,15 @@ class _KaraokeSentenceEnglishLevel3ScreenState
 
 // Levenshtein Distance Helper
 int levenshtein(String s1, String s2) {
-  List<List<int>> dp = List.generate(
-      s1.length + 1, (_) => List.filled(s2.length + 1, 0));
+  List<List<int>> dp =
+      List.generate(s1.length + 1, (_) => List.filled(s2.length + 1, 0));
   for (int i = 0; i <= s1.length; i++) dp[i][0] = i;
   for (int j = 0; j <= s2.length; j++) dp[0][j] = j;
   for (int i = 1; i <= s1.length; i++) {
     for (int j = 1; j <= s2.length; j++) {
       int cost = s1[i - 1] == s2[j - 1] ? 0 : 1;
-      dp[i][j] = [
-        dp[i - 1][j] + 1,
-        dp[i][j - 1] + 1,
-        dp[i - 1][j - 1] + cost
-      ].reduce((a, b) => a < b ? a : b);
+      dp[i][j] = [dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + cost]
+          .reduce((a, b) => a < b ? a : b);
     }
   }
   return dp[s1.length][s2.length];

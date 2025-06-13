@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CombinedChildPerformanceScreen extends StatefulWidget {
   final bool isDarkMode;
@@ -38,15 +39,27 @@ class _CombinedChildPerformanceScreenState
       if (user == null) return;
       final parentId = user.uid;
 
-      final childrenSnapshot = await FirebaseFirestore.instance
+      final prefs = await SharedPreferences.getInstance();
+      final selectedChildId = prefs.getString('lastSelectedChildId');
+
+      if (selectedChildId == null) {
+        print('No selected child ID found in SharedPreferences.');
+        return;
+      }
+
+      // Fetch the correct child using the saved ID
+      final childDoc = await FirebaseFirestore.instance
           .collection('parents')
           .doc(parentId)
           .collection('children')
+          .doc(selectedChildId)
           .get();
 
-      if (childrenSnapshot.docs.isEmpty) return;
+      if (!childDoc.exists) {
+        print('Selected child document does not exist.');
+        return;
+      }
 
-      final childDoc = childrenSnapshot.docs.first;
       final childId = childDoc.id;
       childData = childDoc.data();
 
