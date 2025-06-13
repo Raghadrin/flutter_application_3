@@ -46,6 +46,7 @@ class _EvaluationEnglishScreenState extends State<EvaluationEnglishScreen> {
           size: 16,
         ),
       );
+
   Widget buildCategoryAnalysisBox() {
     final categoryAnalysis = widget.categoryIssues;
 

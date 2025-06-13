@@ -96,7 +96,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           side: BorderSide(color: Colors.deepOrange, width: 2),
                         ),
                         const Text("Remember me",
-                            style: TextStyle(color: Colors.white)),
+                            style:
+                                TextStyle(color: Colors.white, fontSize: 12)),
                       ],
                     ),
                     TextButton(
@@ -107,7 +108,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 builder: (context) => ForgotPasswordPage()));
                       },
                       child: const Text("Forgot password?",
-                          style: TextStyle(color: Colors.white)),
+                          style: TextStyle(color: Colors.white, fontSize: 12)),
                     ),
                   ],
                 ),
