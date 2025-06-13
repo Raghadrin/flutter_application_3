@@ -66,9 +66,9 @@ class _FinalFeedbackScreenState extends State<FinalFeedbackScreen> {
   }
 
   String getFeedback() {
-    if (widget.averageScore >= 90) return "Excellent work!";
-    if (widget.averageScore >= 75) return "Great job! Keep it up.";
-    if (widget.averageScore >= 60) return "Good effort. Try improving.";
+    if (widget.averageScore * 100 >= 90) return "Excellent work!";
+    if (widget.averageScore * 100 >= 75) return "Great job! Keep it up.";
+    if (widget.averageScore * 100 >= 60) return "Good effort. Try improving.";
     return "Keep practicing, you'll get better!";
   }
 
@@ -211,7 +211,7 @@ class _FinalFeedbackScreenState extends State<FinalFeedbackScreen> {
             child: Column(
               children: [
                 Text(
-                  'Your Average Score: ${widget.averageScore.toStringAsFixed(1)}%',
+                  'Your Average Score: ${(widget.averageScore * 100).toStringAsFixed(1)}%',
                   style: const TextStyle(fontSize: 18),
                 ),
                 const SizedBox(height: 10),
