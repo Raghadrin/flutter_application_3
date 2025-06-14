@@ -4,10 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_3/letters/englishLetters/practice/evaluation_english_screen.dart';
 import 'package:flutter_application_3/letters/englishLetters/practice/final_feedback_screen.dart';
-//import 'package:flutter_application_3/letters/englishLetters/practice/final_feedback_screen.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
-//import 'evaluation_english_screen.dart';
 
 class KaraokeSentenceEnglishScreen extends StatefulWidget {
   const KaraokeSentenceEnglishScreen({super.key});
@@ -18,7 +16,8 @@ class KaraokeSentenceEnglishScreen extends StatefulWidget {
 }
 
 class _KaraokeSentenceEnglishScreenState
-    extends State<KaraokeSentenceEnglishScreen> with TickerProviderStateMixin {
+    extends State<KaraokeSentenceEnglishScreen>
+    with TickerProviderStateMixin {
   final FlutterTts flutterTts = FlutterTts();
   late stt.SpeechToText speech;
   bool isListening = false;
@@ -33,63 +32,168 @@ class _KaraokeSentenceEnglishScreenState
   Map<String, bool> wordMatchResults = {};
   List<String> spokenWordSequence = [];
   late Map<String, List<String>> categoryIssues;
-  Map<String, String> wordCategories = {
-    // School / Learning
-    "science": "School Vocabulary",
-    "fair": "School Vocabulary",
-    "materials": "School Vocabulary",
-    "school": "School Vocabulary",
-    "students": "School Vocabulary",
-    "teacher": "School Vocabulary",
-    "project": "School Vocabulary",
-    "presentation": "School Vocabulary",
-    "judges": "School Vocabulary",
-    "questions": "School Vocabulary",
 
-    // Actions (Verbs)
-    "woke": "Action Verbs",
-    "packed": "Action Verbs",
-    "checked": "Action Verbs",
-    "hurried": "Action Verbs",
-    "eat": "Action Verbs",
-    "heading": "Action Verbs",
-    "carried": "Action Verbs",
-    "greeted": "Action Verbs",
-    "joined": "Action Verbs",
-    "present": "Action Verbs",
-    "explained": "Action Verbs",
-    "listened": "Action Verbs",
-    "asked": "Action Verbs",
-    "felt": "Action Verbs",
-    "paid": "Action Verbs",
-    "learned": "Action Verbs",
-    "given": "Action Verbs",
-
-    // Emotions / Feelings
-    "excitement": "Emotions",
-    "confidently": "Emotions",
-    "proud": "Emotions",
-    "hard": "Emotions",
-    "best": "Emotions",
-
-    // Technology & Creativity
-    "robot": "Technology",
-    "inventions": "Technology",
-    "display": "Technology",
-    "chores": "Technology",
-    "posters": "Technology",
-
-    // Descriptive Words
-    "big": "Descriptive Words",
-    "colorful": "Descriptive Words",
-    "unique": "Descriptive Words",
-    "thoughtful": "Descriptive Words",
-    "early": "Descriptive Words",
-
-    // Time / Journey
-    "before": "Time",
-    "after": "Time",
-    "journey": "Time",
+  Map<String, Map<String, String>> wordCategoriesLevel1 = {
+    "after": {
+      "category": "Time",
+      "description": "Means something happens later.",
+    },
+    "all": {
+      "category": "Connectors/Other",
+      "description": "A helper word used often.",
+    },
+    "and": {
+      "category": "Connectors/Other",
+      "description": "A helper word used often.",
+    },
+    "asked": {
+      "category": "Action Verbs",
+      "description": "Means someone said a question.",
+    },
+    "at": {
+      "category": "Connectors/Other",
+      "description": "A helper word used often.",
+    },
+    "bag": {
+      "category": "Objects",
+      "description": "Something you carry your things in.",
+    },
+    "before": {
+      "category": "Time",
+      "description": "Means something happens earlier.",
+    },
+    "best": {
+      "category": "Descriptive Words",
+      "description": "Better than all the others.",
+    },
+    "big": {
+      "category": "Descriptive Words",
+      "description": "Means large in size.",
+    },
+    "breakfast": {
+      "category": "Daily Life",
+      "description": "The meal you eat in the morning.",
+    },
+    "buzzing": {
+      "category": "Connectors/Other",
+      "description": "A helper word used often.",
+    },
+    "unique": {
+      "category": "Descriptive Words",
+      "description": "Very special or one-of-a-kind.",
+    },
+    "up": {
+      "category": "Connectors/Other",
+      "description": "A helper word used often.",
+    },
+    "was": {
+      "category": "Connectors/Other",
+      "description": "A helper word used often.",
+    },
+    "were": {
+      "category": "Connectors/Other",
+      "description": "A helper word used often.",
+    },
+    "when": {
+      "category": "Connectors/Other",
+      "description": "A helper word used often.",
+    },
+    "with": {
+      "category": "Connectors/Other",
+      "description": "A helper word used often.",
+    },
+    "woke": {
+      "category": "Action Verbs",
+      "description": "Means you stopped sleeping.",
+    },
+    "work": {
+      "category": "Connectors/Other",
+      "description": "A helper word used often.",
+    },
+    "him": {
+      "category": "Connectors/Other",
+      "description": "A word that talks about a boy or man.",
+    },
+    "liam": {
+      "category": "People",
+      "description": "The main character in the story.",
+    },
+    "listened": {
+      "category": "Action Verbs",
+      "description": "Means you paid attention to sounds or someone talking.",
+    },
+    "materials": {
+      "category": "School Vocabulary",
+      "description": "Things you need to do a school project.",
+    },
+    "packed": {
+      "category": "Action Verbs",
+      "description": "Put things into a bag or box for taking somewhere.",
+    },
+    "paid": {
+      "category": "Action Verbs",
+      "description": "Means you gave something in return, like time or effort.",
+    },
+    "posters": {
+      "category": "Objects",
+      "description": "Large papers with pictures or writing used to show ideas.",
+    },
+    "present": {
+      "category": "Action Verbs",
+      "description": "To show or talk about something to others.",
+    },
+    "presentation": {
+      "category": "School Vocabulary",
+      "description": "When you explain your project to others.",
+    },
+    "project": {
+      "category": "School Vocabulary",
+      "description": "Work you do to show something you’ve learned.",
+    },
+    "proud": {
+      "category": "Descriptive Words",
+      "description": "A good feeling when you’ve done something well.",
+    },
+    "questions": {
+      "category": "School Vocabulary",
+      "description": "Things people ask to learn more.",
+    },
+    "result": {
+      "category": "School Vocabulary",
+      "description": "What happens at the end of something you do.",
+    },
+    "robot": {
+      "category": "Objects",
+      "description": "A machine that can do tasks, like a helper.",
+    },
+    "school": {
+      "category": "School Vocabulary",
+      "description": "A place where you go to learn.",
+    },
+    "science": {
+      "category": "School Vocabulary",
+      "description": "A subject where you learn about nature and how things work.",
+    },
+    "students": {
+      "category": "People",
+      "description": "Kids who go to school to learn.",
+    },
+    "teacher": {
+      "category": "People",
+      "description": "A person who helps you learn at school.",
+    },
+    "team": {
+      "category": "People",
+      "description": "A group of people working together.",
+    },
+    "thoughtful": {
+      "category": "Descriptive Words",
+      "description": "Kind and careful in thinking about others.",
+    },
+    "time": {
+      "category": "Time",
+      "description": "When something happens, like day or night.",
+    }
   };
 
   List<Map<String, String>> sentences = [
@@ -137,7 +241,8 @@ class _KaraokeSentenceEnglishScreenState
 
     wordMatchResults.forEach((word, isCorrect) {
       if (!isCorrect) {
-        String? category = wordCategories[word.toLowerCase()];
+        String? category =
+            wordCategoriesLevel1[word.toLowerCase()]?["category"];
         if (category != null) {
           categoryIssues.putIfAbsent(category, () => []).add(word);
         }
@@ -190,13 +295,12 @@ class _KaraokeSentenceEnglishScreenState
                   recognizedText: recognizedText,
                   score: score,
                   stars: stars,
-                  level: 'level1',
                   wordMatchResults: wordMatchResults,
                   onNext: () {
                     Navigator.pop(context);
                     nextSentence();
                   },
-                  categoryIssues: categoryIssues,
+                  wordCategories: wordCategoriesLevel1,  // ← new required parameter
                 ),
               ),
             );
@@ -298,18 +402,15 @@ class _KaraokeSentenceEnglishScreenState
 
   void nextSentence() {
     setState(() {
-      if (currentSentenceIndex < 2) {
+      if (currentSentenceIndex < sentences.length - 1) {
         currentSentenceIndex++;
       } else {
-        // Go to FinalFeedbackScreen instead of showing a dialog
-        var totalStars = stars;
-        var totalScore = totalStars;
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (_) => FinalFeedbackScreen(
-              averageScore: totalScore / sentences.length,
-              totalStars: (totalStars / sentences.length).round(),
+              averageScore: score / sentences.length,
+              totalStars: (stars / sentences.length).round(),
               level: 'level1',
             ),
           ),

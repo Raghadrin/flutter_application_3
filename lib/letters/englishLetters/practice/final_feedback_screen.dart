@@ -115,7 +115,7 @@ class _FinalFeedbackScreenState extends State<FinalFeedbackScreen> {
                 barTouchData: BarTouchData(
                   enabled: true,
                   touchTooltipData: BarTouchTooltipData(
-                    tooltipBgColor: Colors.deepPurpleAccent.withOpacity(0.8),
+                    //tooltipBgColor: Colors.deepPurpleAccent.withOpacity(0.8),
                     getTooltipItem: (group, groupIndex, rod, rodIndex) {
                       return BarTooltipItem(
                         '${rod.toY.toStringAsFixed(1)}%',

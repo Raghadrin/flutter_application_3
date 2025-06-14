@@ -2,10 +2,10 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_3/letters/englishLetters/practice/evaluation_english_screen.dart';
 import 'package:flutter_application_3/letters/englishLetters/practice/final_feedback_screen.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
-import 'evaluation_english_screen.dart';
 
 class KaraokeSentenceEnglishLevel2Screen extends StatefulWidget {
   const KaraokeSentenceEnglishLevel2Screen({super.key});
@@ -32,23 +32,110 @@ class _KaraokeSentenceEnglishLevel2ScreenState
   Map<String, bool> wordMatchResults = {};
   List<String> spokenWordSequence = [];
   late Map<String, List<String>> categoryIssues;
+final Map<String, Map<String, String>> wordCategoriesLevel2 = {
+  // People
+  "maya":        {"category": "People",           "description": "The girl in the story."},
+  "parents":     {"category": "People",           "description": "Mom and Dad."},
 
-  final Map<String, String> wordCategories = {
-    'school': 'Places',
-    'window': 'Objects',
-    'umbrella': 'Objects',
-    'cat': 'Animals',
-    'rain': 'Weather',
-    'bench': 'Places',
-    'parents': 'People',
-    'home': 'Places',
-    'sunny': 'Weather',
-    'puddles': 'Nature',
-    'clouds': 'Weather',
-    'sky': 'Nature',
-    'face': 'Body Parts',
-    'story': 'Concepts',
-  };
+  // Animals
+  "cat":         {"category": "Animals",          "description": "A small pet that says 'meow.'"},
+  "sunny":       {"category": "Weather",          "description": "Full of sunshine."},  // name of the cat
+
+  // Objects
+  "window":      {"category": "Objects",          "description": "An opening in a wall to see outside."},
+  "umbrella":    {"category": "Objects",          "description": "Something you use to stay dry in rain."},
+  "bench":       {"category": "Places",           "description": "A seat for two or more people."},
+  "face":        {"category": "Body Parts",       "description": "The front part of your head."},
+  "feet":        {"category": "Body Parts",       "description": "Parts at the end of your legs you stand on."},
+  "light":       {"category": "Objects",          "description": "Brightness that helps you see."},
+  
+  // Weather
+  "clouds":      {"category": "Weather",          "description": "White or gray things in the sky."},
+  "rain":        {"category": "Weather",          "description": "Water drops falling from clouds."},
+  "raindrops":   {"category": "Weather",          "description": "Individual drops of rain."},
+  "puddles":     {"category": "Nature",           "description": "Small pools of water on the ground."},
+  "rainy":       {"category": "Weather",          "description": "Having rain."},
+
+  // Nature
+  "sky":         {"category": "Nature",           "description": "The space above the earth."},
+  "breeze":      {"category": "Nature",           "description": "A gentle wind."},
+
+  // Places
+  "outside":     {"category": "Places",           "description": "The area not inside a building."},
+  "sidewalk":    {"category": "Places",           "description": "A path on the side of a street for walking."},
+  "home":        {"category": "Places",           "description": "Where you live."},
+
+  // Time
+  "soon":        {"category": "Time",             "description": "Happening not long after now."},
+  "suddenly":    {"category": "Time",             "description": "Happening very quickly without warning."},
+  "day":         {"category": "Time",             "description": "The time from sunrise to sunset."},
+  "night":       {"category": "Time",             "description": "The time between evening and morning."},
+
+  // Descriptive Words
+  "gray":        {"category": "Descriptive Words","description": "A color between black and white."},
+  "bright":      {"category": "Descriptive Words","description": "Full of light or vivid color."},
+  "yellow":      {"category": "Descriptive Words","description": "A bright color like the sun."},
+  "wet":         {"category": "Descriptive Words","description": "Covered in water or liquid."},
+  "gently":      {"category": "Descriptive Words","description": "In a soft or light way."},
+  "cool":        {"category": "Descriptive Words","description": "A little bit cold."},
+  "small":       {"category": "Descriptive Words","description": "Little in size."},
+  "whole":       {"category": "Descriptive Words","description": "All of something."},
+
+  // Action Verbs
+  "looked":      {"category": "Action Verbs",     "description": "Used her eyes to see something."},
+  "saw":         {"category": "Action Verbs",     "description": "Used eyes to notice something."},
+  "gathering":   {"category": "Action Verbs",     "description": "Coming together in one place."},
+  "knew":        {"category": "Action Verbs",     "description": "Understood or remembered something."},
+  "reached":     {"category": "Action Verbs",     "description": "Stretched out her hand to get something."},
+  "hurried":     {"category": "Action Verbs",     "description": "Moved very fast."},
+  "stepped":     {"category": "Action Verbs",     "description": "Put her foot down to walk."},
+  "began":       {"category": "Action Verbs",     "description": "Started to happen or do something."},
+  "fall":        {"category": "Action Verbs",     "description": "Move downward quickly."},
+  "smiled":      {"category": "Action Verbs",     "description": "Made a happy face."},
+  "jumped":      {"category": "Action Verbs",     "description": "Pushed off the ground to move up."},
+  "echoed":      {"category": "Action Verbs",     "description": "Made a sound that bounced back."},
+  "noticed":     {"category": "Action Verbs",     "description": "Saw something and paid attention."},
+  "shivering":   {"category": "Action Verbs",     "description": "Shaking because of cold or fear."},
+  "bent":        {"category": "Action Verbs",     "description": "Moved your body forward or down."},
+  "shared":      {"category": "Action Verbs",     "description": "Gave part of something to someone else."},
+  "covering":    {"category": "Action Verbs",     "description": "Putting something over to protect."},
+  "told":        {"category": "Action Verbs",     "description": "Said something to someone."},
+  "decided":     {"category": "Action Verbs",     "description": "Chose what to do."},
+  "keep":        {"category": "Action Verbs",     "description": "Allowed to stay or be owned."},
+  "naming":      {"category": "Action Verbs",     "description": "Giving a name to someone or something."},
+  "bringing":    {"category": "Action Verbs",     "description": "Carrying something along."},
+  "reach":       {"category": "Action Verbs",     "description": "Get to something you want."},
+
+  // Action Nouns
+  "splashes":    {"category": "Action Nouns",     "description": "Sounds or movements of water hitting something."},
+  "feeling":     {"category": "Action Nouns",     "description": "Experiencing a sensation or emotion."},
+
+  // Nouns / Concepts
+  "hesitation":  {"category": "Nouns",            "description": "A pause before doing something."},
+  "story":       {"category": "Concepts",         "description": "A tale with characters and events."},
+  "where":       {"category": "Concepts",         "description": "Used to ask about a place."},
+
+  // Connectors / Other
+  "and":         {"category": "Connectors/Other", "description": "A helper word used often."},
+  "as":          {"category": "Connectors/Other", "description": "A helper word used often."},
+  "at":          {"category": "Connectors/Other", "description": "A helper word used often."},
+  "a":           {"category": "Connectors/Other", "description": "A helper word used often."},
+  "about":       {"category": "Connectors/Other", "description": "A helper word used often."},
+  "in":          {"category": "Connectors/Other", "description": "A helper word used often."},
+  "into":        {"category": "Connectors/Other", "description": "A helper word used often."},
+  "onto":        {"category": "Connectors/Other", "description": "A helper word used often."},
+  "over":        {"category": "Connectors/Other", "description": "A helper word used often."},
+  "under":       {"category": "Connectors/Other", "description": "A helper word used often."},
+  "out":         {"category": "Connectors/Other", "description": "A helper word used often."},
+  "without":     {"category": "Connectors/Other", "description": "Not having something."},
+  "from":        {"category": "Connectors/Other", "description": "A helper word used often."},
+  "them":        {"category": "Connectors/Other", "description": "A word that talks about more than one person."},
+  "both":        {"category": "Connectors/Other", "description": "Meaning two together."},
+  "so":          {"category": "Connectors/Other", "description": "A helper word used often."},
+  "that":        {"category": "Connectors/Other", "description": "A helper word used often."},
+  "would":      {"category": "Connectors/Other", "description": "Shows something likely to happen."},
+  "he":         {"category": "Connectors/Other", "description": "A word that talks about a boy or man."},
+};
 
   List<Map<String, String>> sentences = [
     {
@@ -104,13 +191,13 @@ class _KaraokeSentenceEnglishLevel2ScreenState
                 recognizedText: recognizedText,
                 score: score,
                 stars: stars,
-                level: 'level2',
                 wordMatchResults: wordMatchResults,
                 onNext: () {
                   Navigator.pop(context);
                   nextSentence();
                 },
-                categoryIssues: categoryIssues,
+                wordCategories:
+                    wordCategoriesLevel2, // ← new required parameter
               ),
             ),
           );
@@ -242,7 +329,8 @@ class _KaraokeSentenceEnglishLevel2ScreenState
 
     wordMatchResults.forEach((word, isCorrect) {
       if (!isCorrect) {
-        String? category = wordCategories[word.toLowerCase()];
+        var wordInfo = wordCategoriesLevel2[word.toLowerCase()];
+        String? category = wordInfo != null ? wordInfo['category'] : null;
         if (category != null) {
           categoryIssues.putIfAbsent(category, () => []).add(word);
         }
@@ -254,18 +342,15 @@ class _KaraokeSentenceEnglishLevel2ScreenState
 
   void nextSentence() {
     setState(() {
-      if (currentSentenceIndex < 2) {
+      if (currentSentenceIndex < sentences.length - 1) {
         currentSentenceIndex++;
       } else {
-        // Go to FinalFeedbackScreen instead of showing a dialog
-        var totalStars = stars;
-        var totalScore = totalStars;
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (_) => FinalFeedbackScreen(
-              averageScore: totalScore / sentences.length,
-              totalStars: (totalStars / sentences.length).round(),
+              averageScore: score / sentences.length,
+              totalStars: (stars / sentences.length).round(),
               level: 'level2',
             ),
           ),

@@ -1,13 +1,11 @@
-// karaoke_sentence_english_level3_screen.dart
-
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_application_3/letters/englishLetters/practice/evaluation_english_screen.dart';
 import 'package:flutter_application_3/letters/englishLetters/practice/final_feedback_screen.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
-import 'evaluation_english_screen.dart';
 
 class KaraokeSentenceEnglishLevel3Screen extends StatefulWidget {
   const KaraokeSentenceEnglishLevel3Screen({super.key});
@@ -34,54 +32,320 @@ class _KaraokeSentenceEnglishLevel3ScreenState
   Map<String, bool> wordMatchResults = {};
   List<String> spokenWordSequence = [];
   late Map<String, List<String>> categoryIssues;
-  Map<String, String> wordCategories = {
-    // Space & Astronomy
-    "space": "Space Vocabulary",
-    "exploration": "Space Vocabulary",
-    "rockets": "Space Vocabulary",
-    "planets": "Space Vocabulary",
-    "astronauts": "Space Vocabulary",
-    "gravity": "Space Vocabulary",
-    "station": "Space Vocabulary",
-    "moon": "Space Vocabulary",
-    "earth": "Space Vocabulary",
-    "astronaut": "Space Vocabulary",
-    "stars": "Space Vocabulary",
 
-    // Descriptive Adjectives
-    "big": "Descriptive Words",
-    "rocky": "Descriptive Words",
-    "small": "Descriptive Words",
-    "blue": "Descriptive Words",
-    "amazed": "Descriptive Words",
-    "twinkled": "Descriptive Words",
-    "distant": "Descriptive Words",
+final Map<String, Map<String, String>> wordCategoriesLevel3 = {
+  // Space & Astronomy Vocabulary
+  "space": {
+    "category": "Space Vocabulary",
+    "description": "The area beyond Earth’s atmosphere.",
+  },
+  "exploration": {
+    "category": "Space Vocabulary",
+    "description": "The act of traveling to discover new places.",
+  },
+  "rockets": {
+    "category": "Space Vocabulary",
+    "description": "Vehicles that launch into space.",
+  },
+  "planets": {
+    "category": "Space Vocabulary",
+    "description": "Large objects that orbit a star.",
+  },
+  "astronauts": {
+    "category": "Space Vocabulary",
+    "description": "People trained to travel in space.",
+  },
+  "gravity": {
+    "category": "Space Vocabulary",
+    "description": "The force that pulls objects toward each other.",
+  },
+  "station": {
+    "category": "Space Vocabulary",
+    "description": "A place in space where people live and work.",
+  },
+  "moon": {
+    "category": "Space Vocabulary",
+    "description": "A natural object that orbits Earth.",
+  },
+  "earth": {
+    "category": "Space Vocabulary",
+    "description": "The planet we live on.",
+  },
+  "astronaut": {
+    "category": "Space Vocabulary",
+    "description": "A person who travels in space.",
+  },
+  "stars": {
+    "category": "Space Vocabulary",
+    "description": "Huge balls of burning gas in the sky.",
+  },
 
-    // Actions (Verbs)
-    "opened": "Action Verbs",
-    "saw": "Action Verbs",
-    "flying": "Action Verbs",
-    "floating": "Action Verbs",
-    "showed": "Action Verbs",
-    "shared": "Action Verbs",
-    "explained": "Action Verbs",
-    "trained": "Action Verbs",
-    "protected": "Action Verbs",
-    "dreamed": "Action Verbs",
-    "reach": "Action Verbs",
+  // Descriptive Adjectives
+  "big": {
+    "category": "Descriptive Words",
+    "description": "Very large in size.",
+  },
+  "rocky": {
+    "category": "Descriptive Words",
+    "description": "Covered with rocks or made of rock.",
+  },
+  "small": {
+    "category": "Descriptive Words",
+    "description": "Little in size.",
+  },
+  "blue": {
+    "category": "Descriptive Words",
+    "description": "A color like the sky on a clear day.",
+  },
+  "amazed": {
+    "category": "Descriptive Words",
+    "description": "Feeling surprised and happy.",
+  },
+  "twinkled": {
+    "category": "Descriptive Words",
+    "description": "Shined with a soft, sparkling light.",
+  },
+  "distant": {
+    "category": "Descriptive Words",
+    "description": "Far away.",
+  },
 
-    // School / Learning
-    "book": "School Vocabulary",
-    "class": "School Vocabulary",
-    "friends": "School Vocabulary",
-    "learned": "School Vocabulary",
-    "learn": "School Vocabulary",
+  // Actions (Verbs)
+  "opened": {
+    "category": "Action Verbs",
+    "description": "Made something accessible by moving a part.",
+  },
+  "saw": {
+    "category": "Action Verbs",
+    "description": "Used eyes to notice something.",
+  },
+  "flying": {
+    "category": "Action Verbs",
+    "description": "Moving through the air.",
+  },
+  "floating": {
+    "category": "Action Verbs",
+    "description": "Staying on or near the surface of a liquid or air.",
+  },
+  "showed": {
+    "category": "Action Verbs",
+    "description": "Made something visible to others.",
+  },
+  "shared": {
+    "category": "Action Verbs",
+    "description": "Gave part of something to others.",
+  },
+  "explained": {
+    "category": "Action Verbs",
+    "description": "Told how something works.",
+  },
+  "trained": {
+    "category": "Action Verbs",
+    "description": "Practiced to get better at something.",
+  },
+  "protected": {
+    "category": "Action Verbs",
+    "description": "Kept safe from harm.",
+  },
+  "dreamed": {
+    "category": "Action Verbs",
+    "description": "Thought about something while sleeping.",
+  },
+  "reach": {
+    "category": "Action Verbs",
+    "description": "Get to something you want.",
+  },
 
-    // Miscellaneous
-    "suits": "Clothing",
-    "night": "Time",
-    "cheering": "Emotion/Support",
-  };
+  // School / Learning Vocabulary
+  "book": {
+    "category": "School Vocabulary",
+    "description": "A set of written pages bound together.",
+  },
+  "class": {
+    "category": "School Vocabulary",
+    "description": "A lesson or group gathering to learn.",
+  },
+  "friends": {
+    "category": "School Vocabulary",
+    "description": "People you like to spend time with.",
+  },
+  "learned": {
+    "category": "School Vocabulary",
+    "description": "Understood and remembered new information.",
+  },
+  "learn": {
+    "category": "School Vocabulary",
+    "description": "To get new knowledge or skills.",
+  },
+
+  // Clothing Vocabulary
+  "suits": {
+    "category": "Clothing",
+    "description": "Special outfits worn for protection or formal events.",
+  },
+
+  // Time Vocabulary
+  "night": {
+    "category": "Time",
+    "description": "The time between evening and morning.",
+  },
+
+  // Emotion / Support Vocabulary
+  "cheering": {
+    "category": "Emotion/Support",
+    "description": "Showing happiness and encouragement.",
+  },
+
+  // Connectors & Others
+  "a": {
+    "category": "Connectors/Other",
+    "description": "A helper word used often.",
+  },
+  "about": {
+    "category": "Connectors/Other",
+    "description": "A helper word used often.",
+  },
+  "he": {
+    "category": "Connectors/Other",
+    "description": "A word that talks about a boy or man.",
+  },
+  "to": {
+    "category": "Connectors/Other",
+    "description": "A helper word used often.",
+  },
+  "inside": {
+    "category": "Connectors/Other",
+    "description": "A helper word used often.",
+  },
+  "of": {
+    "category": "Connectors/Other",
+    "description": "A helper word used often.",
+  },
+  "in": {
+    "category": "Connectors/Other",
+    "description": "A helper word used often.",
+  },
+  "zero": {
+    "category": "Descriptive Words",
+    "description": "The number 0.",
+  },
+  "one": {
+    "category": "Connectors/Other",
+    "description": "The number 1 or a single item.",
+  },
+  "picture": {
+    "category": "Concepts",
+    "description": "An image or drawing.",
+  },
+  "surface": {
+    "category": "Descriptive Words",
+    "description": "The outer layer of something.",
+  },
+  "another": {
+    "category": "Connectors/Other",
+    "description": "One more or different.",
+  },
+  "looking": {
+    "category": "Action Verbs",
+    "description": "Used eyes to see attentively.",
+  },
+  "far": {
+    "category": "Descriptive Words",
+    "description": "At a great distance.",
+  },
+  "away": {
+    "category": "Connectors/Other",
+    "description": "A helper word used often.",
+  },
+  "sami": {
+    "category": "People",
+    "description": "The main character in the story.",
+  },
+  "was": {
+    "category": "Connectors/Other",
+    "description": "A helper word used often.",
+  },
+  "wanted": {
+    "category": "Action Verbs",
+    "description": "Desired to have or do something.",
+  },
+  "more": {
+    "category": "Connectors/Other",
+    "description": "An additional amount.",
+  },
+  "back": {
+    "category": "Connectors/Other",
+    "description": "A helper word used often.",
+  },
+  "what": {
+    "category": "Concepts",
+    "description": "Used to ask about something.",
+  },
+  "with": {
+    "category": "Connectors/Other",
+    "description": "A helper word used often.",
+  },
+  "his": {
+    "category": "Connectors/Other",
+    "description": "A word showing something belongs to a boy or man.",
+  },
+  "how": {
+    "category": "Concepts",
+    "description": "Used to ask the way or method of something.",
+  },
+  "their": {
+    "category": "Connectors/Other",
+    "description": "A word showing something belongs to them.",
+  },
+  "becoming": {
+    "category": "Action Verbs",
+    "description": "Turning into or starting to be something.",
+  },
+  "an": {
+    "category": "Connectors/Other",
+    "description": "A helper word used often.",
+  },
+  "above": {
+    "category": "Concepts",
+    "description": "At a higher position.",
+  },
+  "as": {
+    "category": "Connectors/Other",
+    "description": "A helper word used often.",
+  },
+  "if": {
+    "category": "Connectors/Other",
+    "description": "A helper word used often.",
+  },
+  "they": {
+    "category": "Connectors/Other",
+    "description": "A word that talks about a group of people.",
+  },
+  "him": {
+    "category": "Connectors/Other",
+    "description": "A word that talks about a boy or man.",
+  },
+  "on": {
+    "category": "Connectors/Other",
+    "description": "A helper word used often.",
+  },
+  "knew": {
+    "category": "Action Verbs",
+    "description": "Understood or remembered something.",
+  },
+  "day": {
+    "category": "Time",
+    "description": "The time from sunrise to sunset.",
+  },
+  "would": {
+    "category": "Connectors/Other",
+    "description": "Shows something likely to happen.",
+  },
+  "them": {
+    "category": "Connectors/Other",
+    "description": "A word that talks about more than one person.",
+  }
+};
 
   List<Map<String, String>> sentences = [
     {
@@ -123,21 +387,6 @@ class _KaraokeSentenceEnglishLevel3ScreenState
     }
   }
 
-  Map<String, List<String>> getCategoryAnalysis() {
-    Map<String, List<String>> categoryIssues = {};
-
-    wordMatchResults.forEach((word, isCorrect) {
-      if (!isCorrect) {
-        String? category = wordCategories[word.toLowerCase()];
-        if (category != null) {
-          categoryIssues.putIfAbsent(category, () => []).add(word);
-        }
-      }
-    });
-
-    return categoryIssues;
-  }
-
   Future<void> startListening() async {
     bool available = await speech.initialize(
       onStatus: (val) => setState(() => isListening = val != 'done'),
@@ -177,13 +426,12 @@ class _KaraokeSentenceEnglishLevel3ScreenState
                   recognizedText: recognizedText,
                   score: score,
                   stars: stars,
-                  level: 'level3',
                   wordMatchResults: wordMatchResults,
                   onNext: () {
                     Navigator.pop(context);
                     nextSentence();
                   },
-                  categoryIssues: categoryIssues,
+                  wordCategories:wordCategoriesLevel3, // ← new required parameter
                 ),
               ),
             );
@@ -284,20 +532,33 @@ class _KaraokeSentenceEnglishLevel3ScreenState
     }
   }
 
+  Map<String, List<String>> getCategoryAnalysis() {
+    Map<String, List<String>> categoryIssues = {};
+
+    wordMatchResults.forEach((word, isCorrect) {
+      if (!isCorrect) {
+        Map<String, String>? wordInfo = wordCategoriesLevel3[word.toLowerCase()];
+        String? category = wordInfo?['category'];
+        if (category != null) {
+          categoryIssues.putIfAbsent(category, () => []).add(word);
+        }
+      }
+    });
+
+    return categoryIssues;
+  }
+
   void nextSentence() {
     setState(() {
-      if (currentSentenceIndex < 2) {
+      if (currentSentenceIndex < sentences.length - 1) {
         currentSentenceIndex++;
       } else {
-        // Go to FinalFeedbackScreen instead of showing a dialog
-        var totalStars = stars;
-        var totalScore = totalStars;
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (_) => FinalFeedbackScreen(
-              averageScore: totalScore / sentences.length,
-              totalStars: (totalStars / sentences.length).round(),
+              averageScore: score / sentences.length,
+              totalStars: (stars / sentences.length).round(),
               level: 'level3',
             ),
           ),
@@ -417,7 +678,7 @@ class _KaraokeSentenceEnglishLevel3ScreenState
   }
 }
 
-// Levenshtein Distance Helper
+ // Levenshtein Distance Helper
 int levenshtein(String s1, String s2) {
   List<List<int>> dp =
       List.generate(s1.length + 1, (_) => List.filled(s2.length + 1, 0));
