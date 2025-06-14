@@ -21,6 +21,53 @@ class PracticeMispronouncedScreen extends StatefulWidget {
       _PracticeMispronouncedScreenState();
 }
 
+class _CircleButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final Color iconColor;
+  final Color textColor;
+  final VoidCallback onTap;
+
+  const _CircleButton({
+    Key? key,
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.iconColor,
+    required this.textColor,
+    required this.onTap,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Material(
+          color: color,
+          shape: const CircleBorder(),
+          child: InkWell(
+            customBorder: const CircleBorder(),
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.all(18.0),
+              child: Icon(icon, size: 32, color: iconColor),
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          label,
+          style: TextStyle(
+            color: textColor,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _PracticeMispronouncedScreenState
     extends State<PracticeMispronouncedScreen>
     with TickerProviderStateMixin {
@@ -33,7 +80,6 @@ class _PracticeMispronouncedScreenState
   int? _wordScore;
   int? _wordStars;
 
-  /// Collect every mis-pronounced word's category
   final Set<String> _mistakeCategories = {};
 
   final List<String> _encourage = [
@@ -117,7 +163,9 @@ class _PracticeMispronouncedScreenState
   void _showBanner(String msg, {bool success = false}) async {
     final entry = OverlayEntry(builder: (_) {
       return Positioned(
-        bottom: 0, left: 0, right: 0,
+        bottom: 0,
+        left: 0,
+        right: 0,
         child: SlideTransition(
           position: _fbOffset,
           child: Material(
@@ -185,9 +233,35 @@ class _PracticeMispronouncedScreenState
       body: SafeArea(
         child: Column(
           children: [
-            const Spacer(flex: 2),
+            const Spacer(),
 
-            // Category + description
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 32),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade100,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.record_voice_over, size: 32, color: Colors.blue.shade600),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      "Let's practice together! Say the word clearly and slowly.",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue.shade800,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const Spacer(),
+
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 32),
               padding: const EdgeInsets.all(12),
@@ -198,8 +272,7 @@ class _PracticeMispronouncedScreenState
               child: Column(
                 children: [
                   Text(_category,
-                      style: const TextStyle(
-                          fontSize: 20, fontWeight: FontWeight.bold)),
+                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                   if (_description.isNotEmpty) ...[
                     const SizedBox(height: 4),
                     Text(_description, style: const TextStyle(fontSize: 16)),
@@ -207,62 +280,24 @@ class _PracticeMispronouncedScreenState
                 ],
               ),
             ),
+
             const SizedBox(height: 24),
 
-            // Word card
             Card(
               elevation: 4,
               margin: const EdgeInsets.symmetric(horizontal: 32),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16)),
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
                 child: Text(_word,
-                    textAlign: TextAlign.center,
                     style: const TextStyle(
                         fontSize: 36, fontWeight: FontWeight.bold)),
               ),
             ),
-            const SizedBox(height: 16),
 
-            // “You said”
-            if (_lastResult.isNotEmpty) ...[
-              const Text('You said:',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600)),
-              const SizedBox(height: 4),
-              Text(_lastResult,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                      fontSize: 22, fontStyle: FontStyle.italic)),
-              const SizedBox(height: 16),
-            ],
+            const Spacer(),
 
-            // Score & stars
-            if (_wordScore != null && _wordStars != null) ...[
-              Text('Score: $_wordScore%',
-                  style: const TextStyle(
-                      fontSize: 20, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 4),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  3,
-                  (i) => Icon(
-                      i < _wordStars! ? Icons.star : Icons.star_border),
-                ),
-              ),
-              const SizedBox(height: 16),
-            ],
-
-            // Encouragement
-            Text(_enc,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                    fontSize: 22, fontStyle: FontStyle.italic)),
-            const SizedBox(height: 24),
-
-            // Play & Record buttons
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -285,67 +320,22 @@ class _PracticeMispronouncedScreenState
                 ),
               ],
             ),
-            const Spacer(flex: 3),
 
-            // Next
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32),
-              child: ElevatedButton(
-                onPressed: _next,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange.shade400,
-                  minimumSize: const Size.fromHeight(52),
-                  textStyle: const TextStyle(fontSize: 20),
-                ),
-                child: const Text('Next'),
+            const Spacer(),
+
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange.shade400,
+                minimumSize: const Size.fromHeight(52),
               ),
+              onPressed: _next,
+              child: const Text('Next', style: TextStyle(fontSize: 20)),
             ),
+
             const SizedBox(height: 24),
           ],
         ),
       ),
-    );
-  }
-}
-
-/// A circular button with icon + label underneath
-class _CircleButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color color, iconColor, textColor;
-  final VoidCallback onTap;
-
-  const _CircleButton({
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.iconColor,
-    required this.textColor,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        GestureDetector(
-          onTap: onTap,
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: iconColor, size: 32),
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(label,
-            style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: textColor)),
-      ],
     );
   }
 }
