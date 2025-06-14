@@ -32,6 +32,7 @@ class _KaraokeSentenceEnglishLevel2ScreenState
   Map<String, bool> wordMatchResults = {};
   List<String> spokenWordSequence = [];
   late Map<String, List<String>> categoryIssues;
+
 final Map<String, Map<String, String>> wordCategoriesLevel2 = {
   // People
   "maya":        {"category": "People",           "description": "The girl in the story."},
@@ -136,7 +137,6 @@ final Map<String, Map<String, String>> wordCategoriesLevel2 = {
   "would":      {"category": "Connectors/Other", "description": "Shows something likely to happen."},
   "he":         {"category": "Connectors/Other", "description": "A word that talks about a boy or man."},
 };
-
   List<Map<String, String>> sentences = [
     {
       "text":
@@ -193,11 +193,10 @@ final Map<String, Map<String, String>> wordCategoriesLevel2 = {
                 stars: stars,
                 wordMatchResults: wordMatchResults,
                 onNext: () {
-                  Navigator.pop(context);
-                  nextSentence();
+                  Navigator.pop(context); // إغلاق شاشة التقييم
+                  nextSentence(); // الانتقال للجملة التالية أو شاشة النهاية
                 },
-                wordCategories:
-                    wordCategoriesLevel2, // ← new required parameter
+                wordCategories: wordCategoriesLevel2,
               ),
             ),
           );
