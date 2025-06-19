@@ -235,6 +235,7 @@ class _PracticeMispronouncedScreenState
           children: [
             const Spacer(),
 
+            // Instruction box
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 32),
               padding: const EdgeInsets.all(12),
@@ -262,6 +263,7 @@ class _PracticeMispronouncedScreenState
 
             const Spacer(),
 
+            // Category info
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 32),
               padding: const EdgeInsets.all(12),
@@ -283,6 +285,7 @@ class _PracticeMispronouncedScreenState
 
             const SizedBox(height: 24),
 
+            // Word card
             Card(
               elevation: 4,
               margin: const EdgeInsets.symmetric(horizontal: 32),
@@ -295,6 +298,39 @@ class _PracticeMispronouncedScreenState
                         fontSize: 36, fontWeight: FontWeight.bold)),
               ),
             ),
+
+            // Feedback
+            if (_wordScore != null) ...[
+              const SizedBox(height: 16),
+              Text('You said:',
+                  style: TextStyle(fontSize: 18, color: Colors.grey.shade700)),
+              const SizedBox(height: 4),
+              Text(_lastResult,
+                  style: const TextStyle(
+                      fontSize: 22, fontStyle: FontStyle.italic)),
+              const SizedBox(height: 12),
+              Text('Score: $_wordScore%',
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 4),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                    3,
+                    (index) => Icon(
+                          index < (_wordStars ?? 0)
+                              ? Icons.star
+                              : Icons.star_border,
+                          color: Colors.amber,
+                        )),
+              ),
+              const SizedBox(height: 8),
+              Text(_enc,
+                  style: const TextStyle(
+                      fontSize: 16,
+                      fontStyle: FontStyle.italic,
+                      fontWeight: FontWeight.w500)),
+            ],
 
             const Spacer(),
 

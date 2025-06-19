@@ -34,166 +34,229 @@ class _KaraokeSentenceEnglishScreenState
   late Map<String, List<String>> categoryIssues;
 
   Map<String, Map<String, String>> wordCategoriesLevel1 = {
-    "after": {
-      "category": "Time",
-      "description": "Means something happens later.",
-    },
-    "all": {
-      "category": "Connectors/Other",
-      "description": "A helper word used often.",
-    },
-    "and": {
-      "category": "Connectors/Other",
-      "description": "A helper word used often.",
-    },
-    "asked": {
-      "category": "Action Verbs",
-      "description": "Means someone said a question.",
-    },
-    "at": {
-      "category": "Connectors/Other",
-      "description": "A helper word used often.",
-    },
-    "bag": {
-      "category": "Objects",
-      "description": "Something you carry your things in.",
-    },
-    "before": {
-      "category": "Time",
-      "description": "Means something happens earlier.",
-    },
-    "best": {
-      "category": "Descriptive Words",
-      "description": "Better than all the others.",
-    },
-    "big": {
-      "category": "Descriptive Words",
-      "description": "Means large in size.",
-    },
-    "breakfast": {
-      "category": "Daily Life",
-      "description": "The meal you eat in the morning.",
-    },
-    "buzzing": {
-      "category": "Connectors/Other",
-      "description": "A helper word used often.",
-    },
-    "unique": {
-      "category": "Descriptive Words",
-      "description": "Very special or one-of-a-kind.",
-    },
-    "up": {
-      "category": "Connectors/Other",
-      "description": "A helper word used often.",
-    },
-    "was": {
-      "category": "Connectors/Other",
-      "description": "A helper word used often.",
-    },
-    "were": {
-      "category": "Connectors/Other",
-      "description": "A helper word used often.",
-    },
-    "when": {
-      "category": "Connectors/Other",
-      "description": "A helper word used often.",
-    },
-    "with": {
-      "category": "Connectors/Other",
-      "description": "A helper word used often.",
-    },
-    "woke": {
-      "category": "Action Verbs",
-      "description": "Means you stopped sleeping.",
-    },
-    "work": {
-      "category": "Connectors/Other",
-      "description": "A helper word used often.",
-    },
-    "him": {
-      "category": "Connectors/Other",
-      "description": "A word that talks about a boy or man.",
-    },
-    "liam": {
-      "category": "People",
-      "description": "The main character in the story.",
-    },
-    "listened": {
-      "category": "Action Verbs",
-      "description": "Means you paid attention to sounds or someone talking.",
-    },
-    "materials": {
-      "category": "School Vocabulary",
-      "description": "Things you need to do a school project.",
-    },
-    "packed": {
-      "category": "Action Verbs",
-      "description": "Put things into a bag or box for taking somewhere.",
-    },
-    "paid": {
-      "category": "Action Verbs",
-      "description": "Means you gave something in return, like time or effort.",
-    },
-    "posters": {
-      "category": "Objects",
-      "description": "Large papers with pictures or writing used to show ideas.",
-    },
-    "present": {
-      "category": "Action Verbs",
-      "description": "To show or talk about something to others.",
-    },
-    "presentation": {
-      "category": "School Vocabulary",
-      "description": "When you explain your project to others.",
-    },
-    "project": {
-      "category": "School Vocabulary",
-      "description": "Work you do to show something you’ve learned.",
-    },
-    "proud": {
-      "category": "Descriptive Words",
-      "description": "A good feeling when you’ve done something well.",
-    },
-    "questions": {
-      "category": "School Vocabulary",
-      "description": "Things people ask to learn more.",
-    },
-    "result": {
-      "category": "School Vocabulary",
-      "description": "What happens at the end of something you do.",
-    },
-    "robot": {
-      "category": "Objects",
-      "description": "A machine that can do tasks, like a helper.",
-    },
-    "school": {
-      "category": "School Vocabulary",
-      "description": "A place where you go to learn.",
-    },
-    "science": {
-      "category": "School Vocabulary",
-      "description": "A subject where you learn about nature and how things work.",
-    },
-    "students": {
-      "category": "People",
-      "description": "Kids who go to school to learn.",
-    },
-    "teacher": {
-      "category": "People",
-      "description": "A person who helps you learn at school.",
-    },
-    "team": {
-      "category": "People",
-      "description": "A group of people working together.",
-    },
-    "thoughtful": {
-      "category": "Descriptive Words",
-      "description": "Kind and careful in thinking about others.",
-    },
-    "time": {
-      "category": "Time",
-      "description": "When something happens, like day or night.",
-    }
+     // People
+  "liam": {
+    "category": "People",
+    "description": "The boy participating in the science fair."
+  },
+  "teacher": {
+    "category": "People",
+    "description": "The person who instructs students at school."
+  },
+  "students": {
+    "category": "People",
+    "description": "Learners attending classes at school."
+  },
+  "judges": {
+    "category": "People",
+    "description": "Experts evaluating projects at the science fair."
+  },
+  "team": {
+    "category": "People",
+    "description": "A group collaborating on the project."
+  },
+
+  // Places / Events
+  "school": {
+    "category": "Places",
+    "description": "The building where students learn."
+  },
+  "halls": {
+    "category": "Places",
+    "description": "Wide corridors inside a building."
+  },
+  "downstairs": {
+    "category": "Places",
+    "description": "The lower level of a building."
+  },
+  "science": {
+    "category": "Subjects",
+    "description": "The systematic study of the natural world."
+  },
+  "fair": {
+    "category": "Events",
+    "description": "A gathering for showcasing and judging projects."
+  },
+
+  // Objects
+  "bag": {
+    "category": "Objects",
+    "description": "A container used to carry items."
+  },
+  "materials": {
+    "category": "Objects",
+    "description": "Items needed for the science project."
+  },
+  "posters": {
+    "category": "Objects",
+    "description": "Printed boards used for displaying information."
+  },
+  "robot": {
+    "category": "Objects",
+    "description": "A machine built to perform tasks."
+  },
+
+  // Concepts / Nouns
+  "breakfast": {
+    "category": "Nouns",
+    "description": "The first meal of the day."
+  },
+  "inventions": {
+    "category": "Concepts",
+    "description": "New creative devices or ideas."
+  },
+  "questions": {
+    "category": "Nouns",
+    "description": "Sentences used to elicit information."
+  },
+  "presentation": {
+    "category": "Nouns",
+    "description": "The act of showing and explaining a project to an audience."
+  },
+  "journey": {
+    "category": "Nouns",
+    "description": "The process of experience or travel."
+  },
+  "result": {
+    "category": "Concepts",
+    "description": "The outcome of an action or event."
+  },
+  "work": {
+    "category": "Nouns",
+    "description": "Effort performed to achieve a goal."
+  },
+  "excitement": {
+    "category": "Concepts",
+    "description": "A feeling of eager enthusiasm."
+  },
+
+  // Time
+  "early": {
+    "category": "Time",
+    "description": "Before the usual time."
+  },
+  "before": {
+    "category": "Time",
+    "description": "Earlier than a particular event."
+  },
+  "time": {
+    "category": "Time",
+    "description": "A measure of when events occur."
+  },
+
+  // Descriptive Words
+  "big": {
+    "category": "Descriptive Words",
+    "description": "Large in size."
+  },
+  "colorful": {
+    "category": "Descriptive Words",
+    "description": "Having bright, varied colors."
+  },
+  "unique": {
+    "category": "Descriptive Words",
+    "description": "Being the only one of its kind."
+  },
+  "confidently": {
+    "category": "Descriptive Words",
+    "description": "In a self-assured manner."
+  },
+  "thoughtful": {
+    "category": "Descriptive Words",
+    "description": "Showing careful consideration."
+  },
+  "proud": {
+    "category": "Descriptive Words",
+    "description": "Feeling deep satisfaction or pleasure."
+  },
+
+  // Action Verbs
+  "woke": {
+    "category": "Action Verbs",
+    "description": "Stopped sleeping and became awake."
+  },
+  "packed": {
+    "category": "Action Verbs",
+    "description": "Filled a container with items."
+  },
+  "checked": {
+    "category": "Action Verbs",
+    "description": "Examined something to ensure correctness."
+  },
+  "hurried": {
+    "category": "Action Verbs",
+    "description": "Moved quickly."
+  },
+  "buzzing": {
+    "category": "Action Verbs",
+    "description": "Made a humming sound of excitement."
+  },
+  "greeted": {
+    "category": "Action Verbs",
+    "description": "Welcomed someone with a greeting."
+  },
+  "joined": {
+    "category": "Action Verbs",
+    "description": "Became part of a group."
+  },
+  "explained": {
+    "category": "Action Verbs",
+    "description": "Made an idea clear to others."
+  },
+  "help": {
+    "category": "Action Verbs",
+    "description": "Provided assistance."
+  },
+  "listened": {
+    "category": "Action Verbs",
+    "description": "Paid attention to sound."
+  },
+  "asked": {
+    "category": "Action Verbs",
+    "description": "Requested information by questioning."
+  },
+  "felt": {
+    "category": "Action Verbs",
+    "description": "Experienced an emotion."
+  },
+  "paid": {
+    "category": "Action Verbs",
+    "description": "Gave attention or effort to something."
+  },
+  "knew": {
+    "category": "Action Verbs",
+    "description": "Had knowledge of something."
+  },
+  "learned": {
+    "category": "Action Verbs",
+    "description": "Gained information or skill."
+  },
+
+  // Connectors / Other
+  "and": {
+    "category": "Connectors/Other",
+    "description": "A helper word used to join words or phrases."
+  },
+  "the": {
+    "category": "Connectors/Other",
+    "description": "A word used to refer to a specific item or person."
+  },
+  "for": {
+    "category": "Connectors/Other",
+    "description": "Indicates purpose or reason."
+  },
+  "to": {
+    "category": "Connectors/Other",
+    "description": "Indicates direction or purpose."
+  },
+  "all": {
+    "category": "Connectors/Other",
+    "description": "Refers to the whole quantity."
+  },
+  "no": {
+    "category": "Connectors/Other",
+    "description": "A word expressing negation."
+  }
   };
 
   List<Map<String, String>> sentences = [

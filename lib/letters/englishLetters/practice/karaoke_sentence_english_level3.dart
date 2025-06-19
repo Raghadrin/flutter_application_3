@@ -34,316 +34,204 @@ class _KaraokeSentenceEnglishLevel3ScreenState
   late Map<String, List<String>> categoryIssues;
 
 final Map<String, Map<String, String>> wordCategoriesLevel3 = {
-  // Space & Astronomy Vocabulary
-  "space": {
-    "category": "Space Vocabulary",
-    "description": "The area beyond Earth’s atmosphere.",
-  },
-  "exploration": {
-    "category": "Space Vocabulary",
-    "description": "The act of traveling to discover new places.",
-  },
-  "rockets": {
-    "category": "Space Vocabulary",
-    "description": "Vehicles that launch into space.",
-  },
-  "planets": {
-    "category": "Space Vocabulary",
-    "description": "Large objects that orbit a star.",
+ // People
+  "sami": {
+    "category": "People",
+    "description": "The boy reading about space."
   },
   "astronauts": {
-    "category": "Space Vocabulary",
-    "description": "People trained to travel in space.",
+    "category": "People",
+    "description": "People trained to travel and work in space."
   },
-  "gravity": {
-    "category": "Space Vocabulary",
-    "description": "The force that pulls objects toward each other.",
+  "friends": {
+    "category": "People",
+    "description": "Sami’s classmates he shared his learning with."
   },
-  "station": {
-    "category": "Space Vocabulary",
-    "description": "A place in space where people live and work.",
+
+  // Subjects / Events
+  "space exploration": {
+    "category": "Subjects",
+    "description": "The investigation of outer space."
+  },
+  "night": {
+    "category": "Time",
+    "description": "The time between sunset and sunrise."
+  },
+
+  // Places
+  "space station": {
+    "category": "Places",
+    "description": "A facility in orbit where astronauts live and work."
+  },
+  "class": {
+    "category": "Places",
+    "description": "The classroom where Sami and his classmates learn."
+  },
+
+  // Objects
+  "book": {
+    "category": "Objects",
+    "description": "A set of written pages bound together."
+  },
+  "rockets": {
+    "category": "Objects",
+    "description": "Vehicles propelled to travel into space."
+  },
+  "planets": {
+    "category": "Objects",
+    "description": "Large celestial bodies orbiting a star."
+  },
+  "picture": {
+    "category": "Objects",
+    "description": "An illustration or photograph showing something."
   },
   "moon": {
-    "category": "Space Vocabulary",
-    "description": "A natural object that orbits Earth.",
+    "category": "Objects",
+    "description": "Earth’s natural satellite."
   },
   "earth": {
-    "category": "Space Vocabulary",
-    "description": "The planet we live on.",
+    "category": "Objects",
+    "description": "The planet we live on."
   },
-  "astronaut": {
-    "category": "Space Vocabulary",
-    "description": "A person who travels in space.",
+  "suits": {
+    "category": "Objects",
+    "description": "Protective clothing worn by astronauts."
   },
   "stars": {
-    "category": "Space Vocabulary",
-    "description": "Huge balls of burning gas in the sky.",
+    "category": "Objects",
+    "description": "Celestial bodies that shine in the night sky."
   },
 
-  // Descriptive Adjectives
-  "big": {
-    "category": "Descriptive Words",
-    "description": "Very large in size.",
+  // Concepts
+  "gravity": {
+    "category": "Concepts",
+    "description": "The force that pulls objects toward each other."
   },
-  "rocky": {
-    "category": "Descriptive Words",
-    "description": "Covered with rocks or made of rock.",
-  },
-  "small": {
-    "category": "Descriptive Words",
-    "description": "Little in size.",
-  },
-  "blue": {
-    "category": "Descriptive Words",
-    "description": "A color like the sky on a clear day.",
-  },
-  "amazed": {
-    "category": "Descriptive Words",
-    "description": "Feeling surprised and happy.",
-  },
-  "twinkled": {
-    "category": "Descriptive Words",
-    "description": "Shined with a soft, sparkling light.",
-  },
-  "distant": {
-    "category": "Descriptive Words",
-    "description": "Far away.",
+  "surface": {
+    "category": "Concepts",
+    "description": "The outside layer or top of something."
   },
 
-  // Actions (Verbs)
+  // Action Verbs
   "opened": {
     "category": "Action Verbs",
-    "description": "Made something accessible by moving a part.",
+    "description": "Used hands to fold back a cover and view contents."
   },
   "saw": {
     "category": "Action Verbs",
-    "description": "Used eyes to notice something.",
+    "description": "Used eyes to notice something."
   },
   "flying": {
     "category": "Action Verbs",
-    "description": "Moving through the air.",
+    "description": "Moving through the air."
   },
   "floating": {
     "category": "Action Verbs",
-    "description": "Staying on or near the surface of a liquid or air.",
+    "description": "Drifting without falling in zero gravity."
   },
   "showed": {
     "category": "Action Verbs",
-    "description": "Made something visible to others.",
+    "description": "Displayed something for others to see."
   },
   "shared": {
     "category": "Action Verbs",
-    "description": "Gave part of something to others.",
+    "description": "Told or gave part of something to others."
   },
   "explained": {
     "category": "Action Verbs",
-    "description": "Told how something works.",
+    "description": "Made an idea clear by describing it."
   },
   "trained": {
     "category": "Action Verbs",
-    "description": "Practiced to get better at something.",
+    "description": "Prepared for a specific task by practice."
   },
   "protected": {
     "category": "Action Verbs",
-    "description": "Kept safe from harm.",
+    "description": "Kept safe from harm."
   },
   "dreamed": {
     "category": "Action Verbs",
-    "description": "Thought about something while sleeping.",
+    "description": "Thought about things while sleeping."
   },
-  "reach": {
+  "twinkled": {
     "category": "Action Verbs",
-    "description": "Get to something you want.",
-  },
-
-  // School / Learning Vocabulary
-  "book": {
-    "category": "School Vocabulary",
-    "description": "A set of written pages bound together.",
-  },
-  "class": {
-    "category": "School Vocabulary",
-    "description": "A lesson or group gathering to learn.",
-  },
-  "friends": {
-    "category": "School Vocabulary",
-    "description": "People you like to spend time with.",
-  },
-  "learned": {
-    "category": "School Vocabulary",
-    "description": "Understood and remembered new information.",
-  },
-  "learn": {
-    "category": "School Vocabulary",
-    "description": "To get new knowledge or skills.",
-  },
-
-  // Clothing Vocabulary
-  "suits": {
-    "category": "Clothing",
-    "description": "Special outfits worn for protection or formal events.",
-  },
-
-  // Time Vocabulary
-  "night": {
-    "category": "Time",
-    "description": "The time between evening and morning.",
-  },
-
-  // Emotion / Support Vocabulary
-  "cheering": {
-    "category": "Emotion/Support",
-    "description": "Showing happiness and encouragement.",
-  },
-
-  // Connectors & Others
-  "a": {
-    "category": "Connectors/Other",
-    "description": "A helper word used often.",
-  },
-  "about": {
-    "category": "Connectors/Other",
-    "description": "A helper word used often.",
-  },
-  "he": {
-    "category": "Connectors/Other",
-    "description": "A word that talks about a boy or man.",
-  },
-  "to": {
-    "category": "Connectors/Other",
-    "description": "A helper word used often.",
-  },
-  "inside": {
-    "category": "Connectors/Other",
-    "description": "A helper word used often.",
-  },
-  "of": {
-    "category": "Connectors/Other",
-    "description": "A helper word used often.",
-  },
-  "in": {
-    "category": "Connectors/Other",
-    "description": "A helper word used often.",
-  },
-  "zero": {
-    "category": "Descriptive Words",
-    "description": "The number 0.",
-  },
-  "one": {
-    "category": "Connectors/Other",
-    "description": "The number 1 or a single item.",
-  },
-  "picture": {
-    "category": "Concepts",
-    "description": "An image or drawing.",
-  },
-  "surface": {
-    "category": "Descriptive Words",
-    "description": "The outer layer of something.",
-  },
-  "another": {
-    "category": "Connectors/Other",
-    "description": "One more or different.",
-  },
-  "looking": {
-    "category": "Action Verbs",
-    "description": "Used eyes to see attentively.",
-  },
-  "far": {
-    "category": "Descriptive Words",
-    "description": "At a great distance.",
-  },
-  "away": {
-    "category": "Connectors/Other",
-    "description": "A helper word used often.",
-  },
-  "sami": {
-    "category": "People",
-    "description": "The main character in the story.",
-  },
-  "was": {
-    "category": "Connectors/Other",
-    "description": "A helper word used often.",
+    "description": "Shone with flickering light."
   },
   "wanted": {
     "category": "Action Verbs",
-    "description": "Desired to have or do something.",
+    "description": "Desired to have or learn something."
   },
-  "more": {
+  "learn": {
+    "category": "Action Verbs",
+    "description": "To gain knowledge or skill."
+  },
+  "reach": {
+    "category": "Action Verbs",
+    "description": "To arrive at or touch something."
+  },
+  "cheering": {
+    "category": "Action Verbs",
+    "description": "Shouting support to encourage someone."
+  },
+
+  // Descriptive Words
+  "big": {
+    "category": "Descriptive Words",
+    "description": "Large in size."
+  },
+  "zero": {
+    "category": "Descriptive Words",
+    "description": "Having no quantity or magnitude."
+  },
+  "distant": {
+    "category": "Descriptive Words",
+    "description": "Far away in space or time."
+  },
+  "rocky": {
+    "category": "Descriptive Words",
+    "description": "Covered with or full of rocks."
+  },
+  "small": {
+    "category": "Descriptive Words",
+    "description": "Little in size."
+  },
+  "blue": {
+    "category": "Descriptive Words",
+    "description": "The color like the sky on a clear day."
+  },
+  "amazed": {
+    "category": "Descriptive Words",
+    "description": "Filled with wonder or surprise."
+  },
+
+  // Connectors / Other
+  "and": {
     "category": "Connectors/Other",
-    "description": "An additional amount.",
+    "description": "A helper word used to join words or phrases."
   },
-  "back": {
+  "the": {
     "category": "Connectors/Other",
-    "description": "A helper word used often.",
+    "description": "Refers to a specific item or person."
   },
-  "what": {
-    "category": "Concepts",
-    "description": "Used to ask about something.",
+  "to": {
+    "category": "Connectors/Other",
+    "description": "Indicates direction or purpose."
+  },
+  "in": {
+    "category": "Connectors/Other",
+    "description": "Indicates location or inclusion."
+  },
+  "of": {
+    "category": "Connectors/Other",
+    "description": "Indicates belonging or connection."
   },
   "with": {
     "category": "Connectors/Other",
-    "description": "A helper word used often.",
-  },
-  "his": {
-    "category": "Connectors/Other",
-    "description": "A word showing something belongs to a boy or man.",
-  },
-  "how": {
-    "category": "Concepts",
-    "description": "Used to ask the way or method of something.",
-  },
-  "their": {
-    "category": "Connectors/Other",
-    "description": "A word showing something belongs to them.",
-  },
-  "becoming": {
-    "category": "Action Verbs",
-    "description": "Turning into or starting to be something.",
-  },
-  "an": {
-    "category": "Connectors/Other",
-    "description": "A helper word used often.",
-  },
-  "above": {
-    "category": "Concepts",
-    "description": "At a higher position.",
+    "description": "Indicates accompaniment or use."
   },
   "as": {
     "category": "Connectors/Other",
-    "description": "A helper word used often.",
-  },
-  "if": {
-    "category": "Connectors/Other",
-    "description": "A helper word used often.",
-  },
-  "they": {
-    "category": "Connectors/Other",
-    "description": "A word that talks about a group of people.",
-  },
-  "him": {
-    "category": "Connectors/Other",
-    "description": "A word that talks about a boy or man.",
-  },
-  "on": {
-    "category": "Connectors/Other",
-    "description": "A helper word used often.",
-  },
-  "knew": {
-    "category": "Action Verbs",
-    "description": "Understood or remembered something.",
-  },
-  "day": {
-    "category": "Time",
-    "description": "The time from sunrise to sunset.",
-  },
-  "would": {
-    "category": "Connectors/Other",
-    "description": "Shows something likely to happen.",
-  },
-  "them": {
-    "category": "Connectors/Other",
-    "description": "A word that talks about more than one person.",
+    "description": "Used to compare or describe."
   }
 };
 
