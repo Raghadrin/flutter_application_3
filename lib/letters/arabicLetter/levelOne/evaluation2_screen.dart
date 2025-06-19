@@ -1,17 +1,28 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:fl_chart/fl_chart.dart';
+// Updated Evaluation2Screen with old visual style and overflow fix for Arabic
 
-class Evaluation2Screen extends StatefulWidget {
+import 'package:flutter/material.dart';
+import 'practice_mispronounced_ar.dart';
+import 'dyslexia_summary_ar.dart';
+
+const Map<String, String> categoryDescriptionsAr = {
+  'حيوانات': '🐾 كلمات تصف الحيوانات مثل "سلحفاة" أو "أرنب".',
+  'أشخاص': '🧑‍🤝‍🧑 كلمات تشير إلى أشخاص في القصة مثل "سامي" أو "المعلم".',
+  'أشياء': '📦 كلمات لأشياء يمكن لمسها مثل "شجرة" أو "حقيبة".',
+  'أماكن': '📍 كلمات تصف مواقع مثل "البيت" أو "الغابة".',
+  'صفات': '🎨 صفات تصف الشكل أو الشعور مثل "سعيد" أو "ذكي".',
+  'أفعال': '🏃 أفعال تصف ما يفعله الشخص مثل "يركض" أو "يفكر".',
+  'مفاهيم': '💡 أفكار أو معاني غير مادية مثل "العدل" أو "المساعدة".',
+  'مشاعر': '❤️ كلمات تصف المشاعر مثل "الحزن" أو "الفرح".',
+};
+
+class Evaluation2Screen extends StatelessWidget {
   final String recognizedText;
   final double score;
   final int stars;
-  //final String level;
+  final dynamic level;
   final Map<String, bool> wordMatchResults;
   final VoidCallback onNext;
-  final Map<String, List<String>> categoryIssues;
-  final dynamic level;
+  final Map<String, Map<String, String>> wordCategories;
 
   const Evaluation2Screen({
     super.key,
@@ -21,252 +32,149 @@ class Evaluation2Screen extends StatefulWidget {
     required this.level,
     required this.wordMatchResults,
     required this.onNext,
-    required this.categoryIssues,
+    required this.wordCategories,
   });
 
   @override
-  State<Evaluation2Screen> createState() => _Evaluation2ScreenState();
-}
-
-class _Evaluation2ScreenState extends State<Evaluation2Screen> {
-  String? parentId;
-  String? childId;
-  List<double> last5Scores = [];
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  Widget buildCategoryAnalysisBox() {
-    final categoryAnalysis = widget.categoryIssues;
-
-    if (categoryAnalysis.isEmpty) {
-      return const SizedBox();
-    }
-
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      color: Colors.orange.shade50,
-      margin: const EdgeInsets.symmetric(vertical: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              "Possible Areas of Difficulty:",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-                color: Colors.deepOrange,
-              ),
-            ),
-            const SizedBox(height: 12),
-            ...categoryAnalysis.entries.map((entry) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(Icons.error_outline,
-                          color: Colors.deepOrange, size: 22),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              entry.key,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.deepOrangeAccent,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 6,
-                              children: entry.value.map((issue) {
-                                return Chip(
-                                  backgroundColor: Colors.deepOrange.shade100,
-                                  label: Text(
-                                    issue,
-                                    style: const TextStyle(
-                                      color: Colors.deepOrange,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                );
-                              }).toList(),
-                            )
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                )),
-          ],
-        ),
-      ),
-    );
-  }
-
-  List<Widget> buildStars() => List.generate(
-        3,
-        (i) => Icon(
-          i < widget.stars ? Icons.star : Icons.star_border,
-          color: Colors.amber,
-          size: 16,
-        ),
-      );
-
-  Widget buildWordBox(String title, Color color) {
-    final isCorrect = color == Colors.green;
-    final wordList = widget.wordMatchResults.entries
-        .where((entry) => entry.value == isCorrect)
-        .map((entry) => entry.key)
-        .toList();
-
-    if (wordList.isEmpty) {
-      return const SizedBox(); // No box if no words
-    }
-
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 6),
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        border: Border.all(color: color, width: 1),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      width: double.infinity,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: color,
-              fontSize: 13,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: wordList.map((word) {
-              return Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(color: color),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  word,
-                  style: TextStyle(fontSize: 12, color: color),
-                ),
-              );
-            }).toList(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String getFeedback() {
-    if (last5Scores.length < 2) return "استمر في المحاولة للحصول على تقييم.";
-
-    final improvement = last5Scores.last - last5Scores.first;
-    if (improvement >= 10) return "ممتاز! تحسن واضح 👏";
-    if (improvement >= 3) return "تابع التدريب، هناك تحسن بسيط 👍";
-    return "حاول أن تركز أكثر في المحاولة القادمة 💪";
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final total = widget.wordMatchResults.length;
-    final correct = widget.wordMatchResults.values.where((v) => v).length;
+    final wrongWords = wordMatchResults.entries.where((e) => !e.value).map((e) => e.key).toList();
+    final correctWords = wordMatchResults.entries.where((e) => e.value).map((e) => e.key).toList();
+    final mistakeCategories = wrongWords.map((w) => wordCategories[w]?['category']).whereType<String>().toSet().toList();
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('📊 التقييم', style: TextStyle(fontSize: 18)),
-        centerTitle: true,
-        toolbarHeight: 40,
+        backgroundColor: Colors.orange.shade700,
+        title: const Text('📊 التقييم'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(12),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              const Text(
-                ': ما قيل',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+      backgroundColor: const Color(0xFFFFF8F1),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Center(child: Text('النص المُتعرف عليه:', style: Theme.of(context).textTheme.titleSmall, textDirection: TextDirection.rtl)),
+            const SizedBox(height: 4),
+            Center(child: Text(recognizedText, textAlign: TextAlign.center, textDirection: TextDirection.rtl)),
+            const Divider(height: 32),
+            Center(
+              child: Column(
+                children: [
+                  Text('النسبة: ${score.toStringAsFixed(1)}%', style: const TextStyle(fontSize: 20)),
+                  Text('الصحيحة: ${correctWords.length} / ${wordMatchResults.length}'),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(3, (i) => Icon(i < stars ? Icons.star : Icons.star_border, color: Colors.amber)),
+                  )
+                ],
               ),
-              const SizedBox(height: 4),
-              Text(
-                widget.recognizedText,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 12, color: Colors.blueGrey),
+            ),
+            const SizedBox(height: 24),
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.green.shade200),
+                borderRadius: BorderRadius.circular(12),
+                color: Colors.green.shade50,
               ),
-              const Divider(height: 20, thickness: 1),
-              Text(
-                'النسبة: ${widget.score.toStringAsFixed(1)}%',
-                style: const TextStyle(fontSize: 19, color: Colors.black87),
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('✔️ الكلمات الصحيحة:', style: TextStyle(fontWeight: FontWeight.bold), textDirection: TextDirection.rtl),
+                  const SizedBox(height: 6),
+                  Wrap(spacing: 8, runSpacing: 6, children: correctWords.map((w) => Chip(label: Text(w, textDirection: TextDirection.rtl))).toList()),
+                ],
               ),
-              Text(
-                'كلمات صحيحة: $correct من $total',
-                style: TextStyle(fontSize: 19, color: Colors.grey[700]),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.red.shade200),
+                borderRadius: BorderRadius.circular(12),
+                color: Colors.red.shade50,
               ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: buildStars(),
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('❌ الكلمات الخاطئة:', style: TextStyle(fontWeight: FontWeight.bold), textDirection: TextDirection.rtl),
+                  const SizedBox(height: 6),
+                  Wrap(spacing: 8, runSpacing: 6, children: wrongWords.map((w) => Chip(label: Text(w, textDirection: TextDirection.rtl))).toList()),
+                ],
               ),
-              const SizedBox(height: 12),
-              Column(children: [
-                buildWordBox("✅ صحيح:", Colors.green),
-                buildWordBox("❌ خطأ:", Colors.red),
-                buildCategoryAnalysisBox(),
-                // const SizedBox(height: 16),
-                // buildChart(), // 📊 Chart section
-                // const SizedBox(
-                //     height: 20), // Instead of Spacer(), fixed space for scroll
-                ElevatedButton.icon(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  icon: const Icon(Icons.refresh, size: 16),
-                  label:
-                      const Text("Try Again", style: TextStyle(fontSize: 15)),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                    minimumSize:
-                        Size(MediaQuery.of(context).size.width * 0.45, 34),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  ),
+            ),
+            const SizedBox(height: 24),
+            if (mistakeCategories.isNotEmpty)
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.orange.shade50,
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                ElevatedButton.icon(
-                  onPressed: widget.onNext,
-                  icon: const Icon(Icons.navigate_next, size: 16),
-                  label: const Text("التالي", style: TextStyle(fontSize: 15)),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                    minimumSize:
-                        Size(MediaQuery.of(context).size.width * 0.45, 34),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  ),
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('📚 مجالات التعلم', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold), textDirection: TextDirection.rtl),
+                    const SizedBox(height: 16),
+                    for (final cat in mistakeCategories)
+                      if (categoryDescriptionsAr[cat]?.isNotEmpty == true)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('📁 $cat', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold), textDirection: TextDirection.rtl),
+                              const SizedBox(height: 4),
+                              Text(categoryDescriptionsAr[cat]!, style: const TextStyle(fontSize: 13), textDirection: TextDirection.rtl),
+                              const SizedBox(height: 6),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 6,
+                                children: wrongWords
+                                    .where((w) => wordCategories[w]?['category'] == cat)
+                                    .map((w) => Chip(label: Text(w, textDirection: TextDirection.rtl)))
+                                    .toList(),
+                              )
+                            ],
+                          ),
+                        ),
+                  ],
                 ),
-                const SizedBox(height: 8),
-              ])
-            ],
-          ),
+              ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.refresh),
+              onPressed: () => Navigator.pop(context),
+              label: const Text('أعد المحاولة'),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.orange.shade300),
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.record_voice_over),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.orangeAccent),
+              onPressed: wrongWords.isEmpty
+                  ? null
+                  : () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => PracticeMispronouncedArScreen(
+                            words: wrongWords,
+                            wordCategories: wordCategories,
+                            maxAttempts: 3,
+                            onFinished: () => Navigator.of(context).pop(),
+                          ),
+                        ),
+                      );
+                    },
+              label: const Text('تدرب على الكلمات الخاطئة'),
+            ),
+            const SizedBox(height: 12),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.navigate_next),
+              onPressed: onNext,
+              label: const Text('التالي'),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.orangeAccent),
+            ),
+          ],
         ),
       ),
     );

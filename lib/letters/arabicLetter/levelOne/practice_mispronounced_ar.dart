@@ -1,3 +1,5 @@
+// Arabic PracticeMispronouncedArScreen matching English structure with filtered categories
+
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -8,23 +10,21 @@ class PracticeMispronouncedArScreen extends StatefulWidget {
   final List<String> words;
   final Map<String, Map<String, String>> wordCategories;
   final int maxAttempts;
-  final VoidCallback? onFinished; // دعم onFinished
+  final VoidCallback? onFinished;
 
   const PracticeMispronouncedArScreen({
-    Key? key,
+    super.key,
     required this.words,
     required this.wordCategories,
     this.maxAttempts = 3,
     this.onFinished,
-  }) : super(key: key);
+  });
 
   @override
-  State<PracticeMispronouncedArScreen> createState() =>
-      _PracticeMispronouncedArScreenState();
+  State<PracticeMispronouncedArScreen> createState() => _PracticeMispronouncedArScreenState();
 }
 
-class _PracticeMispronouncedArScreenState
-    extends State<PracticeMispronouncedArScreen> with TickerProviderStateMixin {
+class _PracticeMispronouncedArScreenState extends State<PracticeMispronouncedArScreen> with TickerProviderStateMixin {
   late FlutterTts _tts;
   late stt.SpeechToText _speech;
   bool _isListening = false;
@@ -35,9 +35,10 @@ class _PracticeMispronouncedArScreenState
   int? _wordStars;
 
   final Set<String> _mistakeCategories = {};
+  final Set<String> _allWrongWords = {};
 
   final List<String> _encourage = [
-    'عمل رائع! 💖',
+    'أحسنت! 💖',
     'استمر بالمحاولة! 🌟',
     'أنت تستطيع! 👍',
     'كل محاولة تقدم! 🌱',
@@ -46,6 +47,8 @@ class _PracticeMispronouncedArScreenState
   late AnimationController _fbController;
   late Animation<Offset> _fbOffset;
 
+  late final List<String> _filteredWords;
+
   @override
   void initState() {
     super.initState();
@@ -53,16 +56,26 @@ class _PracticeMispronouncedArScreenState
     _speech = stt.SpeechToText();
     _attemptsLeft = widget.maxAttempts;
 
-    _fbController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 300),
-    );
-    _fbOffset = Tween<Offset>(
-      begin: const Offset(0, 1.0),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(parent: _fbController, curve: Curves.easeOut),
-    );
+    _filteredWords = widget.words
+        .where((w) => widget.wordCategories.containsKey(_clean(w)))
+        .toList();
+
+    if (_filteredWords.isEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => DyslexiaSummaryArScreen(
+              mistakeCategories: [],
+            ),
+          ),
+        );
+      });
+    }
+
+    _fbController = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
+    _fbOffset = Tween<Offset>(begin: const Offset(0, 1.0), end: Offset.zero)
+        .animate(CurvedAnimation(parent: _fbController, curve: Curves.easeOut));
   }
 
   @override
@@ -71,12 +84,11 @@ class _PracticeMispronouncedArScreenState
     super.dispose();
   }
 
-  String get _word => widget.words[_currentIndex];
-  Map<String, String> get _info => widget.wordCategories[_word] ?? {};
+  String get _word => _filteredWords[_currentIndex];
+  Map<String, String> get _info => widget.wordCategories[_clean(_word)]!;
   String get _category => _info['category'] ?? 'غير معروف';
   String get _description => _info['description'] ?? '';
-  String get _enc => _encourage[
-      min(widget.maxAttempts - _attemptsLeft, _encourage.length - 1)];
+  String get _enc => _encourage[min(widget.maxAttempts - _attemptsLeft, _encourage.length - 1)];
 
   double get _computedScore {
     final used = widget.maxAttempts - _attemptsLeft + 1;
@@ -91,6 +103,8 @@ class _PracticeMispronouncedArScreenState
     if (s > 0) return 1;
     return 0;
   }
+
+  String _clean(String word) => word.replaceAll(RegExp(r'[^ء-ي]'), '').toLowerCase();
 
   Future<void> _speak() => _tts.speak(_word);
 
@@ -125,9 +139,7 @@ class _PracticeMispronouncedArScreenState
             color: success ? Colors.green.shade300 : Colors.orange.shade300,
             child: Padding(
               padding: const EdgeInsets.all(12),
-              child: Text(msg,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.black, fontSize: 16)),
+              child: Text(msg, textAlign: TextAlign.center, style: const TextStyle(color: Colors.black, fontSize: 16)),
             ),
           ),
         ),
@@ -141,25 +153,26 @@ class _PracticeMispronouncedArScreenState
   }
 
   void _evaluate(String spoken) {
-    if (spoken.trim() == _word.trim()) {
+    if (_clean(spoken) == _clean(_word)) {
       _wordScore = _computedScore.round();
       _wordStars = _computedStars;
       _showBanner('ممتاز! النتيجة: $_wordScore%', success: true);
     } else {
+      _allWrongWords.add(_word);
       _mistakeCategories.add(_category);
       _attemptsLeft--;
       if (_attemptsLeft > 0) {
-        _showBanner('ليست صحيحة — تبقى $_attemptsLeft محاولة. $_enc');
+        _showBanner('❌ تبقى $_attemptsLeft محاولة. $_enc');
       } else {
         _wordScore = 0;
         _wordStars = 0;
-        _showBanner('حاول المرة القادمة! النتيجة: 0%', success: false);
+        _showBanner('حاول في الكلمة التالية! ❌', success: false);
       }
     }
   }
 
   void _next() {
-    if (_currentIndex < widget.words.length - 1) {
+    if (_currentIndex < _filteredWords.length - 1) {
       setState(() {
         _currentIndex++;
         _attemptsLeft = widget.maxAttempts;
@@ -168,31 +181,32 @@ class _PracticeMispronouncedArScreenState
         _wordStars = null;
       });
     } else {
-      // عند الانتهاء: نفذ onFinished إذا موجودة، وإلا افتح ملخص الديسلكسيا
-      if (widget.onFinished != null) {
-        widget.onFinished!();
-      } else {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => DyslexiaSummaryArScreen(
-              mistakeCategories: _mistakeCategories.toList(),
-            ),
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => DyslexiaSummaryArScreen(
+            mistakeCategories: _mistakeCategories.toList(),
           ),
-        );
-      }
+        ),
+      );
     }
   }
+
+  List<Widget> _buildStars() => List.generate(3, (i) => Icon(i < (_wordStars ?? 0) ? Icons.star : Icons.star_border, color: Colors.amber, size: 20));
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.orange.shade50,
-      body: SafeArea(
+      appBar: AppBar(
+        title: const Text('🎤 تدريب النطق'),
+        backgroundColor: Colors.orange.shade700,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
         child: Column(
           children: [
             const Spacer(),
-
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 32),
               padding: const EdgeInsets.all(12),
@@ -205,21 +219,12 @@ class _PracticeMispronouncedArScreenState
                   Icon(Icons.record_voice_over, size: 32, color: Colors.blue.shade600),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
-                      "هيا نتدرب معًا! انطق الكلمة بوضوح وبطء.",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue.shade800,
-                      ),
-                    ),
+                    child: Text('لنتمرن معًا! انطق الكلمة بوضوح.', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue.shade800)),
                   ),
                 ],
               ),
             ),
-
             const Spacer(),
-
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 32),
               padding: const EdgeInsets.all(12),
@@ -229,68 +234,50 @@ class _PracticeMispronouncedArScreenState
               ),
               child: Column(
                 children: [
-                  Text(_category,
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  if (_description.isNotEmpty) ...[
-                    const SizedBox(height: 4),
-                    Text(_description, style: const TextStyle(fontSize: 16)),
-                  ],
+                  Text(_category, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  Text(_description, style: const TextStyle(fontSize: 16)),
                 ],
               ),
             ),
-
             const SizedBox(height: 24),
-
             Card(
               elevation: 4,
               margin: const EdgeInsets.symmetric(horizontal: 32),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-                child: Text(_word,
-                    style: const TextStyle(
-                        fontSize: 36, fontWeight: FontWeight.bold)),
+                child: Text(_word, style: const TextStyle(fontSize: 36, fontWeight: FontWeight.bold)),
               ),
             ),
-
+            if (_wordScore != null) ...[
+              const SizedBox(height: 16),
+              Text('قلت:', style: TextStyle(fontSize: 18, color: Colors.grey.shade700)),
+              const SizedBox(height: 4),
+              Text(_lastResult, style: const TextStyle(fontSize: 22, fontStyle: FontStyle.italic)),
+              const SizedBox(height: 12),
+              Text('النتيجة: $_wordScore%', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 4),
+              Row(mainAxisAlignment: MainAxisAlignment.center, children: _buildStars()),
+              const SizedBox(height: 8),
+              Text(_enc, style: const TextStyle(fontSize: 16, fontStyle: FontStyle.italic, fontWeight: FontWeight.w500)),
+            ],
             const Spacer(),
-
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _CircleButton(
-                  icon: Icons.volume_up,
-                  label: 'استمع',
-                  color: Colors.orange.shade300,
-                  iconColor: Colors.black,
-                  textColor: Colors.black,
-                  onTap: _speak,
-                ),
+                _CircleButton(icon: Icons.volume_up, label: 'استمع', color: Colors.orange.shade300, iconColor: Colors.black, textColor: Colors.black, onTap: _speak),
                 const SizedBox(width: 24),
-                _CircleButton(
-                  icon: _isListening ? Icons.stop : Icons.mic,
-                  label: 'تسجيل',
-                  color: Colors.orange.shade300,
-                  iconColor: Colors.black,
-                  textColor: Colors.black,
-                  onTap: _toggleListen,
-                ),
+                _CircleButton(icon: _isListening ? Icons.stop : Icons.mic, label: 'تسجيل', color: Colors.orange.shade300, iconColor: Colors.black, textColor: Colors.black, onTap: _toggleListen),
               ],
             ),
-
             const Spacer(),
-
             ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange.shade400,
-                minimumSize: const Size.fromHeight(52),
-              ),
               onPressed: _next,
-              child: const Text('التالي', style: TextStyle(fontSize: 20)),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.orange.shade400, minimumSize: const Size.fromHeight(48)),
+              child: const Text("التالي", style: TextStyle(fontSize: 18)),
             ),
-
-            const SizedBox(height: 24),
+            const SizedBox(height: 12),
           ],
         ),
       ),
@@ -298,7 +285,6 @@ class _PracticeMispronouncedArScreenState
   }
 }
 
-// ----------- زر دائري صغير مستخدم أعلاه ------------
 class _CircleButton extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -308,14 +294,13 @@ class _CircleButton extends StatelessWidget {
   final VoidCallback onTap;
 
   const _CircleButton({
-    Key? key,
     required this.icon,
     required this.label,
     required this.color,
     required this.iconColor,
     required this.textColor,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -328,19 +313,13 @@ class _CircleButton extends StatelessWidget {
             customBorder: const CircleBorder(),
             onTap: onTap,
             child: Padding(
-              padding: const EdgeInsets.all(18.0),
+              padding: const EdgeInsets.all(18),
               child: Icon(icon, size: 32, color: iconColor),
             ),
           ),
         ),
         const SizedBox(height: 8),
-        Text(
-          label,
-          style: TextStyle(
-            color: textColor,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        Text(label, style: TextStyle(color: textColor, fontWeight: FontWeight.bold, fontSize: 13)),
       ],
     );
   }
