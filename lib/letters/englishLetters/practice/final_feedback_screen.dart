@@ -1,3 +1,5 @@
+// lib/letters/englishLetters/practice/final_feedback_screen.dart
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fl_chart/fl_chart.dart';
@@ -21,8 +23,6 @@ class FinalFeedbackScreen extends StatefulWidget {
 
 class _FinalFeedbackScreenState extends State<FinalFeedbackScreen> {
   List<double> last5Scores = [];
-  String parentId = '';
-  String childId = '';
 
   @override
   void initState() {
@@ -34,17 +34,14 @@ class _FinalFeedbackScreenState extends State<FinalFeedbackScreen> {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return;
 
-    parentId = user.uid;
-
+    final parentId = user.uid;
     final childrenSnapshot = await FirebaseFirestore.instance
         .collection('parents')
         .doc(parentId)
         .collection('children')
         .get();
-
     if (childrenSnapshot.docs.isEmpty) return;
-
-    childId = childrenSnapshot.docs.first.id;
+    final childId = childrenSnapshot.docs.first.id;
 
     final attemptsSnapshot = await FirebaseFirestore.instance
         .collection('parents')
@@ -66,9 +63,9 @@ class _FinalFeedbackScreenState extends State<FinalFeedbackScreen> {
   }
 
   String getFeedback() {
-    if (widget.averageScore * 100 >= 90) return "Excellent work!";
-    if (widget.averageScore * 100 >= 75) return "Great job! Keep it up.";
-    if (widget.averageScore * 100 >= 60) return "Good effort. Try improving.";
+    if (widget.averageScore >= 90) return "Excellent work!";
+    if (widget.averageScore >= 75) return "Great job! Keep it up.";
+    if (widget.averageScore >= 60) return "Good effort. Try improving.";
     return "Keep practicing, you'll get better!";
   }
 
@@ -84,7 +81,7 @@ class _FinalFeedbackScreenState extends State<FinalFeedbackScreen> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         const Text(
-          "📊 Last 5 attempts ",
+          "📊 Last 5 Attempts",
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 14,
@@ -115,7 +112,6 @@ class _FinalFeedbackScreenState extends State<FinalFeedbackScreen> {
                 barTouchData: BarTouchData(
                   enabled: true,
                   touchTooltipData: BarTouchTooltipData(
-                    //tooltipBgColor: Colors.deepPurpleAccent.withOpacity(0.8),
                     getTooltipItem: (group, groupIndex, rod, rodIndex) {
                       return BarTooltipItem(
                         '${rod.toY.toStringAsFixed(1)}%',
@@ -134,7 +130,7 @@ class _FinalFeedbackScreenState extends State<FinalFeedbackScreen> {
                       showTitles: true,
                       interval: 20,
                       reservedSize: 32,
-                      getTitlesWidget: (value, meta) => Text(
+                      getTitlesWidget: (value, _) => Text(
                         '${value.toInt()}%',
                         style: const TextStyle(
                           fontSize: 10,
@@ -146,10 +142,10 @@ class _FinalFeedbackScreenState extends State<FinalFeedbackScreen> {
                   bottomTitles: AxisTitles(
                     sideTitles: SideTitles(
                       showTitles: true,
-                      getTitlesWidget: (value, meta) => Padding(
+                      getTitlesWidget: (value, _) => Padding(
                         padding: const EdgeInsets.only(top: 8),
                         child: Text(
-                          'Try ${value.toInt() + 1}',
+                          'Attempt ${value.toInt() + 1}',
                           style: const TextStyle(
                             fontSize: 10,
                             color: Colors.black87,
@@ -158,10 +154,8 @@ class _FinalFeedbackScreenState extends State<FinalFeedbackScreen> {
                       ),
                     ),
                   ),
-                  rightTitles:
-                      AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  topTitles:
-                      AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
                 ),
                 gridData: FlGridData(
                   show: true,
@@ -211,7 +205,7 @@ class _FinalFeedbackScreenState extends State<FinalFeedbackScreen> {
             child: Column(
               children: [
                 Text(
-                  'Your Average Score: ${(widget.averageScore * 100).toStringAsFixed(1)}%',
+                  'Your Average Score: ${widget.averageScore.toStringAsFixed(1)}%',
                   style: const TextStyle(fontSize: 18),
                 ),
                 const SizedBox(height: 10),

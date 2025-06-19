@@ -1,26 +1,39 @@
+// lib/letters/englishLetters/practice/practice_mispronounced_screen.dart
+
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'dyslexia_summary_screen.dart';
 
+/// A screen to practice mispronounced words from any karaoke level.
 class PracticeMispronouncedScreen extends StatefulWidget {
+  /// Full list of wrong words to practice.
   final List<String> words;
+
+  /// Merged word→{category,description} map from all levels.
   final Map<String, Map<String, String>> wordCategories;
+
+  /// Maximum attempts per word.
   final int maxAttempts;
 
+  /// Karaoke level origin ("level1","level2","level3").
+  final String level;
+
   const PracticeMispronouncedScreen({
-    Key? key,
+    super.key,
     required this.words,
     required this.wordCategories,
     this.maxAttempts = 3,
-  }) : super(key: key);
+    required this.level,
+  });
 
   @override
-  _PracticeMispronouncedScreenState createState() =>
+  State<PracticeMispronouncedScreen> createState() =>
       _PracticeMispronouncedScreenState();
 }
 
+/// Simple round icon + label button
 class _CircleButton extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -30,14 +43,14 @@ class _CircleButton extends StatelessWidget {
   final VoidCallback onTap;
 
   const _CircleButton({
-    Key? key,
+    super.key,
     required this.icon,
     required this.label,
     required this.color,
     required this.iconColor,
     required this.textColor,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -58,10 +71,7 @@ class _CircleButton extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           label,
-          style: TextStyle(
-            color: textColor,
-            fontWeight: FontWeight.bold,
-          ),
+          style: TextStyle(color: textColor, fontWeight: FontWeight.bold),
         ),
       ],
     );
@@ -80,6 +90,10 @@ class _PracticeMispronouncedScreenState
   int? _wordScore;
   int? _wordStars;
 
+  /// All wrong words actually encountered.
+  final Set<String> _allWrongWords = {};
+
+  /// Distinct mistake categories.
   final Set<String> _mistakeCategories = {};
 
   final List<String> _encourage = [
@@ -92,6 +106,9 @@ class _PracticeMispronouncedScreenState
   late AnimationController _fbController;
   late Animation<Offset> _fbOffset;
 
+  /// Words that have valid category mappings.
+  late final List<String> _filteredWords;
+
   @override
   void initState() {
     super.initState();
@@ -99,16 +116,33 @@ class _PracticeMispronouncedScreenState
     _speech = stt.SpeechToText();
     _attemptsLeft = widget.maxAttempts;
 
+    // Keep only words with known categories
+    _filteredWords = widget.words
+        .where((w) => widget.wordCategories.containsKey(w.toLowerCase()))
+        .toList();
+
+    // If nothing valid, skip directly to summary
+    if (_filteredWords.isEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => DyslexiaSummaryScreen(
+              wrongWords: _allWrongWords.toList(),
+              mistakeCategories: _mistakeCategories.toList(),
+              level: widget.level,   // ← pass level here
+            ),
+          ),
+        );
+      });
+    }
+
     _fbController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 300),
     );
-    _fbOffset = Tween<Offset>(
-      begin: const Offset(0, 1.0),
-      end: Offset.zero,
-    ).animate(
-      CurvedAnimation(parent: _fbController, curve: Curves.easeOut),
-    );
+    _fbOffset = Tween<Offset>(begin: const Offset(0, 1.0), end: Offset.zero)
+        .animate(CurvedAnimation(parent: _fbController, curve: Curves.easeOut));
   }
 
   @override
@@ -117,11 +151,11 @@ class _PracticeMispronouncedScreenState
     super.dispose();
   }
 
-  String get _word => widget.words[_currentIndex];
+  String get _word => _filteredWords[_currentIndex];
   Map<String, String> get _info =>
-      widget.wordCategories[_word.toLowerCase()] ?? {};
-  String get _category => _info['category'] ?? 'Unknown';
-  String get _description => _info['description'] ?? '';
+      widget.wordCategories[_word.toLowerCase()]!;
+  String get _category => _info['category']!;
+  String get _description => _info['description']!;
   String get _enc => _encourage[
       min(widget.maxAttempts - _attemptsLeft, _encourage.length - 1)];
 
@@ -188,11 +222,14 @@ class _PracticeMispronouncedScreenState
   }
 
   void _evaluate(String spoken) {
-    if (spoken.trim().toLowerCase() == _word.toLowerCase()) {
+    final hit = spoken.trim().toLowerCase() == _word.toLowerCase();
+    if (hit) {
       _wordScore = _computedScore.round();
       _wordStars = _computedStars;
       _showBanner('Perfect! Score: $_wordScore%', success: true);
     } else {
+      // record wrong word & category
+      _allWrongWords.add(_word);
       _mistakeCategories.add(_category);
       _attemptsLeft--;
       if (_attemptsLeft > 0) {
@@ -206,7 +243,7 @@ class _PracticeMispronouncedScreenState
   }
 
   void _next() {
-    if (_currentIndex < widget.words.length - 1) {
+    if (_currentIndex < _filteredWords.length - 1) {
       setState(() {
         _currentIndex++;
         _attemptsLeft = widget.maxAttempts;
@@ -215,11 +252,14 @@ class _PracticeMispronouncedScreenState
         _wordStars = null;
       });
     } else {
+      // end: show summary, passing collected wrong words + categories
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (_) => DyslexiaSummaryScreen(
+            wrongWords: _allWrongWords.toList(),
             mistakeCategories: _mistakeCategories.toList(),
+            level: widget.level,  // ← and here
           ),
         ),
       );
@@ -245,7 +285,8 @@ class _PracticeMispronouncedScreenState
               ),
               child: Row(
                 children: [
-                  Icon(Icons.record_voice_over, size: 32, color: Colors.blue.shade600),
+                  Icon(Icons.record_voice_over,
+                      size: 32, color: Colors.blue.shade600),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -274,11 +315,11 @@ class _PracticeMispronouncedScreenState
               child: Column(
                 children: [
                   Text(_category,
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  if (_description.isNotEmpty) ...[
-                    const SizedBox(height: 4),
-                    Text(_description, style: const TextStyle(fontSize: 16)),
-                  ],
+                      style: const TextStyle(
+                          fontSize: 20, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  Text(_description,
+                      style: const TextStyle(fontSize: 16)),
                 ],
               ),
             ),
@@ -292,7 +333,8 @@ class _PracticeMispronouncedScreenState
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16)),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 24, vertical: 32),
                 child: Text(_word,
                     style: const TextStyle(
                         fontSize: 36, fontWeight: FontWeight.bold)),
@@ -303,7 +345,8 @@ class _PracticeMispronouncedScreenState
             if (_wordScore != null) ...[
               const SizedBox(height: 16),
               Text('You said:',
-                  style: TextStyle(fontSize: 18, color: Colors.grey.shade700)),
+                  style:
+                      TextStyle(fontSize: 18, color: Colors.grey.shade700)),
               const SizedBox(height: 4),
               Text(_lastResult,
                   style: const TextStyle(
@@ -316,13 +359,14 @@ class _PracticeMispronouncedScreenState
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(
-                    3,
-                    (index) => Icon(
-                          index < (_wordStars ?? 0)
-                              ? Icons.star
-                              : Icons.star_border,
-                          color: Colors.amber,
-                        )),
+                  3,
+                  (index) => Icon(
+                    index < (_wordStars ?? 0)
+                        ? Icons.star
+                        : Icons.star_border,
+                    color: Colors.amber,
+                  ),
+                ),
               ),
               const SizedBox(height: 8),
               Text(_enc,
@@ -334,6 +378,7 @@ class _PracticeMispronouncedScreenState
 
             const Spacer(),
 
+            // Controls
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

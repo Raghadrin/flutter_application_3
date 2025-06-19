@@ -1,11 +1,18 @@
 // lib/letters/englishLetters/practice/dyslexia_summary_screen.dart
 
 import 'package:flutter/material.dart';
+// import your three karaoke screens:
+import 'karaoke_sentence_english_screen.dart';
+import 'karaoke_sentence_english_level2.dart';
+import 'karaoke_sentence_english_level3.dart';
 
-/// Helper data class for each card
+/// A single card describing a dyslexia type (or your final tips card).
 class _TypeCard {
-  final String title, emoji, description;
+  final String title;
+  final String emoji;
+  final String description;
   final List<String> symptoms;
+
   const _TypeCard({
     required this.title,
     required this.emoji,
@@ -14,13 +21,12 @@ class _TypeCard {
   });
 }
 
-/// A full set of dyslexia types + a final “What You Can Do” card
+/// Your full set of dyslexia types + final “What You Can Do” card
 const List<_TypeCard> _cards = [
   _TypeCard(
     title: 'Phonological Dyslexia',
     emoji: '🔤',
-    description:
-      'Struggles to break words into sounds and spell them.',
+    description: 'Struggles to break words into sounds and spell them.',
     symptoms: [
       'Poor spelling',
       'Hard to link letters→sounds',
@@ -32,8 +38,7 @@ const List<_TypeCard> _cards = [
   _TypeCard(
     title: 'Rapid Naming Dyslexia',
     emoji: '⏱️',
-    description:
-      'Slow at naming letters, numbers or colors, slowing fluency.',
+    description: 'Slow at naming letters, numbers or colors, slowing fluency.',
     symptoms: [
       'Hesitation aloud',
       'Skips or swaps words',
@@ -45,8 +50,7 @@ const List<_TypeCard> _cards = [
   _TypeCard(
     title: 'Double Deficit',
     emoji: '🔀',
-    description:
-      'Has both sound‐and naming difficulties.',
+    description: 'Has both sound‐and naming difficulties.',
     symptoms: [
       'Weak phonemic awareness',
       'Slow naming speed',
@@ -56,8 +60,7 @@ const List<_TypeCard> _cards = [
   _TypeCard(
     title: 'Surface Dyslexia',
     emoji: '👁️',
-    description:
-      'Reads phonetically but can’t sight‐read irregular words.',
+    description: 'Reads phonetically but can’t sight‐read irregular words.',
     symptoms: [
       'Slow overall rate',
       'Confuses “was” vs “saw”',
@@ -69,8 +72,7 @@ const List<_TypeCard> _cards = [
   _TypeCard(
     title: 'Visual Dyslexia',
     emoji: '👓',
-    description:
-      'Text may blur, shift or appear double.',
+    description: 'Text may blur, shift or appear double.',
     symptoms: [
       'Loses track of lines',
       'Words seem to wobble',
@@ -81,8 +83,7 @@ const List<_TypeCard> _cards = [
   _TypeCard(
     title: 'Developmental Dyslexia',
     emoji: '👶',
-    description:
-      'Runs in families; shows up early.',
+    description: 'Runs in families; shows up early.',
     symptoms: [
       'Often genetic',
       'Early school diagnosis',
@@ -91,8 +92,7 @@ const List<_TypeCard> _cards = [
   _TypeCard(
     title: 'Acquired Dyslexia',
     emoji: '⚠️',
-    description:
-      'Occurs after brain trauma or illness.',
+    description: 'Occurs after brain trauma or illness.',
     symptoms: [
       'Normal reading before',
       'Language disrupted post-injury',
@@ -101,8 +101,7 @@ const List<_TypeCard> _cards = [
   _TypeCard(
     title: 'What You Can Do',
     emoji: '💡',
-    description:
-      'Steps to boost reading confidence:',
+    description: 'Steps to boost reading confidence:',
     symptoms: [
       'Get a specialist assessment',
       'Use multisensory programs',
@@ -113,163 +112,141 @@ const List<_TypeCard> _cards = [
   ),
 ];
 
-class DyslexiaSummaryScreen extends StatefulWidget {
+class DyslexiaSummaryScreen extends StatelessWidget {
+  /// All distinct words the user got wrong
+  final List<String> wrongWords;
+
+  /// All distinct categories in which they made mistakes
   final List<String> mistakeCategories;
 
-  const DyslexiaSummaryScreen({Key? key, required this.mistakeCategories})
-      : super(key: key);
+  /// Which karaoke level to return to: 'level1', 'level2' or 'level3'
+  final String level;
 
-  @override
-  _DyslexiaSummaryScreenState createState() => _DyslexiaSummaryScreenState();
-}
+  const DyslexiaSummaryScreen({
+    Key? key,
+    required this.wrongWords,
+    required this.mistakeCategories,
+    required this.level,
+  }) : super(key: key);
 
-class _DyslexiaSummaryScreenState extends State<DyslexiaSummaryScreen> {
-  final PageController _controller = PageController(viewportFraction: 0.85);
-  int _currentPage = 0;
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
+  /// Build a wrap of colored chips
+  Widget _buildChipList(List<String> items, Color color) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 4,
+      children: items
+          .map((w) => Chip(label: Text(w), backgroundColor: color.withOpacity(0.2)))
+          .toList(),
+    );
   }
 
-  Widget _buildIndicator() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(_cards.length, (i) {
-        final isActive = i == _currentPage;
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          margin: const EdgeInsets.symmetric(horizontal: 4),
-          width: isActive ? 12 : 8,
-          height: isActive ? 12 : 8,
-          decoration: BoxDecoration(
-            color:
-                isActive ? Colors.orange.shade700 : Colors.orange.shade200,
-            shape: BoxShape.circle,
-          ),
-        );
-      }),
+  /// Build each of the dyslexia-type cards
+  Widget _buildTypeCard(_TypeCard card) {
+    return Card(
+      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(card.emoji, style: const TextStyle(fontSize: 28)),
+                const SizedBox(width: 8),
+                Text(card.title,
+                    style:
+                        const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(card.description, style: const TextStyle(fontSize: 16)),
+            const SizedBox(height: 8),
+            ...card.symptoms.map((s) => Row(
+                  children: [
+                    const Icon(Icons.check, size: 16, color: Colors.green),
+                    const SizedBox(width: 6),
+                    Expanded(child: Text(s)),
+                  ],
+                )),
+          ],
+        ),
+      ),
     );
+  }
+
+  /// Select the right karaoke screen based on `level`
+  Widget _karaokeForLevel() {
+    switch (level) {
+      case 'level2':
+        return const KaraokeSentenceEnglishLevel2Screen();
+      case 'level3':
+        return const KaraokeSentenceEnglishLevel3Screen();
+      case 'level1':
+      default:
+        return const KaraokeSentenceEnglishScreen();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('🧠 Dyslexia Summary'),
-        backgroundColor: Colors.orange.shade700,
-      ),
+      appBar: AppBar(title: const Text('🔎 Your Mistakes & Tips')),
       body: Column(
         children: [
-          if (widget.mistakeCategories.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Text(
-                'You had challenges in:\n${widget.mistakeCategories.join(', ')}',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 16, color: Colors.grey[800]),
-              ),
+          // 1) Summary of wrong words & categories
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('You got these words wrong:',
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 8),
+                if (wrongWords.isEmpty)
+                  const Text('🎉 None! Great job!',
+                      style: TextStyle(fontSize: 16))
+                else
+                  _buildChipList(wrongWords, Colors.redAccent),
+                const SizedBox(height: 16),
+                const Text('Areas to practice:',
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 8),
+                if (mistakeCategories.isEmpty)
+                  const Text('No specific category mistakes.',
+                      style: TextStyle(fontSize: 16))
+                else
+                  _buildChipList(mistakeCategories, Colors.deepPurpleAccent),
+              ],
             ),
+          ),
 
+          const Divider(),
+
+          // 2) Dyslexia‐type cards
           Expanded(
-            child: PageView.builder(
-              controller: _controller,
-              onPageChanged: (i) => setState(() => _currentPage = i),
+            child: ListView.builder(
               itemCount: _cards.length,
-              itemBuilder: (context, i) {
-                final c = _cards[i];
-                final isActive = i == _currentPage;
+              itemBuilder: (_, i) => _buildTypeCard(_cards[i]),
+            ),
+          ),
 
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 400),
-                  margin: EdgeInsets.symmetric(
-                      vertical: isActive ? 16 : 32, horizontal: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.orange.shade300
-                            .withOpacity(isActive ? 0.6 : 0.3),
-                        blurRadius: isActive ? 24 : 12,
-                        spreadRadius: isActive ? 4 : 1,
-                      ),
-                    ],
-                  ),
-                  child: Transform.scale(
-                    scale: isActive ? 1.0 : 0.9,
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Center(
-                            child: Hero(
-                              tag: 'card_${c.title}',
-                              child: Material(
-                                color: Colors.transparent,
-                                child: Text(
-                                  '${c.emoji}  ${c.title}',
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          Text(c.description,
-                              style: const TextStyle(fontSize: 16)),
-                          const SizedBox(height: 16),
-
-                          // each symptom in its own little box
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: c.symptoms.map((s) {
-                              return Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 12, vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: Colors.orange.shade50,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(s,
-                                    style: const TextStyle(fontSize: 14)),
-                              );
-                            }).toList(),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+          // 3) Back to Karaoke button
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (_) => _karaokeForLevel()),
                 );
               },
+              child:
+                  const Text('Back to Karaoke', style: TextStyle(fontSize: 18)),
             ),
           ),
-
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: _buildIndicator(),
-          ),
-
-          if (_currentPage == _cards.length - 1)
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange.shade400,
-                  minimumSize: const Size.fromHeight(48),
-                ),
-                onPressed: () =>
-                    Navigator.popUntil(context, (r) => r.isFirst),
-                child: const Text('Done', style: TextStyle(fontSize: 18)),
-              ),
-            ),
         ],
       ),
     );
