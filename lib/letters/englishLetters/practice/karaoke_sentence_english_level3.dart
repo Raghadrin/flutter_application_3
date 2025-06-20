@@ -312,27 +312,43 @@ final Map<String, Map<String, String>> wordCategoriesLevel3 = {
         if (val.finalResult) {
           await evaluateResult();
           if (!mounted) return;
-          Navigator.push(
+
+          // First show FinalFeedbackScreen
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => FinalFeedbackScreen(
+          averageScore: score,
+          totalStars: stars,
+          level: 'level3',
+              ),
+            ),
+          );
+
+          if (!mounted) return;
+
+          // Then show EvaluationEnglishScreen
+          await Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) => EvaluationEnglishScreen(
-                recognizedText: recognizedText,
-                score: score,
-                stars: stars,
-                wordMatchResults: wordMatchResults,
-                onNext: () {
-                  Navigator.pop(context);
-                  nextSentence();
-                },
-                wordCategories: wordCategoriesLevel3,
-                level: 'level3',
+          recognizedText: recognizedText,
+          score: score,
+          stars: stars,
+          wordMatchResults: wordMatchResults,
+          onNext: () {
+            Navigator.pop(context);
+            nextSentence();
+          },
+          wordCategories: wordCategoriesLevel3,
+          level: 'level3',
               ),
             ),
           );
         }
-      },
-    );
-  }
+            },
+          );
+        }
 
   void updateMatchedWords() {
     final expected = currentSentence["text"] ?? "";
@@ -445,21 +461,23 @@ void nextSentence() {
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                margin: const EdgeInsets.only(bottom: 20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4))],
-                ),
-                child: SingleChildScrollView(
-                  child: RichText(
-                    textAlign: TextAlign.center,
-                    text: TextSpan(children: buildHighlightedSentence()),
-                  ),
-                ),
+            Container(
+              constraints: BoxConstraints(
+          minHeight: 80,
+          maxHeight: MediaQuery.of(context).size.height * 0.35,
+              ),
+              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.only(bottom: 20),
+              decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4))],
+              ),
+              child: SingleChildScrollView(
+          child: RichText(
+            textAlign: TextAlign.center,
+            text: TextSpan(children: buildHighlightedSentence()),
+          ),
               ),
             ),
             LinearProgressIndicator(

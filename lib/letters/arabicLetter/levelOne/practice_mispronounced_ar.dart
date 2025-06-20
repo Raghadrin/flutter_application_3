@@ -1,5 +1,3 @@
-// Arabic PracticeMispronouncedArScreen matching English structure with filtered categories
-
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -56,18 +54,14 @@ class _PracticeMispronouncedArScreenState extends State<PracticeMispronouncedArS
     _speech = stt.SpeechToText();
     _attemptsLeft = widget.maxAttempts;
 
-    _filteredWords = widget.words
-        .where((w) => widget.wordCategories.containsKey(_clean(w)))
-        .toList();
+    _filteredWords = widget.words.where((w) => widget.wordCategories.containsKey(_clean(w))).toList();
 
     if (_filteredWords.isEmpty) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => DyslexiaSummaryArScreen(
-              mistakeCategories: [],
-            ),
+            builder: (_) => DyslexiaSummaryArScreen(mistakeCategories: []),
           ),
         );
       });
@@ -203,12 +197,12 @@ class _PracticeMispronouncedArScreenState extends State<PracticeMispronouncedArS
         backgroundColor: Colors.orange.shade700,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Column(
           children: [
             const Spacer(),
             Container(
-              margin: const EdgeInsets.symmetric(horizontal: 32),
+              margin: const EdgeInsets.symmetric(horizontal: 16),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: Colors.blue.shade100,
@@ -219,14 +213,17 @@ class _PracticeMispronouncedArScreenState extends State<PracticeMispronouncedArS
                   Icon(Icons.record_voice_over, size: 32, color: Colors.blue.shade600),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text('لنتمرن معًا! انطق الكلمة بوضوح.', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue.shade800)),
+                    child: Text(
+                      'لنتمرن معًا! انطق الكلمة بوضوح.',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue.shade800),
+                    ),
                   ),
                 ],
               ),
             ),
             const Spacer(),
             Container(
-              margin: const EdgeInsets.symmetric(horizontal: 32),
+              margin: const EdgeInsets.symmetric(horizontal: 16),
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: Colors.orange.shade100,
@@ -240,10 +237,10 @@ class _PracticeMispronouncedArScreenState extends State<PracticeMispronouncedArS
                 ],
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
             Card(
               elevation: 4,
-              margin: const EdgeInsets.symmetric(horizontal: 32),
+              margin: const EdgeInsets.symmetric(horizontal: 16),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),

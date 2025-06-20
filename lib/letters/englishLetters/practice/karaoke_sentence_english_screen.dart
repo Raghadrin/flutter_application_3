@@ -33,9 +33,8 @@ class _KaraokeSentenceEnglishScreenState
   int matchedWordCount = 0;
   Map<String, bool> wordMatchResults = {};
   List<String> spokenWordSequence = [];
-  late Map<String, List<String>> categoryIssues;
 
-  // 1️⃣ accumulate each sentence's score
+  // accumulate each sentence's score
   final List<double> _sessionScores = [];
 
  Map<String, Map<String, String>> wordCategoriesLevel1 = {
@@ -265,22 +264,10 @@ class _KaraokeSentenceEnglishScreenState
   };
 
   final List<Map<String, String>> sentences = [
-    {
-      "text":
-          "Liam woke up early and packed his bag for the big science fair. He checked that he had all the materials he needed and hurried downstairs to eat breakfast before heading out."
-    },
-    {
-      "text":
-          "At school, the halls were buzzing with excitement. Students carried colorful posters and unique inventions. Liam greeted his teacher and joined his team near their project display."
-    },
-    {
-      "text":
-          "When it was time to present, Liam confidently explained how their robot could help with household chores. The judges listened carefully and asked thoughtful questions."
-    },
-    {
-      "text":
-          "After the presentation, Liam felt proud. His hard work had paid off. He knew that no matter the result, he had given his best and learned so much during the journey."
-    }
+    { "text": "Liam woke up early and packed his bag for the big science fair. He checked that he had all the materials he needed and hurried downstairs to eat breakfast before heading out." },
+    { "text": "At school, the halls were buzzing with excitement. Students carried colorful posters and unique inventions. Liam greeted his teacher and joined his team near their project display." },
+    { "text": "When it was time to present, Liam confidently explained how their robot could help with household chores. The judges listened carefully and asked thoughtful questions." },
+    { "text": "After the presentation, Liam felt proud. His hard work had paid off. He knew that no matter the result, he had given his best and learned so much during the journey." },
   ];
 
   Map<String, String> get currentSentence => sentences[currentSentenceIndex];
@@ -327,16 +314,31 @@ class _KaraokeSentenceEnglishScreenState
       pauseFor: const Duration(seconds: 3),
       onResult: (val) async {
         recognizedText = val.recognizedWords;
-        updateMatchedWords();
+        _updateMatchedWords();
         matchedWordCount = recognizedText
             .split(RegExp(r'\s+'))
             .where((w) => w.trim().isNotEmpty)
             .length;
 
         if (val.finalResult) {
-          await evaluateResult();
+          await _evaluateResult();
           if (!mounted) return;
-          Navigator.push(
+
+          // 1️⃣ Show FinalFeedbackScreen for this sentence
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => FinalFeedbackScreen(
+                averageScore: score,
+                totalStars: stars,
+                level: 'level1',
+              ),
+            ),
+          );
+
+          if (!mounted) return;
+          // 2️⃣ Then show detailed EvaluationEnglishScreen
+          await Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) => EvaluationEnglishScreen(
@@ -346,7 +348,7 @@ class _KaraokeSentenceEnglishScreenState
                 wordMatchResults: wordMatchResults,
                 onNext: () {
                   Navigator.pop(context);
-                  nextSentence();
+                  _nextSentence();
                 },
                 wordCategories: wordCategoriesLevel1,
                 level: 'level1',
@@ -358,7 +360,7 @@ class _KaraokeSentenceEnglishScreenState
     );
   }
 
-  void updateMatchedWords() {
+  void _updateMatchedWords() {
     final expected = currentSentence["text"] ?? "";
     final expectedWords = expected
         .split(RegExp(r'\s+'))
@@ -381,62 +383,48 @@ class _KaraokeSentenceEnglishScreenState
     });
   }
 
-  Future<void> evaluateResult() async {
+  Future<void> _evaluateResult() async {
     final correct = wordMatchResults.values.where((v) => v).length;
     final total = wordMatchResults.length;
     score = total > 0 ? (correct / total) * 100 : 0.0;
     stars = score >= 90 ? 3 : (score >= 60 ? 2 : (score > 0 ? 1 : 0));
 
-    // 2️⃣ store this sentence’s score %
     _sessionScores.add(score);
-
-    // … your existing saveEvaluation() call …
+    // … (your Firestore save logic, if any) …
   }
 
-  Future<void> saveEvaluation({
-    required String sentence,
-    required String recognizedText,
-    required List<String> correctWords,
-    required List<String> wrongWords,
-    required double score,
-    required int stars,
-  }) async {
-    // … unchanged Firestore logic …
-  }
+  void _nextSentence() {
+    setState(() {
+      if (currentSentenceIndex < sentences.length - 1) {
+        currentSentenceIndex++;
+      } else {
+        // end of session → final summary as before
+        final avgPct = _sessionScores.isEmpty
+            ? 0.0
+            : _sessionScores.reduce((a, b) => a + b) / _sessionScores.length;
+        final avgStars = avgPct >= 90
+            ? 3
+            : (avgPct >= 60 ? 2 : (avgPct > 0 ? 1 : 0));
 
-  void nextSentence() {
-     setState(() {
-    if (currentSentenceIndex < sentences.length - 1) {
-      currentSentenceIndex++;
-    } else {
-      // compute the average percent (0–100) across the session
-      final avgPct = _sessionScores.isEmpty
-          ? 0.0
-          : _sessionScores.reduce((a, b) => a + b) / _sessionScores.length;
-      final avgStars = avgPct >= 90
-          ? 3
-          : (avgPct >= 60 ? 2 : (avgPct > 0 ? 1 : 0));
-
-       Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (_) => FinalFeedbackScreen(
-            averageScore: avgPct,    // ← pass percent directly
-            totalStars: avgStars,
-            level: 'level1',
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => FinalFeedbackScreen(
+              averageScore: avgPct,
+              totalStars: avgStars,
+              level: 'level1',
+            ),
           ),
-        ),
-      );
-    }
-      // reset for next
-    recognizedText = '';
-    score = 0.0;
-    stars = 0;
-    wordMatchResults.clear();
-    spokenWordSequence.clear();
-    matchedWordCount = 0;
-  });
-}
+        );
+      }
+      recognizedText = '';
+      score = 0.0;
+      stars = 0;
+      wordMatchResults.clear();
+      spokenWordSequence.clear();
+      matchedWordCount = 0;
+    });
+  }
 
   List<InlineSpan> buildHighlightedSentence() {
     final sentence = currentSentence["text"]!;
@@ -468,28 +456,30 @@ class _KaraokeSentenceEnglishScreenState
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
-          children: [
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                margin: const EdgeInsets.only(bottom: 20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4))],
-                ),
-                child: SingleChildScrollView(
-                  child: RichText(
-                    textAlign: TextAlign.center,
-                    text: TextSpan(children: buildHighlightedSentence()),
-                  ),
-                ),
+            children: [
+            Container(
+              constraints: BoxConstraints(
+              minHeight: 80,
+              maxHeight: MediaQuery.of(context).size.height * 0.35,
+              ),
+              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.only(bottom: 20),
+              decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4))],
+              ),
+              child: SingleChildScrollView(
+              child: RichText(
+                textAlign: TextAlign.center,
+                text: TextSpan(children: buildHighlightedSentence()),
+              ),
               ),
             ),
             LinearProgressIndicator(
               value: (currentSentenceIndex + 1) / sentences.length,
               backgroundColor: Colors.grey[300],
-              valueColor: const AlwaysStoppedAnimation(Color.fromARGB(255, 109, 175, 252)),
+              valueColor: const AlwaysStoppedAnimation(Color(0xFF6DAFFC)),
             ),
             const SizedBox(height: 20),
             ElevatedButton.icon(
@@ -497,7 +487,7 @@ class _KaraokeSentenceEnglishScreenState
               label: Text(isPlaying ? 'Stop Reading' : 'Read Sentence'),
               onPressed: speakSentence,
               style: ElevatedButton.styleFrom(
-                backgroundColor: isPlaying ? Color.fromARGB(255, 255, 170, 170) : Color.fromARGB(255, 255, 231, 176),
+                backgroundColor: isPlaying ? Color(0xFFFFAAAA) : Color(0xFFFFE7B0),
                 foregroundColor: Colors.black,
                 minimumSize: Size(w * 0.8, 44),
               ),
@@ -515,7 +505,7 @@ class _KaraokeSentenceEnglishScreenState
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: isListening ? Color.fromARGB(255, 255, 204, 204) : Color.fromARGB(255, 204, 255, 204),
+                backgroundColor: isListening ? Color(0xFFFFCCCC) : Color(0xFFCCFFCC),
                 foregroundColor: Colors.black,
                 minimumSize: Size(w * 0.8, 44),
               ),

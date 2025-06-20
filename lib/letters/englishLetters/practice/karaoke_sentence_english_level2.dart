@@ -425,7 +425,23 @@ class _KaraokeSentenceEnglishLevel2ScreenState
         if (val.finalResult) {
           await evaluateResult();
           if (!mounted) return;
-          Navigator.push(
+
+          // First show FinalFeedbackScreen
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => FinalFeedbackScreen(
+                averageScore: score,
+                totalStars: stars,
+                level: 'level2',
+              ),
+            ),
+          );
+
+          if (!mounted) return;
+
+          // Then show EvaluationEnglishScreen
+          await Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) => EvaluationEnglishScreen(
@@ -511,7 +527,7 @@ class _KaraokeSentenceEnglishLevel2ScreenState
             builder: (_) => FinalFeedbackScreen(
               averageScore: avgPct, // ← pass percent directly
               totalStars: avgStars,
-              level: 'level1',
+              level: 'level2',
             ),
           ),
         );
@@ -558,26 +574,28 @@ class _KaraokeSentenceEnglishLevel2ScreenState
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                margin: const EdgeInsets.only(bottom: 20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 8,
-                        offset: Offset(0, 4))
-                  ],
-                ),
-                child: SingleChildScrollView(
-                  child: RichText(
-                    textAlign: TextAlign.center,
-                    text: TextSpan(children: buildHighlightedSentence()),
-                  ),
-                ),
+            Container(
+              constraints: BoxConstraints(
+          minHeight: 100,
+          maxHeight: MediaQuery.of(context).size.height * 0.35,
+              ),
+              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.only(bottom: 20),
+              decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+                color: Colors.black12,
+                blurRadius: 8,
+                offset: Offset(0, 4))
+          ],
+              ),
+              child: SingleChildScrollView(
+          child: RichText(
+            textAlign: TextAlign.center,
+            text: TextSpan(children: buildHighlightedSentence()),
+          ),
               ),
             ),
             LinearProgressIndicator(
