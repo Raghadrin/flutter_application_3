@@ -1,5 +1,3 @@
-// Updated Arabic Karaoke Screen with Fixed Errors and Compatibility
-
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
@@ -206,7 +204,8 @@ class _KaraokeSentenceArabicScreenState extends State<KaraokeSentenceArabicScree
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            Expanded(
+            Flexible(
+              fit: FlexFit.loose,
               child: Container(
                 padding: const EdgeInsets.all(16),
                 margin: const EdgeInsets.only(bottom: 20),

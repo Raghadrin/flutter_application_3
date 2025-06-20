@@ -1,5 +1,3 @@
-// Arabic Karaoke Level 3 Screen (Upgraded with Categories & English Structure)
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -7,7 +5,6 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'FinalFeedbackScreenAr.dart';
 import 'evaluation2_screen.dart';
-import 'category_details_ar.dart';
 
 class KaraokeSentenceLevel3Screen extends StatefulWidget {
   const KaraokeSentenceLevel3Screen({super.key});
@@ -229,7 +226,8 @@ class _KaraokeSentenceLevel3ScreenState extends State<KaraokeSentenceLevel3Scree
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            Expanded(
+            Flexible(
+              fit: FlexFit.loose,
               child: Container(
                 padding: const EdgeInsets.all(16),
                 margin: const EdgeInsets.only(bottom: 20),
